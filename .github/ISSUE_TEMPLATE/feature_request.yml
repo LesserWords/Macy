@@ -1,0 +1,26 @@
+name: Feature Request
+description: Propose a new integration plugin, audit check, industry pack, or workflow enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Use Case
+      description: What workflow or capability gap does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: Describe the interface, CLI/MCP/UI surface, or pack schema change you envision.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any existing plugins, workarounds, or `./context/` overlay options you evaluated.
+    validations:
+      required: false

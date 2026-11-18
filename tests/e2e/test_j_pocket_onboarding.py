@@ -170,6 +170,7 @@ def test_j_pocket_setup_wizard_and_path_b_stateless_smoke(
 
             page.get_by_text(re.compile(r"Pocket E2E")).first.wait_for(timeout=20000)
             sidebar = page.locator('[data-testid="stSidebar"]')
+            sidebar.get_by_text(re.compile(r"Audit|Auditoria")).first.wait_for(timeout=15000)
             sidebar_text = sidebar.inner_text()
             assert "Audit" in sidebar_text or "Auditoria" in sidebar_text
             assert "Brand" in sidebar_text or "Marca" in sidebar_text

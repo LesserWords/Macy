@@ -2,7 +2,26 @@
   <img src="docs/assets/macy.svg" alt="Macy — Content Intelligence & SEO/GEO Audit Engine" width="280" />
 </p>
 
-# Macy — Content Intelligence & SEO/GEO Audit Engine
+<h1 align="center">Macy — Content Intelligence &amp; SEO/GEO Audit Engine</h1>
+
+<p align="center">
+  <a href="https://github.com/LesserWords/open-macy/actions/workflows/ci.yml"><img src="https://github.com/LesserWords/open-macy/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-blue.svg" alt="License: Apache-2.0" /></a>
+  <img src="https://img.shields.io/badge/Python-3.12%2B-3776AB.svg" alt="Python 3.12+" />
+  <img src="https://img.shields.io/badge/PostgreSQL-18-336791.svg" alt="PostgreSQL 18" />
+  <img src="https://img.shields.io/badge/mypy-strict-1f6feb.svg" alt="mypy: strict" />
+  <img src="https://img.shields.io/badge/lint-Ruff-D7FF64.svg" alt="Ruff" />
+  <img src="https://img.shields.io/badge/MCP-stdio%20%7C%20HTTP-7c3aed.svg" alt="MCP Server" />
+</p>
+
+<p align="center">
+  <a href="#quickstart">Quickstart</a> ·
+  <a href="#custom-packs--private-context-overlay-context">Custom Packs &amp; Overlay</a> ·
+  <a href="docs/MCP.md">MCP Server</a> ·
+  <a href="docs/README.md">Documentation</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a> ·
+  <a href="SECURITY.md">Security</a>
+</p>
 
 **Macy** is a modular, multi-workspace editorial intelligence, technical SEO/GEO auditing, and content compliance platform built for blogs, landing pages, and content websites.
 
@@ -197,18 +216,34 @@ Modular capability and optional audit/rank-tracking layers:
 macy/
 ├── app.py                  # Streamlit Admin UI (imports engine.services + engine.contracts only)
 ├── engine/                 # Modular monolith (audit, crawl, monitors, mcp, research, strategy, seo, production, quality, integrations)
-├── packs/                  # Config packs (industries/{general,b2b-saas}, formats/{blog,blog-short,blog-long} + rubric)
-├── prompts/                # Versioned LLM prompts (extract_research, score, brief, write_blog, rewrite_draft, evaluate)
-├── fixtures/               # Seed fixtures (seed_example.yaml)
+├── packs/                  # Built-in OSS packs (industries/{general,b2b-saas}, formats/{blog,blog-short,blog-long} + rubric)
+├── prompts/                # Versioned domain-agnostic LLM prompts (extract_research, score, brief, write_blog, rewrite_draft, evaluate)
+├── fixtures/               # Neutral starter brand fixture (seed_example.yaml)
+├── context/                # Git-ignored private overlay drop-in (packs/industries/*, fixtures/seed_*.yaml)
 ├── locales/                # Bilingual gettext/Babel UI catalogs (pt_BR, en_US)
 ├── db/                     # dbmate SQL migrations + committed db/schema.sql
 ├── evals/                  # Regression evaluation cases (cases 01–07) & pytest -m eval suite
-├── tests/                  # Unit, contract, schema constraint, tenant scoping, offline & live E2E suites
-├── openspec/               # Capability specs (specs/) and archived PR changes (changes/archive/)
-├── docs/                   # PRD, ADRs, feature specs, architecture docs, guides, runbook, milestone plans
-├── scripts/                # Quality gate runner (check.sh), compliance_agent.py, deploy.sh, backup.sh, check_translations.py, hotspots.py
-└── compose*.yaml           # Base, dev override, offline E2E, and staging/prod Caddy + backup overlays
+├── tests/                  # Unit, contract, schema constraint, tenant scoping, overlay smoke & Playwright E2E suites
+├── openspec/               # Capability specs (specs/) and sanitized archived PR changes (changes/archive/)
+├── docs/                   # PRD, ADRs (001–032), features (F01–F23), guides, runbook, milestone plans (M0–M8)
+├── scripts/                # Quality gate runner (check.sh), OSS hygiene audit (check_oss_hygiene.py), deploy, backup, i18n checks
+├── infra/                  # Compose stacks (compose.yaml, compose.pocket.yaml, compose.context.example.yaml, compose.{override,e2e}.yaml)
+├── LICENSE                 # Apache License 2.0
+├── CONTRIBUTING.md         # Local dev setup, quality gates, and custom pack authoring guide
+└── SECURITY.md             # Vulnerability disclosure and security hardening guarantees
 ```
+
+---
+
+## Custom Packs & Private Context Overlay (`./context/`)
+
+Macy separates open-source defaults (`packs/industries/{general,b2b-saas}` and `fixtures/seed_example.yaml`) from organization-specific voice rules, ICPs, vertical taxonomies, and source catalogs via a **hybrid 3-layer overlay + DB snapshot**:
+
+1. **Explicit Environment Overlay:** `MACY_PACKS_DIR`, `MACY_FIXTURES_DIR`, or `MACY_CONTEXT_DIR` (`{packs,fixtures}`)
+2. **Docker Pocket Overlay:** `${MACY_DATA_DIR:-/data}/context` (host `./context` mounted read-only into `/data/context` by `infra/compose.pocket.yaml`)
+3. **Built-in OSS Defaults:** `<repo>/packs` and `<repo>/fixtures`
+
+Merged discovery lets you drop custom vertical packs (`context/packs/industries/<slug>/`) and brand fixtures (`context/fixtures/seed_<slug>.yaml`) into `./context/` while inheriting built-in format packs (`blog`, `blog-short`, `blog-long`). Once seeded, workspaces persist `workspaces.config["industry_pack_snapshot"]` in PostgreSQL so editorial scoring, briefing, writing, and evaluation continue working even when overlay files are unmounted, and the Admin UI provides **Brand `.yaml` Import / Export**. See the **[Brand Fixtures & Overlay Guide](docs/guides/brand-fixtures-guide.md)** for schema details.
 
 ---
 

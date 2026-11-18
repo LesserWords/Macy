@@ -1,0 +1,51 @@
+name: Bug Report
+description: Report a reproducible bug in Macy (engine, CLI, Admin UI, Pocket, or MCP server)
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve Macy. Please verify you are not reporting a security vulnerability (use our Security Policy for private disclosure).
+  - type: input
+    id: component
+    attributes:
+      label: Affected Area
+      description: e.g., CLI, Streamlit Admin UI, Pocket Compose, Path B --stateless, MCP server, SEO/GEO audit, editorial pipeline
+      placeholder: "Pocket / Setup Wizard"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Clear description of the bug and unexpected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Run '...'
+        2. Configure '...'
+        3. Observe error '...'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        - OS: Linux / macOS / Windows
+        - Deployment mode: Pocket / Multi-container Compose / Path B stateless
+        - Python version: 3.12
+    validations:
+      required: false
