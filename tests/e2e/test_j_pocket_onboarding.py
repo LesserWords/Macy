@@ -93,7 +93,10 @@ def _step_through_wizard(page: Any) -> None:
     page.get_by_role("button", name=re.compile(r"Next|Próximo")).click()
 
     page.get_by_text(re.compile(r"Step 2|Etapa 2")).wait_for(timeout=15000)
-    page.get_by_text(re.compile(r"Stack Preset|Predefinição de Stack")).wait_for(timeout=10000)
+    email_in.wait_for(state="detached", timeout=10000)
+    page.get_by_role("button", name=re.compile(r"Back|Voltar")).wait_for(
+        state="visible", timeout=10000
+    )
     next_btn = page.get_by_role("button", name=re.compile(r"Next|Próximo"))
     next_btn.wait_for(state="visible", timeout=5000)
     next_btn.click()
