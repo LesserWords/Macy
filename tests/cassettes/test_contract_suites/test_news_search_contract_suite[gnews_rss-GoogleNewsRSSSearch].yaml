@@ -1,0 +1,31 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8
+    method: GET
+    uri: https://news.google.com/rss/search?q=optometry&hl=pt-BR&gl=BR&ceid=BR%3Apt-419
+  response:
+    body:
+      string: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+          <channel>
+            <title>optometry - Google News</title>
+            <item>
+              <title>Mercado de optometria cresce em 2026</title>
+              <link>https://opticanet.com.br/2026/11/01/optometria-crescimento?utm_source=gnews</link>
+              <pubDate>Sun, 01 Nov 2026 12:00:00 GMT</pubDate>
+              <description>Clinicas optometricas ampliam atendimento preventivo.</description>
+              <source url="https://opticanet.com.br">Opticanet</source>
+            </item>
+          </channel>
+        </rss>
+    headers:
+      Content-Type:
+      - application/rss+xml; charset=utf-8
+    status:
+      code: 200
+      message: OK
+version: 1

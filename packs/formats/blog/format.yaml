@@ -1,0 +1,11 @@
+name: Blog Post
+slug: blog
+min_words: 800
+max_words: 2500
+structure:
+  - title
+  - meta
+  - slug
+  - body
+  - faq
+  - cta

@@ -1,0 +1,22 @@
+interactions:
+- request:
+    body: '{"messages":[{"role":"user","content":"Generate ideas for myopia"}],"model":"gpt-4o-mini"}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - Bearer test-openai-key
+      content-type:
+      - application/json
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"cmp-openai-compat-1","model":"gpt-4o-mini","choices":[{"message":{"role":"assistant","content":"{\"result\":\"Ideas for myopia management and prevention.\"}"}}],"usage":{"prompt_tokens":12,"completion_tokens":15,"total_tokens":27}}'
+    headers:
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

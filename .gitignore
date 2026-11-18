@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.hypothesis/
+dist/
+build/
+*.egg-info/
+
+# Env / secrets — never commit
+.env
+.env.*
+!.env.example
+!.env.*.example
+deploy/**/secrets.toml
+.streamlit/secrets.toml
+
+# Node (OpenSpec, jscpd)
+node_modules/
+
+# Local artefacts
+artifacts/
+backups/
+.complexipy_cache/
+.import_linter_cache/
+exports/
+reports/
+*.log
+.DS_Store
+Thumbs.db
+
+# Private claim-benchmark holdout (copyrighted articles); only its hash is committed
+evals/claim_benchmark/holdout/
+
+# Local private context overlay (Pocket drop-in / private packs & fixtures)
+context/*
+!context/README.md

@@ -1,0 +1,117 @@
+name: macy
+
+x-engine-env: &engine-env
+  ENVIRONMENT: ${ENVIRONMENT:-production}
+  APP_ENV: ${APP_ENV:-production}
+  KEEP_ALIVE: "true"
+  DATABASE_URL: ${DATABASE_URL:-postgres://app:app_secret@db:5432/${POSTGRES_DB:-macy}?sslmode=disable}
+
+x-engine-service: &engine-service
+  image: ${APP_IMAGE:-content-engine}:${APP_TAG:-latest}
+  build:
+    context: ..
+    dockerfile: infra/Dockerfile
+  restart: unless-stopped
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+  environment: *engine-env
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-macy}
+      POSTGRES_USER: ${POSTGRES_USER:-owner}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+    volumes:
+      - db_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-owner} -d $${POSTGRES_DB:-macy}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 2s
+
+  migrate:
+    image: amacneil/dbmate:2.27.0
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-owner}:${POSTGRES_PASSWORD:-secret}@db:5432/${POSTGRES_DB:-macy}?sslmode=disable
+    volumes:
+      - ../db:/db
+    command: up
+
+  app:
+    <<: *engine-service
+    environment:
+      <<: *engine-env
+      DOMAIN: ${DOMAIN:-localhost}
+      CADDY_HTTPS_PORT: ${CADDY_HTTPS_PORT:-443}
+      AUTH_COOKIE_SECRET: ${AUTH_COOKIE_SECRET:-}
+      AUTH_REDIRECT_URI: ${AUTH_REDIRECT_URI:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_SERVER_METADATA_URL: ${GOOGLE_SERVER_METADATA_URL:-https://accounts.google.com/.well-known/openid-configuration}
+    command:
+      - sh
+      - -c
+      - >-
+        python -m engine.auth --output /tmp/macy/secrets.toml &&
+        exec streamlit run app.py --server.port=8501 --server.address=0.0.0.0 --server.headless=true --browser.gatherUsageStats=false
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  worker:
+    <<: *engine-service
+    command: ["python", "-m", "engine"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import engine"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  mcp:
+    <<: *engine-service
+    profiles: ["mcp"]
+    environment:
+      <<: *engine-env
+      MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-}
+      MCP_ACTOR_EMAIL: ${MCP_ACTOR_EMAIL:-}
+    command:
+      - python
+      - -m
+      - engine.cli
+      - mcp
+      - --transport
+      - streamable-http
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8765"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8765/healthz', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+volumes:
+  db_data:

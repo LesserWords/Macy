@@ -1,0 +1,21 @@
+{
+  "threshold": 0.5,
+  "minTokens": 50,
+  "reporters": ["console", "json"],
+  "output": "artifacts/jscpd",
+  "format": ["python", "yaml", "markdown"],
+  "ignore": [
+    "**/.venv/**",
+    "**/__pycache__/**",
+    "**/.mypy_cache/**",
+    "**/.pytest_cache/**",
+    "**/.ruff_cache/**",
+    "**/.claude/**",
+    "**/.github/**",
+    "**/docs/**",
+    "**/openspec/**",
+    "**/spikes/**",
+    "**/artifacts/**",
+    "**/context/**"
+  ]
+}

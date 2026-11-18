@@ -1,0 +1,11 @@
+name: Blog Post Longo (Guia Pilar)
+slug: blog-long
+min_words: 1800
+max_words: 3500
+structure:
+  - title
+  - meta
+  - slug
+  - body
+  - faq
+  - cta

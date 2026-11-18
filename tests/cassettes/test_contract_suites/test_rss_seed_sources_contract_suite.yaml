@@ -1,0 +1,114 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://opticanet.com.br/feed
+  response:
+    body:
+      string: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+          <channel>
+            <title>Opticanet - Portal Óptico</title>
+            <link>https://opticanet.com.br</link>
+            <description>Notícias do setor óptico brasileiro</description>
+            <item>
+              <title>Varejo óptico brasileiro projeta crescimento de 11% no último trimestre</title>
+              <link>https://opticanet.com.br/2026/11/01/varejo-optico-crescimento?utm_source=feed</link>
+              <description>Óticas independentes ampliam vendas de lentes multifocais digitais e armações leves.</description>
+              <pubDate>Sun, 01 Nov 2026 12:00:00 GMT</pubDate>
+            </item>
+          </channel>
+        </rss>
+    headers:
+      Content-Type:
+      - application/rss+xml; charset=utf-8
+      Server:
+      - nginx/1.26.0
+      ETag:
+      - '"opticanet-rss-v1"'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://eyewearintelligence.com/feed
+  response:
+    body:
+      string: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+          <channel>
+            <title>Eyewear Intelligence</title>
+            <link>https://eyewearintelligence.com</link>
+            <description>Global eyewear business news</description>
+            <item>
+              <title>European Eyewear Manufacturers Expand Myopia Control Portfolios</title>
+              <link>https://eyewearintelligence.com/2026/11/02/myopia-control-portfolios?fbclid=abc</link>
+              <description>Leading lens makers report double-digit adoption of pediatric myopia management lenses.</description>
+              <pubDate>Mon, 02 Nov 2026 09:30:00 GMT</pubDate>
+            </item>
+          </channel>
+        </rss>
+    headers:
+      Cache-Control:
+      - max-age=600
+      Server:
+      - cloudflare
+      X-Frame-Options:
+      - SAMEORIGIN
+      Content-Type:
+      - text/xml; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://abioptica.com.br/feed
+  response:
+    body:
+      string: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+          <channel>
+            <title>Abióptica Notícias</title>
+            <link>https://abioptica.com.br</link>
+            <description>Associação Brasileira da Indústria Óptica</description>
+            <item>
+              <title>Abióptica divulga balanço anual do setor óptico nacional</title>
+              <link>https://abioptica.com.br/2026/11/03/balanco-anual-setor-optico</link>
+              <description>Relatório aponta combate à pirataria e avanço na regulamentação sanitária.</description>
+              <pubDate>Tue, 03 Nov 2026 15:00:00 GMT</pubDate>
+            </item>
+          </channel>
+        </rss>
+    headers:
+      Vary:
+      - Accept-Encoding
+      X-Powered-By:
+      - WP-Feed
+      Server:
+      - Apache/2.4
+      Content-Type:
+      - application/xml
+    status:
+      code: 200
+      message: OK
+version: 1

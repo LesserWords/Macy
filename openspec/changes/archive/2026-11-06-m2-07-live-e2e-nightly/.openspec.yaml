@@ -1,0 +1,5 @@
+schema: 1
+created: 2026-11-06
+goal: Live E2E test suite (J0-J4), budget guard fixture, trace capture, and nightly workflow (M2-07, ADR-018)
+affected_areas:
+  - tooling

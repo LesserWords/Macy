@@ -1,0 +1,22 @@
+id: case_04
+name: "Digital Eyestrain and Blue Light Filter Awareness Survey"
+expected_band: medium
+campaign:
+  locale: "pt-BR"
+  market: "BR"
+record:
+  headline: "Pesquisa aponta que 72% dos trabalhadores remotos sofrem de fadiga visual digital"
+  source: "Fique de Olho"
+  url: "https://fiquedeolho.com.br/pesquisa-fadiga-visual-remoto"
+  published_at: "2026-10-25T11:00:00Z"
+  summary: "Levantamento nacional com profissionais em home office indica aumento de sintomas de astenopia e fadiga ocular, impulsionando a procura por lentes com tratamento antirreflexo e filtro azul em ópticas de shopping e rua."
+  facts:
+    - "72% dos entrevistados relataram cansaço nos olhos após jornadas em frente a telas."
+    - "Apenas 35% realizam consultas anuais com especialistas da visão."
+    - "Tratamentos especiais de lentes crescem como opção de upgrade de tíquete médio."
+  entities:
+    - "Home Office"
+    - "Fadiga Visual"
+    - "Lentes com Filtro Azul"
+  source_type: "news"
+  verification_status: "verified"

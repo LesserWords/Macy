@@ -1,0 +1,19 @@
+# Design: M5-01 — Production release, monitoring & workspace readiness
+
+## 1. Release Tagging, Deploy & Post-Deploy J1 Read-Only Smoke (`F20 AC3`)
+- `.github/workflows/deploy.yml` separates staging (`push: branches: [main]`) and production (`push: tags: ['v*']`, plus `workflow_dispatch` target choice), preserving `STAGING_DEPLOY_ENABLED` and gating production with `PROD_DEPLOY_ENABLED == 'true'` and `environment: production`.
+- Both staging and production release tarballs include `scripts/backup.sh` alongside `compose.yaml`, `compose.prod.yaml`, `Caddyfile`, `db`, `scripts/deploy.sh`, and `deploy`.
+- Before running `scripts/deploy.sh` on prod, `deploy-prod` records `PREVIOUS_TAG` from the currently running `app` container. After `scripts/deploy.sh` succeeds (which already verifies container health and internal `/_stcore/health` and rolls back on failure), CI executes `scripts/post_deploy_smoke.py --url "$PROD_APP_URL"`:
+  - Probes `<url>/_stcore/health` for HTTP 200 and body `ok`.
+  - Launches headless Playwright Chromium (with optional `PLAYWRIGHT_STORAGE_STATE`) against `<url>`, asserts zero HTTP `>= 400` or `[data-testid="stException"]` elements, and if authenticated (`--require-auth` when storage state is supplied), navigates to Campaigns (`Campaigns` / `Campanhas`) and asserts read-only Campaign Settings and Estimated Monthly Cost controls without modifying any state.
+  - On failure in `deploy-prod`, `Rollback previous tag` re-runs `APP_TAG="$PREV_TAG" sh scripts/deploy.sh` via SSH while leaving the GitHub Actions job status as failed.
+
+## 2. Production Monitoring (`F20 AC5`, `F20 AC6`, `ADR-023`)
+- **Sentry Runtime & Scrubbing:** `_scrub_value` delegates strings to `_scrub_string`, redacting DSN passwords (`postgres://user:pass@`), `Bearer` tokens, sensitive query parameters (`?api_key=...`, `?token=...`), and secret-prefixed strings (`sk-...`, `whsec_...`) while leaving plain strings untouched. `ensure_sentry_initialized()` checks `sentry_sdk.is_initialized()` so Streamlit reruns do not reinitialize. `execute_run()`, `app.py`, `engine/cli.py`, and `engine/__main__.py` initialize Sentry, set `workspace_id` / `run_id` tags, and capture exceptions cleanly. `content-engine test-sentry` provides deterministic operator verification.
+- **Heartbeat & Weekly Window:** `send_heartbeat(url=None, *, failed=False, timeout=5.0)` GETs `HEARTBEAT_URL` on `completed` runs and `${HEARTBEAT_URL}/fail` on `failed` runs so Healthchecks resets the 7-day grace window only on success and alerts immediately on failure or missed weekly runs.
+- **Backup Alert & Heartbeat:** `scripts/backup.sh` detects step errors explicitly (compatible with POSIX `sh`/`ash` `set -eu`), deletes `.last_backup_ok` (tripping the container healthcheck), GETs `${BACKUP_HEARTBEAT_URL}/fail`, POSTs a JSON alert payload to `BACKUP_ALERT_URL` via `curl` or BusyBox `wget`, and in daemon mode sleeps `$BACKUP_INTERVAL_SECONDS` rather than crash-looping.
+
+## 3. Production Runtime & Workspace Bootstrap Readiness
+- `services.create_workspace()` + `content-engine create-workspace` eliminate manual SQL inserts during workspace setup (`M5-01 Step 2`).
+- `pipeline._resolve_run_adapters()` keeps backward-compatible fake fallbacks in non-prod `offline=None` unit tests, while `offline=False` or `APP_ENV in ('staging', 'production', 'prod')` loads encrypted integrations via `plugin_config` (passing `conn`, `workspace_id`, `run_id` where supported for `usage_ledger` accounting), defaults `feed_source`/`extractor` to `RSSFeedSource`/`TrafilaturaExtractor`, and transitions runs cleanly to `blocked(blocked_reason='integration_missing')` if `llm` or `news_search` is missing.
+- `engine.__main__.run_worker_tick()` connects and executes `process_next_queued_run()` + `deliver_due()` so manual UI `Run now` requests and queued webhooks execute automatically in deployment containers.

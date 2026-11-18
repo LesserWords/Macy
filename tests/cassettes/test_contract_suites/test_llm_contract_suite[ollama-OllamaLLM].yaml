@@ -1,0 +1,22 @@
+interactions:
+- request:
+    body: '{"messages":[{"role":"user","content":"Generate ideas for myopia"}],"model":"llama3.1:8b"}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - Bearer ollama
+      content-type:
+      - application/json
+    method: POST
+    uri: http://localhost:11434/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"cmp-ollama-1","model":"llama3.1:8b","choices":[{"message":{"role":"assistant","content":"{\"result\":\"Local Ollama ideas for myopia management.\"}"}}],"usage":{"prompt_tokens":12,"completion_tokens":15,"total_tokens":27}}'
+    headers:
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

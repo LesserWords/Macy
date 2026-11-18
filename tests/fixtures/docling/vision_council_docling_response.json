@@ -1,0 +1,207 @@
+{
+  "status": "success",
+  "processing_time": 3.3953329199998734,
+  "document": {
+    "filename": "vision_council_market_insights_2026.pdf",
+    "md_content": "## The Vision Council - Market inSights Public Research Summary\n\nPublished Q3 2026 | Source: thevisioncouncil.org\n\nU.S. total optical market revenue reached $69.5 billion (+4.4% YoY value growth), while 94% of U.S. adults (over 250 million people) use some form of prescription or non-prescription eyewear. Plano sunglasses led unit expansion with 312.8 million pairs sold.\n\n| Optical Category               | Retail Sales (USD)   | Unit Volume (M)   | Value YoY (%)   | Avg Unit Price (USD)   |\n|--------------------------------|----------------------|-------------------|-----------------|------------------------|\n| Total U.S. Optical Market      | $69.5B               | N/A               | +4.4%           | N/A                    |\n| Ophthalmic Rx Lenses           | $21.8B               | 98.4              | +5.1%           | $221.54                |\n| Prescription Frames            | $17.4B               | 92.1              | +3.8%           | $188.93                |\n| Eye Exams & Optometry Services | $12.9B               | 104.2             | +4.9%           | $123.80                |\n| Plano Sunglasses               | $11.2B               | 312.8             | +4.2%           | $35.81                 |\n| Contact Lenses                 | $6.2B                | 49.5              | +2.9%           | $125.25                |",
+    "json_content": {
+      "tables": [
+        {
+          "data": {
+            "grid": [
+              [
+                {
+                  "text": "Optical Category",
+                  "column_header": true,
+                  "row_header": false
+                },
+                {
+                  "text": "Retail Sales (USD)",
+                  "column_header": true,
+                  "row_header": false
+                },
+                {
+                  "text": "Unit Volume (M)",
+                  "column_header": true,
+                  "row_header": false
+                },
+                {
+                  "text": "Value YoY (%)",
+                  "column_header": true,
+                  "row_header": false
+                },
+                {
+                  "text": "Avg Unit Price (USD)",
+                  "column_header": true,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Total U.S. Optical Market",
+                  "column_header": false,
+                  "row_header": true
+                },
+                {
+                  "text": "$69.5B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "N/A",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+4.4%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "N/A",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Ophthalmic Rx Lenses",
+                  "column_header": false,
+                  "row_header": true
+                },
+                {
+                  "text": "$21.8B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "98.4",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+5.1%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$221.54",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Prescription Frames",
+                  "column_header": false,
+                  "row_header": true
+                },
+                {
+                  "text": "$17.4B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "92.1",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+3.8%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$188.93",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Eye Exams & Optometry Services",
+                  "column_header": false,
+                  "row_header": true
+                },
+                {
+                  "text": "$12.9B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "104.2",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+4.9%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$123.80",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Plano Sunglasses",
+                  "column_header": false,
+                  "row_header": true
+                },
+                {
+                  "text": "$11.2B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "312.8",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+4.2%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$35.81",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Contact Lenses",
+                  "column_header": false,
+                  "row_header": true
+                },
+                {
+                  "text": "$6.2B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "49.5",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+2.9%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$125.25",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

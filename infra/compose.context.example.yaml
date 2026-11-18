@@ -1,0 +1,21 @@
+# Example private context overlay for full multi-container deployments (ADR-032).
+# Usage:
+#   docker compose -f infra/compose.yaml -f infra/compose.context.example.yaml up -d
+# Or point MACY_HOST_CONTEXT_DIR to a sibling private context repository (e.g. ../macy-context).
+
+services:
+  app:
+    volumes:
+      - ${MACY_HOST_CONTEXT_DIR:-../context}:/data/context:ro
+    environment:
+      MACY_CONTEXT_DIR: /data/context
+      MACY_DEFAULT_PACK: ${MACY_DEFAULT_PACK:-general}
+      MACY_USER_AGENT: ${MACY_USER_AGENT:-MacyContentEngine/1.0}
+
+  worker:
+    volumes:
+      - ${MACY_HOST_CONTEXT_DIR:-../context}:/data/context:ro
+    environment:
+      MACY_CONTEXT_DIR: /data/context
+      MACY_DEFAULT_PACK: ${MACY_DEFAULT_PACK:-general}
+      MACY_USER_AGENT: ${MACY_USER_AGENT:-MacyContentEngine/1.0}

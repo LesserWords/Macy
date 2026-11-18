@@ -1,0 +1,1076 @@
+# Portuguese (Brazil) translations for Macy.
+# Copyright (C) 2026 Macy
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Macy 0.1.0\n"
+"Report-Msgid-Bugs-To: dev@macy.local\n"
+"POT-Creation-Date: 2026-11-09 16:52-0300\n"
+"PO-Revision-Date: 2026-11-04 14:28-0300\n"
+"Last-Translator: Macy Team <dev@macy.local>\n"
+"Language: pt_BR\n"
+"Language-Team: pt_BR <dev@macy.local>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app.py:47 tests/test_i18n.py:25 tests/test_i18n.py:31
+msgid "Language"
+msgstr "Idioma"
+
+#: app.py:65 tests/test_i18n.py:23 tests/test_i18n.py:29
+msgid "Dashboard"
+msgstr "Painel"
+
+#: app.py:66
+msgid "Weekly Report"
+msgstr "Relatório Semanal"
+
+#: app.py:67 app.py:1717
+msgid "Draft Review"
+msgstr "Revisão de Rascunhos"
+
+#: app.py:68 tests/test_i18n.py:24 tests/test_i18n.py:30
+msgid "Campaigns"
+msgstr "Campanhas"
+
+#: app.py:69 app.py:268
+msgid "Brand Profile"
+msgstr "Perfil da Marca"
+
+#: app.py:70
+msgid "Sources"
+msgstr "Fontes"
+
+#: app.py:71 app.py:601
+msgid "Integrations"
+msgstr "Integrações"
+
+#: app.py:72
+msgid "Webhooks"
+msgstr "Webhooks"
+
+#: app.py:73
+msgid "Runs"
+msgstr "Execuções"
+
+#: app.py:76
+msgid "Navigation"
+msgstr "Navegação"
+
+#: app.py:89
+msgid "Scoring Weights (must sum to 100)"
+msgstr "Pesos de Pontuação (devem somar 100)"
+
+#: app.py:92
+msgid "Weight: Novelty"
+msgstr "Peso: Novidade"
+
+#: app.py:100
+msgid "Weight: Audience Fit"
+msgstr "Peso: Adequação ao Público"
+
+#: app.py:108
+msgid "Weight: Brand Fit"
+msgstr "Peso: Adequação à Marca"
+
+#: app.py:116
+msgid "Weight: Competitor Gap"
+msgstr "Peso: Lacuna de Concorrência"
+
+#: app.py:124
+msgid "Weight: Trend"
+msgstr "Peso: Tendência"
+
+#: app.py:132
+msgid "Weight: Urgency"
+msgstr "Peso: Urgência"
+
+#: app.py:178
+msgid "Campaign Settings"
+msgstr "Configurações da Campanha"
+
+#: app.py:185 app.py:1699
+msgid "Campaign Name"
+msgstr "Nome da Campanha"
+
+#: app.py:186
+msgid "Content Locale"
+msgstr "Idioma do Conteúdo"
+
+#: app.py:187
+msgid "Target Market"
+msgstr "Mercado-Alvo"
+
+#: app.py:190
+msgid "Articles per Week"
+msgstr "Artigos por Semana"
+
+#: app.py:199 app.py:853
+msgid "Run Schedule (Cron)"
+msgstr "Agendamento de Execução (Cron)"
+
+#: app.py:202 app.py:861
+msgid "Monthly Spend Cap (USD)"
+msgstr "Limite de Gasto Mensal (USD)"
+
+#: app.py:207 app.py:856 app.py:954
+msgid "Per-Run Spend Cap (USD)"
+msgstr "Limite de Gasto por Execução (USD)"
+
+#: app.py:211
+msgid "Campaign Goal"
+msgstr "Objetivo da Campanha"
+
+#: app.py:215
+msgid "Estimated Monthly Cost"
+msgstr "Custo Mensal Estimado"
+
+#: app.py:217
+msgid "Save Campaign"
+msgstr "Salvar Campanha"
+
+#: app.py:232
+msgid "Campaign settings saved successfully."
+msgstr "Configurações da campanha salvas com sucesso."
+
+#: app.py:275 app.py:316
+msgid "Current Version"
+msgstr "Versão Atual"
+
+#: app.py:277
+msgid "Brand Voice"
+msgstr "Voz da Marca"
+
+#: app.py:279
+msgid "Positioning"
+msgstr "Posicionamento"
+
+#: app.py:282
+msgid "Capabilities (one per line)"
+msgstr "Capacidades (uma por linha)"
+
+#: app.py:287
+msgid "Prohibited Claims (one per line)"
+msgstr "Alegações Proibidas (uma por linha)"
+
+#: app.py:292
+msgid "Prohibited Phrases (regex, one per line)"
+msgstr "Frases Proibidas (regex, uma por linha)"
+
+#: app.py:297
+msgid "CTA Rules (one per line)"
+msgstr "Regras de CTA (uma por linha)"
+
+#: app.py:302
+msgid "Save Brand Profile"
+msgstr "Salvar Perfil da Marca"
+
+#: app.py:317
+msgid "Brand profile saved successfully."
+msgstr "Perfil da marca salvo com sucesso."
+
+#: app.py:389 app.py:710 app.py:752
+msgid "Enabled"
+msgstr "Ativada"
+
+#: app.py:389 app.py:752
+msgid "Disabled"
+msgstr "Desativada"
+
+#: app.py:394
+msgid "Disable"
+msgstr "Desativar"
+
+#: app.py:394
+msgid "Enable"
+msgstr "Ativar"
+
+#: app.py:407
+msgid "Trusted Sources"
+msgstr "Fontes Confiáveis"
+
+#: app.py:410
+msgid ""
+"Role guide: **news** and **company** sources provide topic candidates; "
+"**data** and **management** sources provide statistics and operational "
+"context at brief time."
+msgstr ""
+"Guia de papéis: fontes **news** e **company** geram candidatos a tópicos;"
+" fontes **data** e **management** fornecem estatísticas e contexto "
+"operacional na geração do briefing."
+
+#: app.py:423
+msgid "Select Source to Edit"
+msgstr "Selecionar Fonte para Editar"
+
+#: app.py:434
+msgid "Source Name"
+msgstr "Nome da Fonte"
+
+#: app.py:435
+msgid "Source Domain"
+msgstr "Domínio da Fonte"
+
+#: app.py:436
+msgid "Source URL"
+msgstr "URL da Fonte"
+
+#: app.py:439
+msgid "Fetch Mode"
+msgstr "Modo de Coleta"
+
+#: app.py:444
+msgid "Feed URL"
+msgstr "URL do Feed"
+
+#: app.py:448
+msgid "Source Tier"
+msgstr "Nível (Tier) da Fonte"
+
+#: app.py:456
+msgid "Source Role"
+msgstr "Papel da Fonte"
+
+#: app.py:462
+msgid "Source Locales (comma-separated)"
+msgstr "Idiomas da Fonte (separados por vírgula)"
+
+#: app.py:467
+msgid "Source Topics (comma-separated)"
+msgstr "Tópicos da Fonte (separados por vírgula)"
+
+#: app.py:471
+msgid "Source Enabled"
+msgstr "Fonte Ativa"
+
+#: app.py:473
+msgid "Save Source"
+msgstr "Salvar Fonte"
+
+#: app.py:490
+msgid "Source saved successfully."
+msgstr "Fonte salva com sucesso."
+
+#: app.py:505
+msgid "LLM Models by Stage"
+msgstr "Modelos LLM por Etapa"
+
+#: app.py:515
+#, python-brace-format
+msgid "Model for stage: {stage}"
+msgstr "Modelo para a etapa: {stage}"
+
+#: app.py:538
+msgid "Secret saved"
+msgstr "Segredo salvo"
+
+#: app.py:604
+msgid "Integration saved successfully."
+msgstr "Integração salva com sucesso."
+
+#: app.py:614
+msgid "Integration Port"
+msgstr "Porta de Integração"
+
+#: app.py:624
+msgid "Plugin"
+msgstr "Plugin"
+
+#: app.py:657
+msgid "Save Integration"
+msgstr "Salvar Integração"
+
+#: app.py:673
+msgid "Test Connection"
+msgstr "Testar Conexão"
+
+#: app.py:681
+msgid "Connection test succeeded."
+msgstr "Teste de conexão concluído com sucesso."
+
+#: app.py:687
+msgid "Add Webhook Subscription"
+msgstr "Adicionar Inscrição de Webhook"
+
+#: app.py:689
+msgid "Target URL"
+msgstr "URL de Destino"
+
+#: app.py:705
+msgid "Event Types"
+msgstr "Tipos de Eventos"
+
+#: app.py:712
+msgid "Create Webhook Subscription"
+msgstr "Criar Inscrição de Webhook"
+
+#: app.py:714
+msgid "Target URL is required."
+msgstr "A URL de destino é obrigatória."
+
+#: app.py:717
+msgid "At least one event type must be selected."
+msgstr "Pelo menos um tipo de evento deve ser selecionado."
+
+#: app.py:728
+msgid "Webhook subscription created!"
+msgstr "Inscrição de webhook criada!"
+
+#: app.py:740
+msgid "No webhook subscriptions configured yet."
+msgstr "Nenhuma inscrição de webhook configurada ainda."
+
+#: app.py:743
+msgid "Active Subscriptions"
+msgstr "Inscrições Ativas"
+
+#: app.py:750
+msgid "Events:"
+msgstr "Eventos:"
+
+#: app.py:753 app.py:785
+msgid "Status:"
+msgstr "Status:"
+
+#: app.py:755
+msgid "Delete"
+msgstr "Excluir"
+
+#: app.py:761
+msgid "Subscription deleted."
+msgstr "Inscrição excluída."
+
+#: app.py:773
+msgid "No webhook deliveries recorded yet."
+msgstr "Nenhuma entrega de webhook registrada ainda."
+
+#: app.py:782
+msgid "Error:"
+msgstr "Erro:"
+
+#: app.py:789
+msgid "Attempts:"
+msgstr "Tentativas:"
+
+#: app.py:791
+msgid "Delivered:"
+msgstr "Entregue:"
+
+#: app.py:794
+msgid "Re-send"
+msgstr "Reenviar"
+
+#: app.py:803
+msgid "Delivery re-sent."
+msgstr "Entrega reenviada."
+
+#: app.py:811
+msgid "Outbound Webhooks"
+msgstr "Webhooks de Saída"
+
+#: app.py:814
+msgid ""
+"Subscribe external HTTP endpoints to engine lifecycle events. Requests "
+"are signed using Standard Webhooks HMAC-SHA256."
+msgstr ""
+"Inscreva endpoints HTTP externos nos eventos de ciclo de vida do motor. "
+"As requisições são assinadas usando Standard Webhooks HMAC-SHA256."
+
+#: app.py:821
+msgid "Signing Secret (copy now, it will not be shown again):"
+msgstr "Chave Secreta de Assinatura (copie agora, não será exibida novamente):"
+
+#: app.py:823
+msgid "I have saved the secret"
+msgstr "Já salvei a chave secreta"
+
+#: app.py:827
+msgid "Subscriptions"
+msgstr "Inscrições"
+
+#: app.py:827
+msgid "Delivery Log"
+msgstr "Registro de Entregas"
+
+#: app.py:838
+msgid "Runs & Orchestration"
+msgstr "Execuções e Orquestração"
+
+#: app.py:844 app.py:1316
+msgid "No active campaign configured for this workspace."
+msgstr "Nenhuma campanha ativa configurada para este espaço de trabalho."
+
+#: app.py:849
+msgid "Campaign"
+msgstr "Campanha"
+
+#: app.py:867
+msgid "Run now"
+msgstr "Executar agora"
+
+#: app.py:877
+#, python-brace-format
+msgid "Run triggered successfully: {run_id}"
+msgstr "Execução disparada com sucesso: {run_id}"
+
+#: app.py:879
+msgid "An active run is already queued or running for this campaign."
+msgstr "Uma execução ativa já está na fila ou em andamento para esta campanha."
+
+#: app.py:881
+msgid "Monthly budget cap reached. New runs are refused."
+msgstr "Limite de orçamento mensal atingido. Novas execuções são recusadas."
+
+#: app.py:885
+msgid "Run History"
+msgstr "Histórico de Execuções"
+
+#: app.py:893 app.py:963
+msgid "No runs recorded yet."
+msgstr "Nenhuma execução registrada ainda."
+
+#: app.py:901 app.py:967
+msgid "Run ID"
+msgstr "ID da Execução"
+
+#: app.py:902 app.py:967
+msgid "Trigger"
+msgstr "Gatilho"
+
+#: app.py:903 app.py:967 app.py:1643 app.py:1702
+msgid "Status"
+msgstr "Status"
+
+#: app.py:904 app.py:1673
+msgid "Stage"
+msgstr "Etapa"
+
+#: app.py:905 app.py:968 app.py:990 app.py:1674
+msgid "Cost"
+msgstr "Custo"
+
+#: app.py:906 app.py:1644
+msgid "Created"
+msgstr "Criado em"
+
+#: app.py:919
+msgid "View Weekly Report"
+msgstr "Ver Relatório Semanal"
+
+#: app.py:940
+msgid "Cost & Spend Overview"
+msgstr "Visão Geral de Custos e Gastos"
+
+#: app.py:952
+msgid "Current Month Spend"
+msgstr "Gasto do Mês Atual"
+
+#: app.py:953
+msgid "Remaining Monthly Budget"
+msgstr "Orçamento Mensal Restante"
+
+#: app.py:956
+msgid "Average Cost per Run"
+msgstr "Custo Médio por Execução"
+
+#: app.py:957
+msgid "Average Cost per Published Article"
+msgstr "Custo Médio por Artigo Publicado"
+
+#: app.py:958
+msgid "Pilot Target per Article"
+msgstr "Meta do Piloto por Artigo"
+
+#: app.py:960
+msgid "Cost per Run"
+msgstr "Custo por Execução"
+
+#: app.py:968 app.py:1673
+msgid "Calls"
+msgstr "Chamadas"
+
+#: app.py:968
+msgid "Published Articles"
+msgstr "Artigos Publicados"
+
+#: app.py:982
+msgid "Cost per Published Article"
+msgstr "Custo por Artigo Publicado"
+
+#: app.py:985
+msgid "No published articles recorded yet."
+msgstr "Nenhum artigo publicado registrado ainda."
+
+#: app.py:990
+msgid "Title"
+msgstr "Título"
+
+#: app.py:990 app.py:1433
+msgid "Destination"
+msgstr "Destino"
+
+#: app.py:991
+msgid "Pilot Target"
+msgstr "Meta do Piloto"
+
+#: app.py:1014
+#, python-brace-format
+msgid "Recommended Topic (#{rank})"
+msgstr "Tópico Recomendado (#{rank})"
+
+#: app.py:1016
+#, python-brace-format
+msgid "Topic Opportunity (#{rank})"
+msgstr "Oportunidade de Pauta (#{rank})"
+
+#: app.py:1022 app.py:1114
+msgid "Angle"
+msgstr "Ângulo"
+
+#: app.py:1024
+msgid "Funnel Stage"
+msgstr "Etapa do Funil"
+
+#: app.py:1027
+msgid "Total Score"
+msgstr "Pontuação Total"
+
+#: app.py:1029
+msgid "Confidence"
+msgstr "Confiança"
+
+#: app.py:1032 app.py:1383 app.py:1580 app.py:1582 app.py:1656
+msgid "N/A"
+msgstr "N/D"
+
+#: app.py:1034 app.py:1380
+msgid "Verified"
+msgstr "Verificada"
+
+#: app.py:1036 app.py:1382
+msgid "Unverified"
+msgstr "Não Verificada"
+
+#: app.py:1040 app.py:1570
+msgid "Publication Date"
+msgstr "Data de Publicação"
+
+#: app.py:1044 app.py:1569
+msgid "Source"
+msgstr "Fonte"
+
+#: app.py:1044
+msgid "View Original"
+msgstr "Ver Original"
+
+#: app.py:1046
+msgid "Summary"
+msgstr "Resumo"
+
+#: app.py:1057
+msgid "Evaluation Scores & Evidence"
+msgstr "Pontuações de Avaliação e Evidências"
+
+#: app.py:1062 app.py:1094 app.py:1099
+msgid "(Estimated)"
+msgstr "(Estimado)"
+
+#: app.py:1096 app.py:1099
+msgid "Search Volume"
+msgstr "Volume de Busca"
+
+#: app.py:1110
+#, python-brace-format
+msgid "Editorial Brief (v{version})"
+msgstr "Briefing Editorial (v{version})"
+
+#: app.py:1111
+msgid "Brand Version"
+msgstr "Versão da Marca"
+
+#: app.py:1111
+msgid "Format"
+msgstr "Formato"
+
+#: app.py:1112
+msgid "Topic"
+msgstr "Tópico"
+
+#: app.py:1113
+msgid "Target Audience"
+msgstr "Público-Alvo"
+
+#: app.py:1118
+msgid "Target Keywords"
+msgstr "Palavras-Chave Alvo"
+
+#: app.py:1124
+msgid "Outline"
+msgstr "Estrutura"
+
+#: app.py:1128
+msgid "CTA Goal"
+msgstr "Objetivo de CTA"
+
+#: app.py:1132
+msgid "Verified Facts"
+msgstr "Fatos Verificados"
+
+#: app.py:1158
+msgid "Open Draft Review"
+msgstr "Abrir Revisão do Rascunho"
+
+#: app.py:1166
+msgid "Latest draft rejected by evaluator; topic returned to pool."
+msgstr "Último rascunho reprovado pelo avaliador; tópico devolvido ao acervo."
+
+#: app.py:1169
+msgid "Write & Evaluate Draft"
+msgstr "Redigir e Avaliar Rascunho"
+
+#: app.py:1199
+msgid "Configure a Brand Profile to generate an editorial brief."
+msgstr "Configure um Perfil da Marca para gerar o briefing editorial."
+
+#: app.py:1202
+msgid "Generate Brief"
+msgstr "Gerar Briefing"
+
+#: app.py:1247
+msgid "Topic approved! Brief generation queued."
+msgstr "Tópico aprovado! Geração de briefing na fila."
+
+#: app.py:1259
+msgid "Topic Approved"
+msgstr "Tópico Aprovado"
+
+#: app.py:1261 app.py:1268 app.py:1488 app.py:1494 app.py:1499
+msgid "Decision Note"
+msgstr "Nota de Decisão"
+
+#: app.py:1266
+msgid "Topic Rejected"
+msgstr "Tópico Rejeitado"
+
+#: app.py:1272
+msgid "Topic Expired (Not decided in previous run)"
+msgstr "Tópico Expirado (Não decidido na execução anterior)"
+
+#: app.py:1277 app.py:1505
+msgid "Decision Note (optional)"
+msgstr "Nota de Decisão (opcional)"
+
+#: app.py:1279
+msgid "e.g. Focus on practical tips"
+msgstr "ex: Focar em dicas práticas"
+
+#: app.py:1283 app.py:1512
+msgid "Approve"
+msgstr "Aprovar"
+
+#: app.py:1291
+msgid "Reject"
+msgstr "Rejeitar"
+
+#: app.py:1300
+msgid "Topic rejected."
+msgstr "Tópico rejeitado."
+
+#: app.py:1310
+msgid "Weekly Opportunity Report"
+msgstr "Relatório Semanal de Oportunidades"
+
+#: app.py:1325
+msgid ""
+"No runs recorded yet. Trigger a run from the Runs page to generate "
+"reports."
+msgstr ""
+"Nenhuma execução registrada ainda. Dispare uma execução na página de "
+"Execuções para gerar relatórios."
+
+#: app.py:1337
+msgid "Select Run"
+msgstr "Selecionar Execução"
+
+#: app.py:1352
+msgid "Articles / Week"
+msgstr "Artigos / Semana"
+
+#: app.py:1354
+msgid "Recommended Topics"
+msgstr "Tópicos Recomendados"
+
+#: app.py:1356
+msgid "Total Opportunities"
+msgstr "Total de Oportunidades"
+
+#: app.py:1360
+msgid "No opportunities scored for this run."
+msgstr "Nenhuma oportunidade pontuada para esta execução."
+
+#: app.py:1369 app.py:1738
+msgid "Awaiting Approval"
+msgstr "Aguardando Aprovação"
+
+#: app.py:1370 app.py:1486
+msgid "Draft Approved"
+msgstr "Rascunho Aprovado"
+
+#: app.py:1371 app.py:1492
+msgid "Draft Declined"
+msgstr "Rascunho Recusado"
+
+#: app.py:1372 app.py:1497
+msgid "Draft Published"
+msgstr "Rascunho Publicado"
+
+#: app.py:1434
+msgid "Publish Mode"
+msgstr "Modo de Publicação"
+
+#: app.py:1435
+msgid "Publication Status"
+msgstr "Status da Publicação"
+
+#: app.py:1439
+msgid "Published URL"
+msgstr "URL Publicada"
+
+#: app.py:1441
+msgid "Unknown error"
+msgstr "Erro desconhecido"
+
+#: app.py:1442
+msgid "Publication failed"
+msgstr "Falha na publicação"
+
+#: app.py:1461
+msgid "Retry Publish"
+msgstr "Tentar Publicar Novamente"
+
+#: app.py:1467
+msgid "Re-publish"
+msgstr "Republicar"
+
+#: app.py:1472
+msgid "Publish Now"
+msgstr "Publicar Agora"
+
+#: app.py:1507
+msgid "e.g. Verified numbers and brand tone"
+msgstr "ex: Números verificados e tom da marca"
+
+#: app.py:1521
+msgid "Decline"
+msgstr "Recusar"
+
+#: app.py:1540
+msgid "Article Preview"
+msgstr "Pré-visualização do Artigo"
+
+#: app.py:1542
+msgid "Slug"
+msgstr "Slug"
+
+#: app.py:1543
+msgid "Meta Description"
+msgstr "Meta Descrição"
+
+#: app.py:1546
+msgid "FAQ"
+msgstr "Perguntas Frequentes (FAQ)"
+
+#: app.py:1556 app.py:1558
+msgid "Call to Action"
+msgstr "Chamada para Ação (CTA)"
+
+#: app.py:1562
+msgid "Claims & Sources"
+msgstr "Reivindicações e Fontes"
+
+#: app.py:1564
+msgid "No claims recorded for this draft."
+msgstr "Nenhuma reivindicação registrada para este rascunho."
+
+#: app.py:1569
+msgid "Claim"
+msgstr "Reivindicação"
+
+#: app.py:1569
+msgid "Kind"
+msgstr "Tipo"
+
+#: app.py:1570
+msgid "URL"
+msgstr "URL"
+
+#: app.py:1570
+msgid "Date Status"
+msgstr "Status da Data"
+
+#: app.py:1577
+msgid "Fact"
+msgstr "Fato"
+
+#: app.py:1577
+msgid "Analysis"
+msgstr "Análise"
+
+#: app.py:1578
+msgid "Unlinked Source"
+msgstr "Fonte Não Vinculada"
+
+#: app.py:1591
+msgid "Quality Evaluation"
+msgstr "Avaliação de Qualidade"
+
+#: app.py:1593
+msgid "No quality evaluation recorded for this draft yet."
+msgstr "Nenhuma avaliação de qualidade registrada para este rascunho ainda."
+
+#: app.py:1600 app.py:1644
+msgid "Evaluator Verdict"
+msgstr "Veredito do Avaliador"
+
+#: app.py:1601 app.py:1644
+msgid "Score"
+msgstr "Pontuação"
+
+#: app.py:1602
+msgid "Model"
+msgstr "Modelo"
+
+#: app.py:1606
+msgid "Deterministic Checks"
+msgstr "Verificações Determinísticas"
+
+#: app.py:1618
+msgid "No deterministic checks recorded."
+msgstr "Nenhuma verificação determinística registrada."
+
+#: app.py:1621
+msgid "Evaluator Findings"
+msgstr "Achados do Avaliador"
+
+#: app.py:1632
+msgid "No evaluator findings recorded."
+msgstr "Nenhum achado do avaliador registrado."
+
+#: app.py:1636
+msgid "Revision History"
+msgstr "Histórico de Revisões"
+
+#: app.py:1638
+msgid "No revision history found."
+msgstr "Nenhum histórico de revisões encontrado."
+
+#: app.py:1643 app.py:1701
+msgid "Revision"
+msgstr "Revisão"
+
+#: app.py:1643 app.py:1700
+msgid "Brief Version"
+msgstr "Versão do Briefing"
+
+#: app.py:1665
+msgid "Run Cost Breakdown"
+msgstr "Custos da Execução"
+
+#: app.py:1666
+msgid "Total Run Cost"
+msgstr "Custo Total da Execução"
+
+#: app.py:1668
+msgid "No stage costs recorded for this run yet."
+msgstr "Nenhum custo por etapa registrado para esta execução ainda."
+
+#: app.py:1673
+msgid "Input Tokens"
+msgstr "Tokens de Entrada"
+
+#: app.py:1674
+msgid "Output Tokens"
+msgstr "Tokens de Saída"
+
+#: app.py:1696
+msgid "Surfaced after 2 revisions for owner decision."
+msgstr "Encaminhado após 2 revisões para decisão do proprietário."
+
+#: app.py:1726
+msgid ""
+"No drafts awaiting review or decided yet. Generate a draft from an "
+"approved brief on the Weekly Report."
+msgstr ""
+"Nenhum rascunho aguardando revisão ou decidido ainda. Gere um rascunho a "
+"partir de um briefing aprovado no Relatório Semanal."
+
+#: app.py:1740
+msgid "Approved"
+msgstr "Aprovados"
+
+#: app.py:1742
+msgid "Published"
+msgstr "Publicados"
+
+#: app.py:1744
+msgid "Declined"
+msgstr "Recusados"
+
+#: app.py:1760
+msgid "Select Draft"
+msgstr "Selecionar Rascunho"
+
+#: app.py:1782
+msgid "System Overview"
+msgstr "Visão Geral do Sistema"
+
+#: app.py:1783
+msgid "Current Date"
+msgstr "Data Atual"
+
+#: app.py:1784
+msgid "Estimated Monthly Cap"
+msgstr "Teto Mensal Estimado"
+
+#: app.py:1836
+#, python-brace-format
+msgid "Workspace: {name}"
+msgstr "Espaço de trabalho: {name}"
+
+#: app.py:1837
+#, python-brace-format
+msgid "Welcome back, {email}!"
+msgstr "Bem-vindo de volta, {email}!"
+
+#: engine/auth.py:100
+msgid "Macy Content Intelligence Engine"
+msgstr "Macy - Mecanismo de Inteligência de Conteúdo"
+
+#: engine/auth.py:101
+msgid ""
+"Please sign in with your authorized Google account to access your "
+"workspace."
+msgstr ""
+"Por favor, entre com sua conta Google autorizada para acessar seu espaço "
+"de trabalho."
+
+#: engine/auth.py:102 tests/test_auth.py:131
+msgid "Sign in with Google"
+msgstr "Entrar com Google"
+
+#: engine/auth.py:108
+#, python-brace-format
+msgid "Access denied: '{email}' is not a member of any workspace."
+msgstr "Acesso negado: '{email}' não é membro de nenhum espaço de trabalho."
+
+#: engine/auth.py:109
+msgid "Please contact your workspace owner for access."
+msgstr ""
+"Por favor, entre em contato com o proprietário do espaço de trabalho para"
+" solicitar acesso."
+
+#: engine/auth.py:110 engine/auth.py:120 tests/test_auth.py:156
+#: tests/test_auth.py:181
+msgid "Sign out"
+msgstr "Sair"
+
+#: engine/auth.py:116
+msgid "User"
+msgstr "Usuário"
+
+#: engine/auth.py:117
+msgid "Workspace"
+msgstr "Espaço de trabalho"
+
+msgid "Stack Presets"
+msgstr "Predefinições de Stack"
+
+msgid "Quick Stack Preset"
+msgstr "Predefinição Rápida de Stack"
+
+msgid "Apply Stack Preset"
+msgstr "Aplicar Predefinição"
+
+msgid "Stack preset applied successfully."
+msgstr "Predefinição de stack aplicada com sucesso."
+
+msgid "Macy Setup Wizard"
+msgstr "Assistente de Configuração Macy"
+
+msgid "Step 1 of 3: Account & Capabilities"
+msgstr "Etapa 1 de 3: Conta e Capacidades"
+
+msgid "Step 2 of 3: Integration Stack"
+msgstr "Etapa 2 de 3: Stack de Integrações"
+
+msgid "Step 3 of 3: Website Auto-Seed"
+msgstr "Etapa 3 de 3: Auto-Semeio por URL"
+
+msgid "Owner Email"
+msgstr "E-mail do Proprietário"
+
+msgid "Admin Password"
+msgstr "Senha do Administrador"
+
+msgid "Workspace Name"
+msgstr "Nome do Espaço de Trabalho"
+
+msgid "Workspace Slug"
+msgstr "Slug do Espaço de Trabalho"
+
+msgid "Enabled Capabilities"
+msgstr "Capacidades Ativadas"
+
+msgid "Next"
+msgstr "Próximo"
+
+msgid "Back"
+msgstr "Voltar"
+
+msgid "Please enter owner email, workspace name, and slug."
+msgstr "Por favor, informe o e-mail do proprietário, nome e slug do espaço."
+
+msgid "Stack Preset"
+msgstr "Predefinição de Stack"
+
+msgid "Ollama Base URL (optional)"
+msgstr "URL Base do Ollama (opcional)"
+
+msgid "API Key (optional)"
+msgstr "Chave de API (opcional)"
+
+msgid "Website URL (optional)"
+msgstr "URL do Site (opcional)"
+
+msgid "Complete Setup"
+msgstr "Concluir Configuração"
+
+msgid "Import / Export Brand YAML"
+msgstr "Importar / Exportar Marca em YAML"
+
+msgid "Built-in / Context Fixture"
+msgstr "Fixture Padrão / de Contexto"
+
+msgid "Load Selected Brand Fixture"
+msgstr "Carregar Fixture de Marca Selecionada"
+
+msgid "Brand fixture imported successfully."
+msgstr "Fixture de marca importada com sucesso."
+
+msgid "Upload Brand YAML"
+msgstr "Enviar Arquivo YAML da Marca"
+
+msgid "Import Uploaded Brand YAML"
+msgstr "Importar YAML da Marca Enviado"
+
+msgid "Export Brand YAML"
+msgstr "Exportar YAML da Marca"
+
+msgid "Industry Pack"
+msgstr "Pacote de Indústria"
+
+#~ msgid "Add New Source"
+#~ msgstr "Adicionar Nova Fonte"

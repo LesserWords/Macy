@@ -1,0 +1,3 @@
+schema: spec-driver/change/v1
+created: 2026-11-04
+goal: Build UI shell and bilingual interface (pt-BR / en-US) with translation CI gate

@@ -1,0 +1,20 @@
+id: case_05
+name: "Local Clothing Boutique Opening with Minor Sunglasses Rack"
+expected_band: low
+campaign:
+  locale: "pt-BR"
+  market: "BR"
+record:
+  headline: "Nova loja de roupas femininas inaugura em shopping de Curitiba com espaço para acessórios"
+  source: "Gazeta Local"
+  url: "https://gazetalocal.com.br/inauguracao-loja-roupas-curitiba"
+  published_at: "2026-10-20T16:00:00Z"
+  summary: "Uma nova boutique de vestuário casual feminino foi aberta no Shopping Curitiba, oferecendo vestidos, bolsas e uma pequena arara de óculos de sol de marca própria."
+  facts:
+    - "Loja conta com 80 m² e foco principal em moda jovem feminina."
+    - "Acessórios e óculos de sol genéricos representam menos de 5% do mostruário."
+  entities:
+    - "Shopping Curitiba"
+    - "Moda Feminina"
+  source_type: "news"
+  verification_status: "verified"

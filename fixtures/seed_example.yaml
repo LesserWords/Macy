@@ -1,0 +1,24 @@
+schema_version: 1
+voice: "Analytical, clear, and evidence-driven; communicates practical operational insights and measurable trade-offs without hype or unverified claims."
+positioning: "Acme Content OS is an open, modular editorial intelligence and technical SEO workflow platform built for distributed teams that require source-grounded claims, deterministic compliance checks, and CMS-agnostic publishing."
+capabilities:
+  - "Source-grounded article drafting where every factual claim links to a verified primary source record"
+  - "Deterministic SEO, brand safety, and bilingual readability verification prior to LLM review"
+  - "CMS-agnostic publishing via signed Standard Webhooks and structured Markdown + JSON-LD export"
+  - "Multi-workspace tenant isolation with per-run and monthly USD spend caps"
+  - "Technical SEO & GEO single-URL audits and bounded site crawls"
+  - "Model Context Protocol (MCP) server for agent-driven compliance and editorial workflows"
+prohibited_claims:
+  - "Guarantee fixed organic traffic growth, search ranking positions, or revenue percentages without empirical evidence"
+  - "Claim official endorsement or compliance certification without primary source documentation"
+  - "Promise zero human editorial oversight or 100% autonomous error-free publishing"
+prohibited_phrases:
+  - "\\b#1 platform in the world\\b"
+  - "\\bguaranteed #1 ranking\\b"
+  - "\\b100% error-free\\b"
+  - "\\bo melhor do mundo\\b"
+  - "\\bresultado 100% garantido\\b"
+cta_rules:
+  - "TOFU: Invite readers to explore open operational guides, checklists, and reproducible workflows without a hard sales pitch"
+  - "MOFU: Suggest testing deterministic compliance checks or running a sample URL audit against their own documentation"
+  - "BOFU: Encourage teams to deploy a self-hosted workspace or schedule a technical walkthrough with an engineer"

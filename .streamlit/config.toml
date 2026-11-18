@@ -1,0 +1,5 @@
+[secrets]
+files = [
+    "/tmp/macy/secrets.toml",
+    ".streamlit/secrets.toml",
+]

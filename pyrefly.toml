@@ -1,0 +1,23 @@
+python-version = "3.12"
+
+project-includes = [
+    "app.py",
+    "engine",
+    "scripts",
+    "spikes",
+    "tests",
+    "vulture_whitelist.py",
+]
+
+search-path = [
+    ".",
+    "engine",
+    "tests",
+]
+
+site-package-path = [
+    ".venv/Lib/site-packages",
+]
+
+[errors]
+unnecessary-type-conversion = false

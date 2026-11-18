@@ -1,0 +1,180 @@
+{
+  "status": "success",
+  "processing_time": 3.231737297000109,
+  "document": {
+    "filename": "euromonitor_eyewear_public_summary_2026.pdf",
+    "md_content": "## Euromonitor International - World Market for Eyewear (Public Executive Summary)\n\nPassport Global Briefing Excerpt | 2026 Edition\n\nGlobal eyewear retail value reached $168.4 billion in 2025/2026, led by prescription spectacles (68.5% share) and accelerated myopia management adoption. Latin America posted +6.8% YoY constant value growth, with Brazil accounting for 38.2% of regional optical retail turnover.\n\n| Segment / Region                | Retail Value (USD B)   | Market Share (%)   | YoY Growth (%)   | 2026-2030 CAGR (%)   |\n|---------------------------------|------------------------|--------------------|------------------|----------------------|\n| Global Eyewear Total            | $168.4B                | 100.0%             | +5.6%            | +5.2%                |\n| Spectacles (Rx Frames & Lenses) | $115.4B                | 68.5%              | +5.4%            | +5.0%                |\n| Sunglasses                      | $29.8B                 | 17.7%              | +6.1%            | +5.8%                |\n| Contact Lenses & Care           | $23.2B                 | 13.8%              | +5.9%            | +5.6%                |\n| Latin America (incl. Brazil)    | $14.6B                 | 8.7%               | +6.8%            | +6.4%                |",
+    "json_content": {
+      "tables": [
+        {
+          "data": {
+            "grid": [
+              [
+                {
+                  "text": "Segment / Region",
+                  "column_header": true,
+                  "row_header": false
+                },
+                {
+                  "text": "Retail Value (USD B)",
+                  "column_header": true,
+                  "row_header": false
+                },
+                {
+                  "text": "Market Share (%)",
+                  "column_header": true,
+                  "row_header": false
+                },
+                {
+                  "text": "YoY Growth (%)",
+                  "column_header": true,
+                  "row_header": false
+                },
+                {
+                  "text": "2026-2030 CAGR (%)",
+                  "column_header": true,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Global Eyewear Total",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$168.4B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "100.0%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+5.6%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+5.2%",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Spectacles (Rx Frames & Lenses)",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$115.4B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "68.5%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+5.4%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+5.0%",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Sunglasses",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$29.8B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "17.7%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+6.1%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+5.8%",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Contact Lenses & Care",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$23.2B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "13.8%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+5.9%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+5.6%",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ],
+              [
+                {
+                  "text": "Latin America (incl. Brazil)",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "$14.6B",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "8.7%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+6.8%",
+                  "column_header": false,
+                  "row_header": false
+                },
+                {
+                  "text": "+6.4%",
+                  "column_header": false,
+                  "row_header": false
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

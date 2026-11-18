@@ -1,0 +1,5 @@
+schema: 1
+created: 2026-11-06
+goal: Staging deployment stack, deploy workflow and runbook (M2-06, F20 AC2)
+affected_areas:
+  - operations

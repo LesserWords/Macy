@@ -1,0 +1,71 @@
+# Macy Pocket Plug-and-Play Stack (ADR-030, Path A)
+# Start with zero .env configuration:
+#   docker compose -f infra/compose.pocket.yaml up -d
+name: macy-pocket
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-macy}
+      POSTGRES_USER: ${POSTGRES_USER:-owner}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-macy_pocket_secret}
+    volumes:
+      - pocket_db_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-owner} -d $${POSTGRES_DB:-macy}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 2s
+
+  macy:
+    image: ${APP_IMAGE:-content-engine}:${APP_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${MACY_PORT:-8501}:8501"
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      POCKET_MODE: "true"
+      AUTO_MIGRATE: "true"
+      EMBEDDED_WORKER: "true"
+      AUTH_MODE: ${AUTH_MODE:-auto}
+      MACY_DATA_DIR: /data
+      MACY_CONTEXT_DIR: /data/context
+      MACY_DEFAULT_PACK: ${MACY_DEFAULT_PACK:-general}
+      MACY_USER_AGENT: ${MACY_USER_AGENT:-MacyContentEngine/1.0}
+      MIGRATION_DATABASE_URL: postgres://${POSTGRES_USER:-owner}:${POSTGRES_PASSWORD:-macy_pocket_secret}@db:5432/${POSTGRES_DB:-macy}?sslmode=disable
+      DATABASE_URL: postgres://app:${APP_DB_PASSWORD:-app_secret}@db:5432/${POSTGRES_DB:-macy}?sslmode=disable
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    volumes:
+      - macy_data:/data
+      - ${MACY_HOST_CONTEXT_DIR:-../context}:/data/context:ro
+    command:
+      - sh
+      - -c
+      - >-
+        exec streamlit run app.py --server.port=8501 --server.address=0.0.0.0 --server.headless=true --browser.gatherUsageStats=false
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+volumes:
+  pocket_db_data:
+  macy_data:

@@ -1,0 +1,16 @@
+rubric:
+  - criterion: factual_accuracy
+    weight: 30
+    critical: true
+  - criterion: audience_relevance
+    weight: 25
+    critical: false
+  - criterion: search_optimization
+    weight: 20
+    critical: false
+  - criterion: brand_voice_alignment
+    weight: 15
+    critical: false
+  - criterion: clarity_and_structure
+    weight: 10
+    critical: false

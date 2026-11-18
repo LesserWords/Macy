@@ -1,0 +1,22 @@
+interactions:
+- request:
+    body: '{"messages":[{"role":"user","content":"Generate ideas for myopia"}],"model":"anthropic/claude-haiku-5.5","provider":{"data_collection":"deny","require_parameters":true}}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - Bearer test-openrouter-key
+      content-type:
+      - application/json
+    method: POST
+    uri: https://openrouter.ai/api/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"gen-test-myopia-123","model":"anthropic/claude-haiku-5.5","choices":[{"message":{"role":"assistant","content":"{\"result\":\"Ideas for myopia management and prevention in children.\"}"}}],"usage":{"prompt_tokens":15,"completion_tokens":20,"total_tokens":35,"cost":0.000015}}'
+    headers:
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

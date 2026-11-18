@@ -1,0 +1,239 @@
+[project]
+name = "content-engine"
+version = "0.2.0"
+description = "Content Intelligence Engine: research, score, brief, write and evaluate sourced articles"
+requires-python = ">=3.12"
+dependencies = [
+    "babel>=2.18.0",
+    "cryptography>=44.0",
+    "defusedxml>=0.7.1",
+    "feedparser>=6.0.14",
+    "instructor>=1.17.0",
+    "lingua-language-detector>=2.2.0",
+    "mcp>=1.2.0",
+    "openai>=3.3.0",
+    "psycopg[binary]>=3.3.8",
+    "pydantic>=2.10",
+    "pymupdf4llm>=0.0.17",
+    "python-frontmatter>=1.1.0",
+    "pyyaml>=6.0",
+    "sentry-sdk>=2.73.0",
+    "standardwebhooks>=1.1.0",
+    "streamlit[auth]>=1.66.1",
+    "trafilatura>=2.3.1",
+]
+
+[project.optional-dependencies]
+core = [
+    "cryptography>=44.0",
+    "defusedxml>=0.7.1",
+    "mcp>=1.2.0",
+    "pydantic>=2.10",
+    "python-frontmatter>=1.1.0",
+    "pyyaml>=6.0",
+]
+editorial = [
+    "feedparser>=6.0.14",
+    "instructor>=1.17.0",
+    "lingua-language-detector>=2.2.0",
+    "openai>=3.3.0",
+    "pymupdf4llm>=0.0.17",
+    "trafilatura>=2.3.1",
+]
+ui = [
+    "babel>=2.18.0",
+    "streamlit[auth]>=1.66.1",
+]
+agent = ["strands-agents>=0.1.0"]
+audit-browser = ["playwright>=1.49.0", "axe-playwright-python>=0.1.5"]
+full = [
+    "content-engine[core,editorial,ui,audit-browser]",
+]
+
+[dependency-groups]
+dev = [
+  "complexipy>=8.3.0",
+  "dbos>=3.4.0",
+  "diff-cover>=11.0.0",
+  "hypothesis>=6.170.14",
+  "import-linter>=2.15",
+  "mypy>=1.13",
+  "pre-commit>=4.0",
+  "pytest>=8.3",
+  "pytest-cov>=7.1.0",
+  "pytest-playwright>=0.10.0",
+  "pytest-recording>=0.14.1",
+  "pytest-rerunfailures>=16.7",
+  "ruff>=0.8",
+  "types-defusedxml>=0.7.0.20260504",
+  "types-pyyaml>=6.0.12.20261103",
+  "vulture>=2.16",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+content-engine = "engine.cli:main"
+
+[project.entry-points."content_engine.llm"]
+fake = "engine.integrations.fakes:FakeLLM"
+openrouter = "engine.integrations.openrouter:OpenRouterLLM"
+openai_compat = "engine.integrations.openai_compat:UniversalOpenAILLM"
+ollama = "engine.integrations.openai_compat:OllamaLLM"
+
+[project.entry-points."content_engine.feed_source"]
+fake = "engine.integrations.fakes:FakeFeedSource"
+rss = "engine.integrations.rss:RSSFeedSource"
+
+[project.entry-points."content_engine.news_search"]
+fake = "engine.integrations.fakes:FakeNewsSearch"
+brave = "engine.integrations.brave:BraveNewsSearch"
+gnews_rss = "engine.integrations.gnews_rss:GoogleNewsRSSSearch"
+
+[project.entry-points."content_engine.extractor"]
+fake = "engine.integrations.fakes:FakeExtractor"
+trafilatura = "engine.integrations.trafilatura_extractor:TrafilaturaExtractor"
+
+[project.entry-points."content_engine.keyword_provider"]
+fake = "engine.integrations.fakes:FakeKeywordProvider"
+dataforseo = "engine.integrations.dataforseo:DataForSEOKeywordProvider"
+autocomplete = "engine.integrations.autocomplete_keywords:AutocompleteKeywordProvider"
+
+[project.entry-points."content_engine.publisher"]
+fake = "engine.integrations.fakes:FakePublisher"
+markdown_export = "engine.integrations.markdown_export:MarkdownExportPublisher"
+http_webhook = "engine.integrations.http_webhook:HttpWebhookPublisher"
+
+[project.entry-points."content_engine.analytics_source"]
+fake = "engine.integrations.fakes:FakeAnalyticsSource"
+gsc = "engine.integrations.gsc:GSCAnalyticsSource"
+
+[project.entry-points."content_engine.capabilities"]
+core-compliance = "engine.capabilities.builtins:CoreComplianceCapability"
+seo-audit = "engine.capabilities.builtins:SeoAuditCapability"
+editorial-pipeline = "engine.capabilities.builtins:EditorialPipelineCapability"
+route-monitors = "engine.capabilities.builtins:RouteMonitorsCapability"
+
+[tool.hatch.build.targets.wheel]
+packages = ["engine"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "/context/*",
+  "!/context/README.md",
+  "/founder",
+  "/.env",
+  "/.env.prod",
+  "/.env.staging",
+  "/.env.local",
+  "/artifacts",
+  "/backups",
+  "/exports",
+  "/reports",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["docs", "openspec", ".claude"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "C901", "PLR0912", "PLR0913", "PLR0915", "S", "SIM"]
+ignore = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-branches = 12
+max-statements = 50
+max-args = 5
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S104", "S105"]
+"evals/**" = ["S101", "S104", "S105"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = ["app.py", "engine", "evals", "scripts", "spikes", "tests", "vulture_whitelist.py"]
+# Private, git-ignored holdout tooling (copyrighted sources); not part of the codebase.
+exclude = ["evals/claim_benchmark/holdout/"]
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["authlib", "authlib.*", "feedparser", "feedparser.*"]
+ignore_missing_imports = true
+
+[tool.complexipy]
+paths = ["engine", "scripts"]
+max-complexity-allowed = 15
+
+[tool.vulture]
+paths = ["engine", "scripts", "tests", "vulture_whitelist.py"]
+min_confidence = 60
+ignore_names = ["test_*", "prompt", "schema", "side_effect", "dbos_runtime"]
+
+[tool.importlinter]
+root_packages = ["engine"]
+
+[[tool.importlinter.contracts]]
+name = "No circular imports in engine"
+type = "acyclic_siblings"
+ancestors = ["engine"]
+
+[[tool.importlinter.contracts]]
+name = "CLI imports services and contracts only"
+type = "forbidden"
+source_modules = [
+    "engine.cli",
+]
+forbidden_modules = [
+    "engine.db",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "MCP imports services and contracts only"
+type = "forbidden"
+source_modules = [
+    "engine.mcp",
+]
+forbidden_modules = [
+    "engine.db",
+]
+allow_indirect_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests", "evals"]
+markers = [
+    "eval: live LLM evaluation suite (costs money, run on prompt/pack changes)",
+    "live_e2e: live E2E journey suite against staging or local live server (ADR-018)",
+]
+addopts = "-q -m 'not eval and not live_e2e' --cov=engine --cov-branch --cov-report=term-missing --cov-report=xml:coverage.xml --cov-report=json:artifacts/coverage.json --cov-fail-under=90"
+
+[tool.coverage.run]
+branch = true
+source = ["engine"]
+omit = ["engine/app.py"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+
+[tool.pyrefly]
+python-version = "3.12"
+project-includes = ["app.py", "engine", "scripts", "spikes", "tests", "vulture_whitelist.py"]
+search-path = [".", "engine", "tests"]
+site-package-path = [
+    ".venv/Lib/site-packages",
+]
+
+[tool.pyrefly.errors]
+unnecessary-type-conversion = false

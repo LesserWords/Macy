@@ -1,0 +1,38 @@
+# Delta for research
+
+## MODIFIED Requirements
+
+### Requirement: Document collection and structured extraction
+The system SHALL poll feeds and site searches within the run window, canonicalize URLs, honour `robots.txt`, extract dates and language, and generate structured `ResearchRecord` rows with failure isolation and trigram near-duplicate deduplication (`similarity >= 0.6` within 14 days).
+
+#### Scenario: Canonical URL deduplication
+- **WHEN** a page is fetched during collection
+- **THEN** it is stored once per canonical URL in `documents` with `fetch_status`, `content_hash`, and the detected `lang` (`pt` or `en`), and subsequent references to the same canonical URL reuse the document row
+
+#### Scenario: Trigram near-duplicate title detection
+- **WHEN** two research records have title similarity meeting or exceeding the `0.6` trigram threshold within the 14-day window
+- **THEN** the later record is marked `status = 'duplicate'` with `duplicate_of` pointing to the earlier non-duplicate record
+
+#### Scenario: Missing publication date sets unverified status and caps confidence
+- **WHEN** no publication date can be extracted from feed metadata or article metadata
+- **THEN** `date_status` is set to `unverified` and the record's confidence is capped at `"medium"`
+
+#### Scenario: Extraction failure or paywall does not abort the run
+- **WHEN** extraction fails or the page is paywalled
+- **THEN** `documents.fetch_status` records `extraction_failed` or `paywalled` (or `research_records.status` records `failed` on LLM extraction failure) and the run continues processing remaining items
+
+#### Scenario: LLM extraction produces valid ResearchRecord with schema_version
+- **WHEN** the LLM extraction step runs on an extracted document
+- **THEN** a valid `ResearchRecord` payload (facts, entities, summary, source_type, verification_status) is stored in `research_records` with `schema_version` and `status = 'extracted'`
+
+#### Scenario: Robots.txt disallow prevents fetching
+- **WHEN** `robots.txt` for a target domain disallows fetching a URL
+- **THEN** the page is not fetched and `fetch_status` is recorded as `blocked`
+
+#### Scenario: Site search queries NewsSearch scoped to source domain
+- **WHEN** a run's research stage executes
+- **THEN** each enabled `feed` source is polled via `FeedSourcePort` and each enabled `site_search` source is queried through `NewsSearchPort` scoped to its `domain` for the run window
+
+#### Scenario: Brave news search maps locale and records unit cost in usage ledger
+- **WHEN** the `brave` `NewsSearch` plugin executes a domain-scoped or open search
+- **THEN** it maps supported locales (`pt-BR`, `en-US`) to Brave parameters (raising `UnsupportedLocale` for unmapped locales) and records its unit cost in `usage_ledger`

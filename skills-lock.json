@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "skills": {
+    "architecture-designer": {
+      "source": "Jeffallan/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/architecture-designer/SKILL.md",
+      "computedHash": "425f974f7b0758a7356b5d9cc34a63c05e1ff64ec7477922b590330047b6b164"
+    }
+  }
+}

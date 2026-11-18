@@ -1,0 +1,22 @@
+id: case_01
+name: "Myopia Management Clinical Guidelines in Brazil"
+expected_band: high
+campaign:
+  locale: "pt-BR"
+  market: "BR"
+record:
+  headline: "Abióptica divulga novas diretrizes clínicas para manejo de miopia infantil no Brasil"
+  source: "Abióptica"
+  url: "https://abioptica.com.br/diretrizes-miopia-infantil-2026"
+  published_at: "2026-11-01T10:00:00Z"
+  summary: "A Abióptica e conselhos de oftalmologia publicaram novas diretrizes para diagnóstico e controle da miopia infantil em ópticas e clínicas brasileiras, impulsionando a prescrição de lentes de controle de miopia de alto valor agregado."
+  facts:
+    - "Novas diretrizes recomendam monitoramento periódico a cada 6 meses para crianças."
+    - "Lentes com tecnologia de desfoque periférico têm aumento de 45% nas recomendações clínicas."
+    - "Mercado de lentes para miopia infantil cresceu 28% no último ano no Brasil."
+  entities:
+    - "Abióptica"
+    - "Miopia Infantil"
+    - "Lentes de Desfoque Periférico"
+  source_type: "news"
+  verification_status: "verified"

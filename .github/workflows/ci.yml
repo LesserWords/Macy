@@ -1,0 +1,144 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run complexipy engine --max-complexity-allowed 15 --output-format json --output artifacts/complexipy.json
+      - run: uv run vulture
+      - run: uv run lint-imports
+      - run: npx --yes jscpd@4.0.5 .
+      - uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: static-analysis-trends
+          path: |
+            artifacts/complexipy.json
+            artifacts/jscpd/jscpd-report.json
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+      HYPOTHESIS_PROFILE: ci
+      DATABASE_URL: postgres://app:app_secret@localhost:5432/macy?sslmode=disable
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v7
+      - name: Start PostgreSQL and run migrations
+        run: |
+          docker compose -f infra/compose.yaml -f infra/compose.override.yaml up -d db
+          docker compose -f infra/compose.yaml -f infra/compose.override.yaml run --rm migrate up
+      - run: uv sync --locked
+      - name: Install Playwright Chromium
+        run: uv run playwright install --with-deps chromium
+      - run: uv run complexipy engine --max-complexity-allowed 15 --output-format json --output artifacts/complexipy.json
+      - run: uv run pytest
+      - run: uv run diff-cover coverage.xml --compare-branch="origin/${{ github.base_ref || github.ref_name }}" --fail-under=100
+      - run: uv run python scripts/hotspots.py artifacts/complexipy.json artifacts/coverage.json artifacts/hotspots.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-and-hotspots-trends
+          path: |
+            coverage.xml
+            artifacts/coverage.json
+            artifacts/hotspots.json
+
+  openspec-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - run: npx --yes @fission-ai/openspec@1.16.0 validate --all --strict --no-interactive
+
+  compose-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate compose.yaml
+        run: |
+          docker compose -f infra/compose.yaml config -q
+          docker compose -f infra/compose.yaml --profile mcp config -q
+          docker compose -f infra/compose.pocket.yaml config -q
+      - name: Validate compose.override.yaml (dev)
+        run: |
+          docker compose -f infra/compose.yaml -f infra/compose.override.yaml config -q
+          docker compose -f infra/compose.yaml -f infra/compose.override.yaml --profile mcp config -q
+      - name: Validate compose.e2e.yaml
+        run: |
+          docker compose -f infra/compose.yaml -f infra/compose.e2e.yaml config -q
+          docker compose -f infra/compose.yaml -f infra/compose.e2e.yaml --profile mcp config -q
+      - name: Validate compose.prod.yaml (staging baseline)
+        run: |
+          docker compose --env-file .env.staging.example -f infra/compose.yaml -f infra/compose.prod.yaml config -q
+          docker compose --env-file .env.staging.example -f infra/compose.yaml -f infra/compose.prod.yaml --profile mcp config -q
+      - name: Validate compose.prod.yaml (prod baseline)
+        run: |
+          docker compose --env-file .env.prod.example -f infra/compose.yaml -f infra/compose.prod.yaml config -q
+          docker compose --env-file .env.prod.example -f infra/compose.yaml -f infra/compose.prod.yaml --profile mcp config -q
+      - name: Staging overlay refuses to render without required secrets
+        run: |
+          if docker compose -f infra/compose.yaml -f infra/compose.prod.yaml config -q 2>/dev/null; then
+            echo "compose.prod.yaml rendered without an env file; required secrets are not enforced" >&2
+            exit 1
+          fi
+      - name: Lint deploy and backup scripts
+        run: shellcheck scripts/deploy.sh scripts/backup.sh
+      - name: Validate deploy preflight rejects placeholder baselines
+        run: |
+          cp .env.staging.example "$RUNNER_TEMP/staging.env"
+          chmod 600 "$RUNNER_TEMP/staging.env"
+          if ENV_FILE="$RUNNER_TEMP/staging.env" sh scripts/deploy.sh --preflight-only; then
+            echo "preflight accepted placeholder secrets" >&2
+            exit 1
+          fi
+          cp .env.prod.example "$RUNNER_TEMP/prod.env"
+          chmod 600 "$RUNNER_TEMP/prod.env"
+          if ENV_FILE="$RUNNER_TEMP/prod.env" sh scripts/deploy.sh --preflight-only; then
+            echo "preflight accepted prod placeholder secrets" >&2
+            exit 1
+          fi
+          if MCP_ENABLED=true ENV_FILE="$RUNNER_TEMP/prod.env" sh scripts/deploy.sh --preflight-only; then
+            echo "preflight accepted placeholder MCP secrets" >&2
+            exit 1
+          fi
+
+  squawk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - run: npx --yes squawk-cli --no-error-on-unmatched-pattern db/migrations/*.sql

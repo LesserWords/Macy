@@ -1,0 +1,23 @@
+id: case_02
+name: "Brazilian Optical Tax Reform Exemption for Prescription Frames"
+expected_band: high
+campaign:
+  locale: "pt-BR"
+  market: "BR"
+record:
+  headline: "Reforma Tributária: Regulamentação da CBS e IBS mantém alíquota reduzida para armações receituárias"
+  source: "Opticanet"
+  url: "https://opticanet.com.br/reforma-tributaria-armacoes-2026"
+  published_at: "2026-11-02T14:30:00Z"
+  summary: "Regulamentação definitiva da reforma tributária garante alíquota reduzida para armações receituárias e lentes oftálmicas, exigindo que varejistas ópticos adaptem seus sistemas de gestão e cadastros fiscais até o fim do trimestre."
+  facts:
+    - "Alíquota especial para dispositivos médicos e oftálmicos confirmada pelo Senado Federal."
+    - "Varejistas ópticos precisam recadastrar códigos NCM e regras de tributação no ERP."
+    - "Prazo de adequação fiscal nos sistemas encerra no final do próximo trimestre."
+  entities:
+    - "Receita Federal"
+    - "Senado Federal"
+    - "CBS/IBS"
+    - "Óticas"
+  source_type: "news"
+  verification_status: "verified"

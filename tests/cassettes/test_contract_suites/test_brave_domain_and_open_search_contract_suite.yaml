@@ -1,0 +1,66 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+    method: GET
+    uri: https://api.search.brave.com/res/v1/news/search?q=site%3Asebrae.com.br+varejo+optico&country=BR&search_lang=pt-br&ui_lang=pt-BR&count=20
+  response:
+    body:
+      string: |
+        {
+          "type": "news",
+          "results": [
+            {
+              "title": "Sebrae publica guia de gestao financeira para varejo optico",
+              "url": "https://sebrae.com.br/2026/11/02/guia-gestao-varejo-optico?utm_medium=search&fbclid=abc",
+              "description": "Indicadores de capital de giro e ticket medio para pequenas oticas brasileiras.",
+              "page_age": "2026-11-02T11:30:00Z",
+              "meta_url": {
+                "hostname": "sebrae.com.br"
+              }
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      X-Brave-Region:
+      - br-sp
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+    method: GET
+    uri: https://api.search.brave.com/res/v1/news/search?q=myopia+control&country=US&search_lang=en&ui_lang=en-US&count=20
+  response:
+    body:
+      string: |
+        {
+          "type": "news",
+          "results": [
+            {
+              "title": "FDA clearances accelerate myopia control spectacle adoption",
+              "url": "https://eyewearintelligence.com/2026/11/03/fda-myopia-control-spectacles?gclid=xyz",
+              "description": "US optical retailers expand pediatric myopia management clinics across major metros.",
+              "page_age": "2026-11-03T16:45:00Z",
+              "meta_url": {
+                "hostname": "eyewearintelligence.com"
+              }
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      X-Brave-Region:
+      - us-east
+    status:
+      code: 200
+      message: OK
+version: 1

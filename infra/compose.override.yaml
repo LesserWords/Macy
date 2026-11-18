@@ -1,0 +1,35 @@
+# Local development overrides (ADR-012)
+services:
+  db:
+    ports:
+      - "5432:5432"
+
+  app:
+    ports:
+      - "8501:8501"
+    volumes:
+      - ../engine:/app/engine:ro
+      - ../app.py:/app/app.py:ro
+      - ../.streamlit:/app/.streamlit:ro
+    environment:
+      ENVIRONMENT: dev
+      APP_ENV: development
+      MACY_TEST_USER_EMAIL: admin@example.com
+
+  worker:
+    volumes:
+      - ../engine:/app/engine:ro
+    environment:
+      ENVIRONMENT: dev
+      APP_ENV: development
+      MACY_TEST_USER_EMAIL: admin@example.com
+
+  mcp:
+    ports:
+      - "127.0.0.1:8765:8765"
+    volumes:
+      - ../engine:/app/engine:ro
+    environment:
+      ENVIRONMENT: dev
+      APP_ENV: development
+      MACY_TEST_USER_EMAIL: admin@example.com

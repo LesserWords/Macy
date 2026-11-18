@@ -1,0 +1,34 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+    method: GET
+    uri: https://suggestqueries.google.com/complete/search?client=firefox&hl=pt&gl=BR&q=lentes
+  response:
+    body:
+      string: '["lentes", ["lentes de contato", "lentes multifocais", "lentes transitions"]]'
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+    method: GET
+    uri: https://suggestqueries.google.com/complete/search?client=firefox&hl=pt&gl=BR&q=oculos
+  response:
+    body:
+      string: '["oculos", ["oculos de grau", "oculos de sol", "oculos infantil"]]'
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    status:
+      code: 200
+      message: OK
+version: 1

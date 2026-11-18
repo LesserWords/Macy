@@ -1,0 +1,53 @@
+id: case_07
+stage: brief
+name: "Pediatric Myopia Lens Adoption in US Independent Practices"
+campaign:
+  locale: "en-US"
+  market: "US"
+opportunity:
+  title: "Pediatric myopia control adoption in independent optometry practices"
+  angle: "Clinical workflow and parent education playbooks driving specialized lens retention"
+  funnel_stage: "tofu"
+  confidence: "high"
+  summary: "Independent optometry clinics face growing demand for evidence-backed myopia management programs."
+evidence_documents:
+  - id: "22222222-2222-4222-8222-222222222201"
+    source_name: "The Vision Council"
+    source_role: "data"
+    url: "https://thevisioncouncil.org/consumer-insights-pediatric-2026"
+    title: "Consumer Insights Report: Pediatric Eyewear and Specialty Lens Trends"
+    summary: "Survey data highlights rising parental concern regarding childhood screen exposure and progressive myopia."
+    facts:
+      - "Annual pediatric comprehensive eye exams grew 14% year-over-year across independent practices."
+  - id: "22222222-2222-4222-8222-222222222202"
+    source_name: "Euromonitor International"
+    source_role: "data"
+    url: "https://euromonitor.com/us-eyewear-specialty-forecast-2026"
+    title: "North America Eyewear Market Forecast Through 2028"
+    summary: "Euromonitor tracks premium specialty ophthalmic coatings outpacing standard single-vision replacements."
+    facts:
+      - "Specialty myopia-control ophthalmic lenses capture 19% higher unit revenue than baseline lenses."
+keywords:
+  - keyword: "pediatric myopia control optometry"
+    search_volume: 0
+    difficulty: 0.0
+    cpc_usd: 0.0
+    intent: "informational"
+    is_estimate: true
+  - keyword: "myopia management optical practice"
+    search_volume: 0
+    difficulty: 0.0
+    cpc_usd: 0.0
+    intent: "commercial"
+    is_estimate: true
+expected:
+  min_outline_items: 4
+  min_required_facts: 1
+  format: "blog"
+  require_estimate_awareness: true
+write_expected:
+  min_words: 200
+  min_claims: 3
+  min_fact_claims: 2
+  min_faq_items: 2
+  slug_pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"

@@ -1,0 +1,34 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://example.com/rss
+  response:
+    body:
+      string: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+          <channel>
+            <title>Example Optical Feed</title>
+            <link>https://example.com</link>
+            <description>Optical industry updates</description>
+            <item>
+              <title>Optical Retail Growth in 2026</title>
+              <link>https://example.com/articles/general-growth-2026?utm_source=rss</link>
+              <description>Independent optical stores report strong demand for progressive lenses.</description>
+              <pubDate>Sun, 01 Nov 2026 10:00:00 GMT</pubDate>
+            </item>
+          </channel>
+        </rss>
+    headers:
+      Content-Type:
+      - application/rss+xml; charset=utf-8
+    status:
+      code: 200
+      message: OK
+version: 1

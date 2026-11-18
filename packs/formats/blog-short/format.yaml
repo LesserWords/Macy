@@ -1,0 +1,11 @@
+name: Blog Post Curto
+slug: blog-short
+min_words: 400
+max_words: 800
+structure:
+  - title
+  - meta
+  - slug
+  - body
+  - faq
+  - cta

@@ -1,0 +1,307 @@
+# Starter set: companies, people and figures are invented, so models cannot lean on outside knowledge.
+# Results are directional until real articles replace these. Each error is one find/replace in one sentence.
+- id: en-01
+  locale: en-US
+  title: Halden Optical expands lens lab output
+  source: |
+    Halden Optical Group reported on 14 March 2026 that its lens laboratory in Porto Verde processed 412,000 pairs in 2025, up 18% from 2024. The company said growth came mainly from progressive lenses, which made up 37% of volume. Chief operating officer Marta Lindqvist said the lab cut average turnaround from 6 days to 4 days after installing two automated coating lines. Halden invested 3.2 million euros in the lines. The company warned that margins fell by 1.5 percentage points because of higher coating-material costs. Halden plans to open a second laboratory in Valmora in the first quarter of 2027, subject to regulatory approval. It did not disclose expected hiring for the new site.
+  sentences:
+    - text: Halden Optical Group's Porto Verde laboratory processed 412,000 lens pairs in 2025, an 18% increase on the previous year.
+      errors:
+        - {type: number, find: "18%", replace: "28%"}
+    - text: Progressive lenses accounted for 37% of the lab's volume and drove most of the growth.
+      errors:
+        - {type: scope, find: "most of the growth", replace: "all of the growth"}
+    - text: Chief operating officer Marta Lindqvist said two automated coating lines reduced average turnaround from 6 days to 4 days.
+      errors:
+        - {type: attribution, find: "Chief operating officer", replace: "Chief financial officer"}
+    - text: The investment in those lines totaled 3.2 million euros.
+      errors:
+        - {type: fabricated, find: "euros.", replace: "euros and created 60 new jobs."}
+    - text: Higher coating-material costs reduced margins by 1.5 percentage points.
+      errors:
+        - {type: direction, find: "reduced", replace: "increased"}
+    - text: A second laboratory is planned for Valmora in the first quarter of 2027, pending regulatory approval.
+      errors:
+        - {type: date, find: "first quarter of 2027", replace: "first quarter of 2026"}
+    - text: For independent opticians, faster lab turnaround is worth watching when choosing a supplier.
+
+- id: en-02
+  locale: en-US
+  title: Vistara survey finds opticians slow to adopt online booking
+  source: |
+    A survey published by the trade body Vistara Retail Forum in February 2026 questioned 1,240 independent opticians across six countries. It found that 31% offered online appointment booking, compared with 22% in the 2024 edition. Among stores that offered booking, 64% reported fewer missed appointments. Cost was the most cited barrier, named by 45% of stores without booking, ahead of staff training at 29%. The forum's research director, Tomas Bergen, said adoption was highest among stores with three or more locations. The survey did not measure effects on revenue. Vistara said the margin of error was 3 percentage points.
+  sentences:
+    - text: Vistara Retail Forum surveyed 1,240 independent opticians in six countries.
+      errors:
+        - {type: number, find: "1,240", replace: "12,400"}
+    - text: Online booking was offered by 31% of them, up from 22% in 2024.
+      errors:
+        - {type: direction, find: "up from", replace: "down from"}
+    - text: Almost two thirds of stores with booking saw fewer missed appointments.
+    - text: Cost was the barrier cited most often, ahead of staff training.
+      errors:
+        - {type: entity, find: "Cost", replace: "Software complexity"}
+    - text: Research director Tomas Bergen said adoption was highest among stores with three or more locations.
+      errors:
+        - {type: scope, find: "three or more locations", replace: "a single location"}
+    - text: Stores that added booking also grew revenue, the survey found.
+      planted_sentence: fabricated
+    - text: The survey's margin of error was 3 percentage points.
+    - text: Smaller stores may want to compare booking tools before the next budget cycle.
+
+- id: en-03
+  locale: en-US
+  title: Corvane raises prices on contact lens lines
+  source: |
+    Contact lens maker Corvane Vision told distributors on 3 September 2026 that wholesale prices on its monthly lens range will rise 6% from 1 January 2027. Daily lenses will rise 4%. The company attributed the change to a 12% increase in polymer costs over the previous year. Corvane said it would freeze prices on its toric range until June 2027. Sales director Ilse Marchetti said distributors placing orders before 15 December can buy at current prices, up to 110% of their 2026 average monthly volume. Corvane holds about 14% of the European market, according to its most recent annual report.
+  sentences:
+    - text: Corvane Vision will raise wholesale prices on monthly lenses by 6% from 1 January 2027.
+      errors:
+        - {type: date, find: "1 January 2027", replace: "1 January 2026"}
+    - text: Daily lenses will go up by 4%.
+      errors:
+        - {type: number, find: "4%", replace: "9%"}
+    - text: The company blamed a 12% rise in polymer costs.
+      errors:
+        - {type: causal, find: "polymer costs", replace: "shipping costs"}
+    - text: Toric lens prices are frozen until June 2027.
+      errors:
+        - {type: entity, find: "Toric", replace: "Multifocal"}
+    - text: Sales director Ilse Marchetti said distributors ordering before 15 December can buy at current prices, within a volume limit.
+      errors:
+        - {type: scope, find: ", within a volume limit", replace: " with no volume limit"}
+    - text: Corvane has around 14% of the European market, its annual report shows.
+    - text: Distributors should review stock plans ahead of the change.
+
+- id: en-04
+  locale: en-US
+  title: Brightlane cuts churn with onboarding change
+  source: |
+    Brightlane, a payroll software provider for small retailers, said in its April 2026 customer report that annual churn fell from 14% to 9% after it introduced a guided onboarding program in 2025. The program assigns each new customer a specialist for 30 days. Chief executive Dara Okafor said about 2,300 accounts went through the program in its first year. Support tickets per new account declined by 26%. Brightlane stated that the program costs about 85 dollars per account to deliver. The company cautioned that the churn figures cover accounts under 50 employees only and that it had also raised prices during the period, which may have affected results.
+  sentences:
+    - text: Brightlane says annual churn dropped from 14% to 9% following a guided onboarding program launched in 2025.
+      errors:
+        - {type: number, find: "9%", replace: "4%"}
+    - text: New customers get a specialist for 30 days.
+      errors:
+        - {type: number, find: "30 days", replace: "90 days"}
+    - text: Chief executive Dara Okafor said about 2,300 accounts took part in the first year.
+      errors:
+        - {type: attribution, find: "Dara Okafor", replace: "Lena Marsh"}
+    - text: Support tickets per new account fell by 26%.
+      errors:
+        - {type: direction, find: "fell", replace: "rose"}
+    - text: The program costs about 85 dollars per account.
+      errors:
+        - {type: fabricated, find: "per account.", replace: "per account and paid for itself within two months."}
+    - text: The churn figures cover only accounts with fewer than 50 employees.
+      errors:
+        - {type: scope, find: "only accounts with fewer than 50 employees", replace: "all of its accounts"}
+    - text: Other software vendors may learn from this approach.
+
+- id: en-05
+  locale: en-US
+  title: Port authority report shows delay in eyewear imports
+  source: |
+    The Eastmark Port Authority reported on 22 May 2026 that average customs clearance for eyewear shipments rose to 9 days in the first quarter, from 5 days a year earlier. The authority linked the delays to a new labeling inspection introduced in January. Inspections affected roughly 40% of eyewear containers. Port director Sanjay Velez said staffing would increase by 25 inspectors by September. Importers can apply for a pre-clearance program, which has approved 118 companies so far. The authority said delays for non-eyewear goods were unchanged. It gave no estimate of when clearance times would return to earlier levels.
+  sentences:
+    - text: Eyewear shipments at Eastmark took 9 days on average to clear customs in the first quarter, compared with 5 days a year before.
+      errors:
+        - {type: number, find: "5 days", replace: "3 days"}
+    - text: The port authority tied the delay to a labeling inspection introduced in January.
+      errors:
+        - {type: causal, find: "a labeling inspection", replace: "a customs officers' strike"}
+    - text: Around 40% of eyewear containers were inspected.
+      errors:
+        - {type: entity, find: "eyewear", replace: "all"}
+    - text: Port director Sanjay Velez said 25 more inspectors would be added by September.
+      errors:
+        - {type: direction, find: "added", replace: "cut"}
+    - text: The pre-clearance program has approved 118 companies.
+    - text: Delays did not affect other goods.
+      errors:
+        - {type: scope, find: "did not affect", replace: "affected all"}
+    - text: The authority expects clearance times to normalize by the end of the year.
+      planted_sentence: fabricated
+    - text: Importers planning autumn collections should allow extra time.
+
+- id: en-06
+  locale: en-US
+  title: Marlowe Labs pilot tests AI lens recommendations
+  source: |
+    Marlowe Labs ran a 12-week pilot of an AI lens recommendation tool in 38 stores, the company said on 9 October 2026. Stores using the tool sold premium coatings in 41% of transactions, against 33% in a control group of 40 stores. Average order value rose 7%. Product manager Noor Haddad said staff completed training in under two hours. Marlowe said customer satisfaction scores showed no significant difference between the groups. The pilot excluded children's prescriptions. The company will extend the tool to 120 stores in 2027, and has not announced pricing for outside retailers.
+  sentences:
+    - text: Marlowe Labs tested an AI lens recommendation tool for 12 weeks across 38 stores.
+      errors:
+        - {type: number, find: "38 stores", replace: "380 stores"}
+    - text: Premium coatings were sold in 41% of transactions at those stores, compared with 33% in the control group.
+      errors:
+        - {type: number, find: "33%", replace: "13%"}
+    - text: Average order value went up 7%.
+    - text: Product manager Noor Haddad said staff were trained in under two hours.
+      errors:
+        - {type: number, find: "two hours", replace: "two days"}
+    - text: Customer satisfaction did not differ significantly between the groups.
+      errors:
+        - {type: direction, find: "did not differ significantly", replace: "improved significantly"}
+    - text: Children's prescriptions were excluded from the pilot.
+      errors:
+        - {type: scope, find: "excluded from", replace: "included in"}
+    - text: Marlowe will roll the tool out to 120 stores in 2027.
+      errors:
+        - {type: fabricated, find: "in 2027.", replace: "in 2027 at a price of 99 dollars a month."}
+    - text: Retailers interested in decision tools should watch how this expands.
+
+- id: pt-01
+  locale: pt-BR
+  title: Rede Vistaclara amplia laboratório próprio
+  source: |
+    A rede de óticas Vistaclara informou em 12 de março de 2026 que seu laboratório em Campo Sereno processou 186 mil pares de lentes em 2025, alta de 22% em relação a 2024. Segundo a empresa, as lentes multifocais representaram 41% do volume. A diretora de operações, Helena Prado, afirmou que o prazo médio de entrega caiu de 7 para 3 dias após a instalação de uma nova linha de surfaçagem. O investimento foi de R$ 2,4 milhões. A companhia alertou que a margem bruta recuou 2 pontos percentuais por causa do custo de insumos importados. A Vistaclara pretende abrir 15 lojas até dezembro de 2027, sem detalhar em quais estados.
+  sentences:
+    - text: O laboratório da Vistaclara em Campo Sereno processou 186 mil pares de lentes em 2025, alta de 22% sobre o ano anterior.
+      errors:
+        - {type: number, find: "186 mil", replace: "286 mil"}
+    - text: As lentes multifocais responderam por 41% do volume.
+      errors:
+        - {type: entity, find: "multifocais", replace: "de contato"}
+    - text: A diretora de operações, Helena Prado, disse que o prazo médio de entrega caiu de 7 para 3 dias com a nova linha de surfaçagem.
+      errors:
+        - {type: attribution, find: "diretora de operações", replace: "diretora financeira"}
+    - text: O investimento somou R$ 2,4 milhões.
+      errors:
+        - {type: number, find: "R$ 2,4 milhões", replace: "R$ 24 milhões"}
+    - text: A margem bruta recuou 2 pontos percentuais devido ao custo de insumos importados.
+      errors:
+        - {type: direction, find: "recuou", replace: "avançou"}
+    - text: A empresa planeja abrir 15 lojas até dezembro de 2027.
+      errors:
+        - {type: fabricated, find: "até dezembro de 2027.", replace: "até dezembro de 2027, todas na região Nordeste."}
+    - text: Para donos de óticas independentes, vale acompanhar o movimento de verticalização das redes.
+
+- id: pt-02
+  locale: pt-BR
+  title: Pesquisa mostra avanço do agendamento digital em óticas
+  source: |
+    Levantamento da Associação Lumen de Varejo Óptico, divulgado em fevereiro de 2026, ouviu 860 óticas independentes em 11 estados. O estudo indica que 27% delas já oferecem agendamento online, ante 18% em 2024. Entre as que oferecem o serviço, 58% relataram redução nas faltas de clientes. O custo foi a principal barreira, citada por 49% das óticas sem o recurso, à frente da falta de treinamento, com 26%. Segundo o coordenador da pesquisa, Rafael Tavares, a adoção é maior no Sudeste. O levantamento não avaliou impacto no faturamento. A margem de erro é de 3,5 pontos percentuais.
+  sentences:
+    - text: A Associação Lumen de Varejo Óptico ouviu 860 óticas independentes em 11 estados.
+      errors:
+        - {type: number, find: "11 estados", replace: "21 estados"}
+    - text: O agendamento online já é oferecido por 27% delas, contra 18% em 2024.
+      errors:
+        - {type: number, find: "27%", replace: "37%"}
+    - text: Mais da metade das óticas com o serviço relatou menos faltas de clientes.
+    - text: O custo foi a barreira mais citada, à frente da falta de treinamento.
+      errors:
+        - {type: direction, find: "à frente da", replace: "atrás da"}
+    - text: O coordenador Rafael Tavares afirmou que a adoção é maior no Sudeste.
+      errors:
+        - {type: entity, find: "Sudeste", replace: "Nordeste"}
+    - text: As óticas que adotaram o agendamento aumentaram o faturamento, aponta o estudo.
+      planted_sentence: fabricated
+    - text: A margem de erro é de 3,5 pontos percentuais.
+    - text: Vale comparar ferramentas antes de contratar um sistema.
+
+- id: pt-03
+  locale: pt-BR
+  title: Fabricante Solarim reajusta tabela de armações
+  source: |
+    A fabricante de armações Solarim comunicou aos distribuidores, em 2 de setembro de 2026, reajuste de 8% na linha de acetato a partir de 1º de fevereiro de 2027. A linha metálica subirá 5%. A empresa atribuiu a alta ao aumento de 15% no custo do acetato importado. A linha infantil terá preços congelados até julho de 2027. Segundo a gerente comercial, Beatriz Nogueira, pedidos feitos até 10 de dezembro manterão os valores atuais, limitados a 120% da média mensal de compras de 2026. A Solarim detém cerca de 11% do mercado nacional, de acordo com seu relatório anual.
+  sentences:
+    - text: A Solarim vai reajustar a linha de acetato em 8% a partir de 1º de fevereiro de 2027.
+      errors:
+        - {type: date, find: "1º de fevereiro de 2027", replace: "1º de fevereiro de 2026"}
+    - text: A linha metálica terá alta de 5%.
+      errors:
+        - {type: number, find: "5%", replace: "15%"}
+    - text: A empresa justificou o reajuste pelo aumento de 15% no custo do acetato importado.
+      errors:
+        - {type: causal, find: "custo do acetato importado", replace: "custo do frete marítimo"}
+    - text: Os preços da linha infantil ficam congelados até julho de 2027.
+      errors:
+        - {type: entity, find: "infantil", replace: "esportiva"}
+    - text: A gerente comercial Beatriz Nogueira disse que pedidos feitos até 10 de dezembro manterão os valores atuais, dentro de um limite de volume.
+      errors:
+        - {type: scope, find: ", dentro de um limite de volume", replace: ", sem limite de volume"}
+    - text: A Solarim tem cerca de 11% do mercado nacional.
+    - text: Distribuidores devem revisar seus estoques antes da mudança.
+
+- id: pt-04
+  locale: pt-BR
+  title: Contabiliza reduz cancelamentos com novo atendimento
+  source: |
+    A Contabiliza, fornecedora de software fiscal para pequenos varejistas, informou em abril de 2026 que a taxa anual de cancelamento caiu de 16% para 10% depois da criação de um programa de implantação assistida em 2025. O programa oferece um especialista dedicado por 45 dias. Segundo a presidente, Marina Salgado, cerca de 1.700 contas participaram no primeiro ano. Os chamados de suporte por nova conta diminuíram 31%. O custo do programa é de aproximadamente R$ 310 por conta. A empresa ressaltou que os números incluem apenas clientes com até 20 funcionários e que também houve reajuste de preços no período.
+  sentences:
+    - text: A Contabiliza afirma que o cancelamento anual caiu de 16% para 10% após o programa de implantação assistida.
+      errors:
+        - {type: number, find: "10%", replace: "6%"}
+    - text: Cada novo cliente tem um especialista dedicado por 45 dias.
+      errors:
+        - {type: number, find: "45 dias", replace: "15 dias"}
+    - text: A presidente Marina Salgado disse que cerca de 1.700 contas participaram no primeiro ano.
+      errors:
+        - {type: number, find: "1.700", replace: "17.000"}
+    - text: Os chamados de suporte por nova conta diminuíram 31%.
+      errors:
+        - {type: direction, find: "diminuíram", replace: "aumentaram"}
+    - text: O programa custa aproximadamente R$ 310 por conta.
+      errors:
+        - {type: fabricated, find: "por conta.", replace: "por conta e se paga em três meses."}
+    - text: Os números consideram apenas clientes com até 20 funcionários.
+      errors:
+        - {type: scope, find: "apenas clientes com até 20 funcionários", replace: "toda a base de clientes"}
+    - text: Outros fornecedores de software podem se inspirar nesse modelo.
+
+- id: pt-05
+  locale: pt-BR
+  title: Porto de Vila Marinha registra atraso em lentes importadas
+  source: |
+    A Autoridade Portuária de Vila Marinha informou em 20 de maio de 2026 que o tempo médio de liberação de cargas de produtos ópticos subiu para 11 dias no primeiro trimestre, ante 6 dias um ano antes. O órgão associou o atraso a uma nova exigência de inspeção de rotulagem, em vigor desde janeiro. A inspeção atingiu cerca de 35% dos contêineres de produtos ópticos. O diretor do porto, Paulo Antunes, disse que 18 fiscais serão contratados até setembro. Importadores podem aderir a um programa de pré-liberação, que já aprovou 74 empresas. O órgão afirmou que os demais tipos de carga não tiveram alteração nos prazos.
+  sentences:
+    - text: As cargas de produtos ópticos levaram em média 11 dias para serem liberadas em Vila Marinha no primeiro trimestre, contra 6 dias um ano antes.
+      errors:
+        - {type: number, find: "11 dias", replace: "21 dias"}
+    - text: O órgão associou o atraso à nova inspeção de rotulagem em vigor desde janeiro.
+      errors:
+        - {type: causal, find: "nova inspeção de rotulagem", replace: "greve dos fiscais"}
+    - text: Cerca de 35% dos contêineres de produtos ópticos foram inspecionados.
+      errors:
+        - {type: scope, find: "contêineres de produtos ópticos", replace: "contêineres do porto"}
+    - text: O diretor Paulo Antunes disse que 18 fiscais serão contratados até setembro.
+      errors:
+        - {type: direction, find: "contratados", replace: "desligados"}
+    - text: O programa de pré-liberação já aprovou 74 empresas.
+    - text: Os demais tipos de carga não tiveram alteração nos prazos.
+      errors:
+        - {type: scope, find: "não tiveram alteração", replace: "também sofreram atrasos"}
+    - text: O órgão prevê normalização dos prazos até o fim do ano.
+      planted_sentence: fabricated
+    - text: Importadores devem planejar suas compras com mais antecedência.
+
+- id: pt-06
+  locale: pt-BR
+  title: Grupo Olhar Certo testa recomendação por IA
+  source: |
+    O Grupo Olhar Certo realizou um piloto de 10 semanas com uma ferramenta de recomendação de lentes por inteligência artificial em 24 lojas, informou a empresa em 7 de outubro de 2026. Nas lojas com a ferramenta, antirreflexos premium foram vendidos em 44% das transações, contra 35% em um grupo de controle de 26 lojas. O ticket médio subiu 6%. Segundo a gerente de produto, Camila Rezende, o treinamento das equipes levou menos de três horas. A satisfação dos clientes não apresentou diferença significativa entre os grupos. Receitas infantis ficaram fora do piloto. A empresa levará a ferramenta a 90 lojas em 2027.
+  sentences:
+    - text: O Grupo Olhar Certo testou por 10 semanas uma ferramenta de recomendação de lentes por IA em 24 lojas.
+      errors:
+        - {type: number, find: "10 semanas", replace: "10 meses"}
+    - text: Antirreflexos premium foram vendidos em 44% das transações nessas lojas, contra 35% no grupo de controle.
+      errors:
+        - {type: number, find: "44%", replace: "54%"}
+    - text: O ticket médio subiu 6%.
+    - text: A gerente de produto Camila Rezende disse que o treinamento levou menos de três horas.
+      errors:
+        - {type: attribution, find: "gerente de produto", replace: "diretora de marketing"}
+    - text: A satisfação dos clientes não apresentou diferença significativa entre os grupos.
+      errors:
+        - {type: direction, find: "não apresentou diferença significativa", replace: "melhorou de forma significativa"}
+    - text: Receitas infantis ficaram fora do piloto.
+      errors:
+        - {type: scope, find: "ficaram fora do", replace: "foram incluídas no"}
+    - text: A ferramenta chegará a 90 lojas em 2027.
+      errors:
+        - {type: fabricated, find: "em 2027.", replace: "em 2027, com custo de R$ 500 por loja."}
+    - text: Redes interessadas em ferramentas de apoio à venda devem acompanhar a expansão.

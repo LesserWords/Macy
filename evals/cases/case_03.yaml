@@ -1,0 +1,22 @@
+id: case_03
+name: "Global Vintage Acetate Eyewear Fashion Trend"
+expected_band: medium
+campaign:
+  locale: "pt-BR"
+  market: "BR"
+record:
+  headline: "Milan Fashion Week Highlights Bold 90s Vintage Acetate Eyewear"
+  source: "Eyewear Intelligence"
+  url: "https://eyewearintelligence.com/milan-fashion-week-90s-acetate-frames"
+  published_at: "2026-10-28T09:00:00Z"
+  summary: "Runway shows in Milan showcase oversized 90s vintage acetate optical frames and earth-tone tints, creating fresh styling inspiration for boutique optical retailers and independent brands."
+  facts:
+    - "Over 60% of runway eyewear featured thick chunky acetate silhouettes."
+    - "Earth tones, tortoiseshell, and transparent amber were dominant colorways."
+    - "Independent boutique optical stores report steady consumer inquiries."
+  entities:
+    - "Milan Fashion Week"
+    - "Acetate Eyewear"
+    - "Vintage Frames"
+  source_type: "news"
+  verification_status: "verified"

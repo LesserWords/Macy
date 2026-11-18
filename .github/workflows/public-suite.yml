@@ -1,0 +1,65 @@
+name: Public benchmark suite (weekly)
+
+'on':
+  schedule:
+    # 04:00 UTC every Monday (OpenSpec 2026-11-11-public-suite-and-detection-metrics)
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      methods:
+        description: 'Methods to run'
+        required: false
+        default: 'jev_judge'
+
+concurrency:
+  group: public-suite-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  public-suite:
+    name: Public suite tiers A and B
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      METHODS: ${{ github.event.inputs.methods || 'jev_judge' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Fetch Tier B (ASSIN 2)
+        run: uv run python -m evals.public_suite.loader --tier b
+
+      - name: Fetch Tier A (LLM-AggreFact, needs HF_TOKEN)
+        if: env.HF_TOKEN != ''
+        run: uv run python -m evals.public_suite.loader --tier a
+
+      - name: Check samples match the committed manifest
+        run: git diff --exit-code evals/public_suite/manifest.json
+
+      - name: Run Tier B
+        run: uv run python -m evals.claim_benchmark.harness --dataset public-b --methods $METHODS
+
+      - name: Run Tier A
+        if: env.HF_TOKEN != ''
+        run: uv run python -m evals.claim_benchmark.harness --dataset public-a --methods $METHODS
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: public-suite-reports
+          path: artifacts/claim_benchmark/
+          retention-days: 30

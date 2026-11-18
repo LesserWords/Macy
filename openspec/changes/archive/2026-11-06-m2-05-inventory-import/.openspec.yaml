@@ -1,0 +1,6 @@
+schema: 1
+created: 2026-11-06
+goal: Content Inventory Import & Already-Covered Check (M2-05)
+affected_areas:
+  - publishing
+  - scoring

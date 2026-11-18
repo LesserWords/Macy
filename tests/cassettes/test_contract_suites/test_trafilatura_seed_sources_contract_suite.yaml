@@ -1,0 +1,152 @@
+interactions:
+- request:
+    body: null
+    headers:
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://opticanet.com.br/robots.txt
+  response:
+    body:
+      string: |
+        User-agent: *
+        Allow: /
+    headers:
+      Content-Type:
+      - text/plain; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://opticanet.com.br/2026/11/01/varejo-optico-crescimento
+  response:
+    body:
+      string: |
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+          <head>
+            <title>Varejo óptico brasileiro projeta crescimento de 11% no último trimestre</title>
+            <meta name="author" content="Redação Opticanet" />
+            <meta property="og:site_name" content="Opticanet" />
+            <meta property="article:published_time" content="2026-11-01T12:00:00Z" />
+          </head>
+          <body>
+            <article>
+              <h1>Varejo óptico brasileiro projeta crescimento de 11% no último trimestre</h1>
+              <p>O varejo óptico brasileiro apresentou recuperação consistente impulsionada pela demanda por lentes multifocais e tratamentos antirreflexo.</p>
+              <p>Dados consolidados pela <a href="https://abioptica.com.br/estudos-setoriais">Abióptica</a> e pelo <a href="https://ibge.gov.br/estatisticas/economicas">IBGE</a> confirmam a expansão.</p>
+            </article>
+          </body>
+        </html>
+    headers:
+      Content-Type:
+      - text/html; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://eyewearintelligence.com/robots.txt
+  response:
+    body:
+      string: |
+        User-agent: *
+        Allow: /
+    headers:
+      Content-Type:
+      - text/plain; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://eyewearintelligence.com/2026/11/02/myopia-control-portfolios
+  response:
+    body:
+      string: |
+        <!DOCTYPE html>
+        <html lang="en-US">
+          <head>
+            <title>European Eyewear Manufacturers Expand Myopia Control Portfolios</title>
+            <meta name="author" content="Sophie Laurent" />
+            <meta property="og:site_name" content="Eyewear Intelligence" />
+            <meta property="article:published_time" content="2026-11-02T09:30:00Z" />
+          </head>
+          <body>
+            <article>
+              <h1>European Eyewear Manufacturers Expand Myopia Control Portfolios</h1>
+              <p>Leading optical groups across Europe are accelerating clinical trials and retail training for pediatric myopia management lenses.</p>
+              <p>Read the latest clinical benchmark from <a href="https://thevisioncouncil.org/research-reports">The Vision Council</a>.</p>
+            </article>
+          </body>
+        </html>
+    headers:
+      Content-Type:
+      - text/html; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://abioptica.com.br/robots.txt
+  response:
+    body:
+      string: |
+        User-agent: *
+        Allow: /
+    headers:
+      Content-Type:
+      - text/plain; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      User-Agent:
+      - MacyContentEngine/1.0
+    method: GET
+    uri: https://abioptica.com.br/2026/11/03/balanco-anual-setor-optico
+  response:
+    body:
+      string: |
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+          <head>
+            <title>Abióptica divulga balanço anual do setor óptico nacional</title>
+            <meta name="author" content="Assessoria Abióptica" />
+            <meta property="og:site_name" content="Abióptica" />
+            <meta property="article:published_time" content="2026-11-03T15:00:00Z" />
+          </head>
+          <body>
+            <article>
+              <h1>Abióptica divulga balanço anual do setor óptico nacional</h1>
+              <p>A Associação Brasileira da Indústria Óptica destacou o crescimento sustentável das óticas formalizadas em todas as regiões do país.</p>
+              <p>Consulte os indicadores de gestão do <a href="https://sebrae.com.br/setor-optico">Sebrae</a>.</p>
+            </article>
+          </body>
+        </html>
+    headers:
+      Content-Type:
+      - text/html; charset=utf-8
+    status:
+      code: 200
+      message: OK
+version: 1

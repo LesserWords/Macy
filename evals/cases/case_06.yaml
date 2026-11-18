@@ -1,0 +1,53 @@
+id: case_06
+stage: brief
+name: "Inventory Turnover and Optical Margin Management in Brazil"
+campaign:
+  locale: "pt-BR"
+  market: "BR"
+opportunity:
+  title: "Gestão de estoque de armações e margem operacional em óticas independentes"
+  angle: "Como reduzir capital parado em vitrine usando curva ABC e indicadores de giro no ERP"
+  funnel_stage: "mofu"
+  confidence: "high"
+  summary: "Dados setoriais apontam oportunidade para óticas independentes melhorarem fluxo de caixa reduzindo encalhe de armações sazonais."
+evidence_documents:
+  - id: "11111111-1111-4111-8111-111111111101"
+    source_name: "IBGE"
+    source_role: "data"
+    url: "https://ibge.gov.br/pmc-varejo-otico-2026"
+    title: "Pesquisa Mensal de Comércio: desempenho do varejo de saúde e óptica"
+    summary: "Levantamento do IBGE registra variação positiva nas vendas do varejo especializado enquanto custos operacionais pressionam margens."
+    facts:
+      - "Vendas do segmento óptico cresceram 6,4% no acumulado de 12 meses segundo a PMC/IBGE."
+  - id: "11111111-1111-4111-8111-111111111102"
+    source_name: "Sebrae"
+    source_role: "management"
+    url: "https://sebrae.com.br/cartilha-gestao-estoque-oticas"
+    title: "Gestão de capital de giro e curva ABC para micro e pequenas óticas"
+    summary: "Cartilha prática do Sebrae orienta lojistas a classificar armações por giro mensal e evitar compras excessivas."
+    facts:
+      - "Armações classe C chegam a imobilizar até 38% do capital de giro quando não há reposição orientada por demanda."
+keywords:
+  - keyword: "gestao de estoque otica"
+    search_volume: 2400
+    difficulty: 34.0
+    cpc_usd: 1.45
+    intent: "commercial"
+    is_estimate: false
+  - keyword: "curva abc armacoes oticas"
+    search_volume: 480
+    difficulty: 22.0
+    cpc_usd: 0.95
+    intent: "informational"
+    is_estimate: false
+expected:
+  min_outline_items: 4
+  min_required_facts: 2
+  format: "blog"
+  require_estimate_awareness: false
+write_expected:
+  min_words: 200
+  min_claims: 3
+  min_fact_claims: 2
+  min_faq_items: 2
+  slug_pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"

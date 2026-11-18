@@ -1,0 +1,45 @@
+schema: spec-driven
+
+context: |
+  Product docs live in docs/ (PRD, ADRs, feature specs F01-F20, plans M0-M5).
+  Every change maps to one plan item (PR id, e.g. M0-01) from docs/plans/.
+  Python 3.12+, Pydantic v2 contracts, Postgres, Docker Compose. See docs/adr/.
+
+rules:
+  proposal:
+    - Name the plan item (PR id), features (F..) and ADRs it implements
+    - State what is out of scope
+  tasks:
+    - Vertical slices; every slice starts with "write failing test"
+    - Each task names its verify step (command or observation)
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
