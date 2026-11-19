@@ -51,13 +51,13 @@ Furthermore:
    - Adopt **Apache-2.0** in root `LICENSE`, alongside `CONTRIBUTING.md` and `SECURITY.md`.
    - Retain and sanitize all historical specs under `openspec/changes/archive/**` (replacing identifying personal/company references with neutral examples) so OSS contributors and evaluators retain full spec-driven engineering visibility without context leaks.
    - Enforce `scripts/check_oss_hygiene.py` inside `scripts/check.sh` to fail deterministically on forbidden proprietary tokens, local workstation `file://` filesystem URIs, forbidden context directories (`founder/`), or missing governance files.
-6. **Dual-Repo Public Release to `https://github.com/LesserWords/open-macy.git` & Private Context Cutover:**
+6. **Dual-Repo Public Release to `https://github.com/LesserWords/Macy.git` & Private Context Cutover:**
    - Maintain the application/project name as **`macy`** (`content-engine` / `Macy`).
    - Preserve the current private repository (`macy`) as the private full-history & business-context repository (`founder/`, private product brand fixtures, private vertical pack, `.env.prod`, `.env.staging`, and `compose.private.yaml`).
-   - Publish the sanitized OSS codebase as a clean orphan initial release history to `https://github.com/LesserWords/open-macy.git`, verify `scripts/check_oss_hygiene.py --check-git-history` and `uv build` cleanliness, run the OSS `open-macy` engine locally/in production consuming private context via `MACY_CONTEXT_DIR` / `./context`, and swap GitHub repository names once cutover is verified.
+   - Publish the sanitized OSS codebase as a clean orphan initial release history to `https://github.com/LesserWords/Macy.git`, verify `scripts/check_oss_hygiene.py --check-git-history` and `uv build` cleanliness, run the OSS `macy` engine locally/in production consuming private context via `MACY_CONTEXT_DIR` / `./context`, and swap GitHub repository names once cutover is verified.
 
 ## Consequences
-- **Easier:** Anyone can clone, install, and run Macy raw with two neutral bilingual packs (`general`, `b2b-saas`), drop custom packs/fixtures into Pocket `./context/`, import/export `.yaml` profiles in the UI, or use Path B `--stateless` without PostgreSQL. The maintainer runs the untouched OSS engine (`open-macy`) over private data stored in the private repository with zero merge drift and clean public git history.
+- **Easier:** Anyone can clone, install, and run Macy raw with two neutral bilingual packs (`general`, `b2b-saas`), drop custom packs/fixtures into Pocket `./context/`, import/export `.yaml` profiles in the UI, or use Path B `--stateless` without PostgreSQL. The maintainer runs the untouched OSS engine (`macy`) over private data stored in the private repository with zero merge drift and clean public git history.
 - **Harder:** Existing unit, MCP mock, and contract tests coupled to private demo slugs, private vertical packs, or personal handles, plus archived `openspec/changes/archive/**` files, had to be sanitized in lockstep, and the `prompts/score.md` SHA-256 hash updates when generalized.
 
 ## Revisit when
@@ -67,4 +67,4 @@ Furthermore:
 - [x] `M8-01` — Implement hybrid 3-layer context search path (`MACY_CONTEXT_DIR`, Pocket `/data/context`, built-in OSS), `workspaces.config.industry_pack_snapshot` DB fallback, UI `.yaml` import/export, configurable `MACY_USER_AGENT`, `general` + `b2b-saas` starter packs, `seed_example.yaml`, and `infra/compose.pocket.yaml` + `infra/compose.context.example.yaml`.
 - [x] `M8-02` — Generalize `prompts/score.md` and neutralize `engine/mcp/mock_store.py`, Compose dev/E2E overlays, VCR cassettes, and tests.
 - [x] `M8-03` — Configure private context layout (retaining `founder/`, proprietary fixtures, private vertical packs, `.env.*` in the private context folder/repo), add Apache-2.0 `LICENSE` / `CONTRIBUTING.md` / `SECURITY.md`, sanitize docs and `openspec/changes/archive/**`, and wire `scripts/check_oss_hygiene.py` into `scripts/check.sh`.
-- [x] `M8-04` — Verify private overlay & DB snapshot E2E parity (`test_private_overlay_smoke.py`), wheel/sdist build hygiene (`test_package.py`), `--check-git-history` sanitization gate, and clean orphan release runbook for `https://github.com/LesserWords/open-macy.git`.
+- [x] `M8-04` — Verify private overlay & DB snapshot E2E parity (`test_private_overlay_smoke.py`), wheel/sdist build hygiene (`test_package.py`), `--check-git-history` sanitization gate, and clean orphan release runbook for `https://github.com/LesserWords/Macy.git`.

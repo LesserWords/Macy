@@ -356,7 +356,7 @@ content-engine mcp --transport stdio --stateless --check
 
 ## Private Context Overlay & Clean OSS Release (`M8`, `ADR-032`, `F23`)
 
-### Running `open-macy` with Private Context (`./context/`)
+### Running `macy` with Private Context (`./context/`)
 
 1. Keep proprietary industry packs (`packs/industries/<slug>/`), brand fixtures (`fixtures/seed_*.yaml`), private `.env.*` files, and founder docs inside git-ignored `./context/` (or set `MACY_CONTEXT_DIR` / `MACY_PACKS_DIR` / `MACY_FIXTURES_DIR`).
 2. **Docker Pocket (`infra/compose.pocket.yaml`):** automatically bind-mounts `${MACY_HOST_CONTEXT_DIR:-../context}` read-only to `/data/context` (`MACY_CONTEXT_DIR=/data/context`).
@@ -368,22 +368,22 @@ content-engine mcp --transport stdio --stateless --check
 
 4. Workspaces also snapshot resolved industry pack definitions in `workspaces.config["industry_pack_snapshot"]`, so runtime evaluation continues cleanly even if overlay files are later unmounted.
 
-### Building & Verifying the Clean Orphan `open-macy` Release
+### Building & Verifying the Clean Orphan `macy` Release
 
 1. Run the full verification & OSS hygiene suite (`sh scripts/check.sh`).
-2. Build a single clean orphan commit on `open-macy-main` from the verified tree (`HEAD^{tree}`):
+2. Build a single clean orphan commit on `oss-main` from the verified tree (`HEAD^{tree}`):
 
    ```sh
    TREE_COMMIT=$(git commit-tree HEAD^{tree} -m "feat: initial open-macy v0.2.0 open-source release (Apache-2.0)")
-   git branch -f open-macy-main "$TREE_COMMIT"
-   uv run python scripts/check_oss_hygiene.py --check-git-history --branch open-macy-main
+   git branch -f oss-main "$TREE_COMMIT"
+   uv run python scripts/check_oss_hygiene.py --check-git-history --branch oss-main
    ```
 
-3. Push `open-macy-main` to the public repository (maintaining app/CLI name `macy` / `content-engine`):
+3. Push `oss-main` to the public repository (maintaining app/CLI name `macy` / `content-engine`):
 
    ```sh
-   git remote add open-macy https://github.com/LesserWords/open-macy.git
-   git push open-macy open-macy-main:main
+   git remote add open-macy https://github.com/LesserWords/Macy.git
+   git push open-macy oss-main:main
    ```
 
-4. Validate `open-macy` locally and in Pocket/Docker against `./context/` before swapping GitHub repository names, retaining the current private repo (`private-context-v0.2` / `dev`) as the full-history & private context backup.
+4. Validate `macy` locally and in Pocket/Docker against `./context/` before swapping GitHub repository names, retaining the current private repo (`private-context-v0.2` / `dev`) as the full-history & private context backup.

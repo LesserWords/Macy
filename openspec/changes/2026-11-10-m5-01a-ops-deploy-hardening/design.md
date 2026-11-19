@@ -14,7 +14,7 @@
 
 **Goals:**
 - Make encryption key rotation single-transaction across `workspace_integrations` and `webhook_subscriptions` behind `engine.services` without breaking `import-linter`.
-- Guarantee `content-engine purge` connects under `RETENTION_DATABASE_URL` (never `DATABASE_URL`) and enforce non-default `RETENTION_DB_PASSWORD` in deploy preflight and Compose prod/staging overlays.
+- Guarantee `macy purge` connects under `RETENTION_DATABASE_URL` (never `DATABASE_URL`) and enforce non-default `RETENTION_DB_PASSWORD` in deploy preflight and Compose prod/staging overlays.
 - Consolidate OIDC configuration exclusively in `.env` by removing `deploy/*/secrets.toml.example` and `STREAMLIT_SECRETS_FILE` preflight logic.
 - Harden production smoke auth gating and make `--rollback <tag>` migration-free.
 - Align `docs/runbook.md`, `docs/guides/environment-and-credentials.md`, `.env.staging.example`, and `.env.prod.example`.
@@ -51,7 +51,7 @@
 ### Decision 5: Explicit Env Template Defaults & Host-Side `rclone` Boundary
 - **Choice:**
   - Set `APP_TAG=CHANGE_ME_release_tag` in `.env.prod.example` (never mutable `latest` in prod baseline), add `RETENTION_DB_PASSWORD` + `BACKUP_RETENTION_DAYS`/`BACKUP_INTERVAL_SECONDS`/`OFFSITE_BACKUP_PATH`/`OFFSITE_SYNC_CMD` consistently to `.env.staging.example`, and clarify `DOMAIN`/`CADDY_HTTP_PORT`/`CADDY_HTTPS_PORT` (`80`/`443` default with `8080`/`8443` commented for side-by-side local rehearsal) in `.env.prod.example`.
-  - Document in `docs/runbook.md` and `docs/guides/environment-and-credentials.md` that `OFFSITE_SYNC_CMD` executes inside `postgres:18-alpine` (`sh`/POSIX utilities only), while external tools like `rclone` run via host cron/systemd timer syncing `$OFFSITE_BACKUP_PATH`. Reorder VPS bootstrap so `scripts/deploy.sh` runs before `dc run --rm --no-deps app content-engine create-workspace/add-owner/seed-brand/seed-sources`.
+  - Document in `docs/runbook.md` and `docs/guides/environment-and-credentials.md` that `OFFSITE_SYNC_CMD` executes inside `postgres:18-alpine` (`sh`/POSIX utilities only), while external tools like `rclone` run via host cron/systemd timer syncing `$OFFSITE_BACKUP_PATH`. Reorder VPS bootstrap so `scripts/deploy.sh` runs before `dc run --rm --no-deps app macy create-workspace/add-owner/seed-brand/seed-sources`.
 
 ## Risks / Trade-offs
 
@@ -62,7 +62,7 @@
 ## Migration Plan
 
 1. Deploy updated code and `compose.prod.yaml` / `scripts/deploy.sh` to staging (`dev -> main`), verifying `RETENTION_DB_PASSWORD` is present in `/opt/macy/staging/.env`.
-2. Re-run `content-engine rotate-key` test/drill on staging when rotating keys so both `workspace_integrations` and `webhook_subscriptions` re-encrypt cleanly.
+2. Re-run `macy rotate-key` test/drill on staging when rotating keys so both `workspace_integrations` and `webhook_subscriptions` re-encrypt cleanly.
 3. For initial production tag before OIDC session state capture, set `PROD_SMOKE_ALLOW_UNAUTHENTICATED=true`, deploy `v*`, capture `PROD_PLAYWRIGHT_STORAGE_STATE`, and unset `PROD_SMOKE_ALLOW_UNAUTHENTICATED`.
 
 ## Open Questions

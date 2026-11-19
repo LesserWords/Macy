@@ -49,7 +49,7 @@ The system SHALL authenticate users via Google OIDC and restrict access exclusiv
 The system SHALL provide a CLI command `add-owner <workspace_slug> <email>` to provision workspace owners and log an audit event.
 
 #### Scenario: Add owner CLI provisions membership and logs event
-- **WHEN** `content-engine add-owner <workspace_slug> <email>` is executed
+- **WHEN** `macy add-owner <workspace_slug> <email>` is executed
 - **THEN** the user and membership records exist and a `membership.created` event is recorded
 
 ### Requirement: Fake identity login restricted to non-production
@@ -60,10 +60,10 @@ The system SHALL permit simulated test identity authentication during offline E2
 - **THEN** the request is rejected with an authentication error
 
 ### Requirement: CLI workspace provisioning
-The system SHALL provide `services.create_workspace` and `content-engine create-workspace <slug>` so operators can provision a production or staging workspace with its industry pack and timezone without executing raw SQL.
+The system SHALL provide `services.create_workspace` and `macy create-workspace <slug>` so operators can provision a production or staging workspace with its industry pack and timezone without executing raw SQL.
 
 #### Scenario: Create workspace CLI provisions workspace idempotently or rejects duplicates cleanly
-- **WHEN** `content-engine create-workspace acme-demo --name "Acme Demo" --pack general` runs
+- **WHEN** `macy create-workspace acme-demo --name "Acme Demo" --pack general` runs
 - **THEN** the workspace row exists with slug `acme-demo` and the configured industry pack and timezone
 
 ### Requirement: Built-in local admin authentication with automatic OIDC switching

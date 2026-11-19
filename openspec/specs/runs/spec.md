@@ -29,7 +29,7 @@ The system SHALL manage pipeline stage transitions using a PostgreSQL state mach
 - **THEN** the corresponding `run.completed` or `run.failed` event is emitted and an observability heartbeat ping (or `/fail` ping on failure) is sent
 
 ### Requirement: Production integration resolution, report compilation, and worker tick
-The system SHALL resolve workspace integrations via `plugin_config` for non-offline or production runs (`blocked(integration_missing)` when `llm` or `news_search` is unconfigured), align `content-engine run-week --workspace` with `crontab` output, compile `report()` on `run-week` completion, and process queued runs and webhooks in `engine.__main__.run_worker_tick`.
+The system SHALL resolve workspace integrations via `plugin_config` for non-offline or production runs (`blocked(integration_missing)` when `llm` or `news_search` is unconfigured), align `macy run-week --workspace` with `crontab` output, compile `report()` on `run-week` completion, and process queued runs and webhooks in `engine.__main__.run_worker_tick`.
 
 #### Scenario: Non-offline production run resolves configured plugins or blocks on integration_missing
 - **WHEN** `execute_run` executes with `offline=False` or in `staging`/`production` without explicit fake adapters

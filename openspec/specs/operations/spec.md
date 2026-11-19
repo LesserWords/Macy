@@ -50,7 +50,7 @@ The system SHALL validate all outbound user-supplied URLs and refuse requests to
 - **THEN** the request is aborted
 
 ### Requirement: Sentry exception tracking with secret scrubbing
-The system SHALL initialize Sentry automatically across application, pipeline worker, and CLI runtimes when `SENTRY_DSN` is configured, capture unhandled and pipeline-isolated exceptions tagged with `workspace_id` and `run_id`, scrub all sensitive dict keys and inline credential patterns (DSN passwords, Bearer tokens, API keys, webhook secrets, sensitive query params) before sending, and provide `content-engine test-sentry` to verify end-to-end delivery (`F20 AC5`, `ADR-023`).
+The system SHALL initialize Sentry automatically across application, pipeline worker, and CLI runtimes when `SENTRY_DSN` is configured, capture unhandled and pipeline-isolated exceptions tagged with `workspace_id` and `run_id`, scrub all sensitive dict keys and inline credential patterns (DSN passwords, Bearer tokens, API keys, webhook secrets, sensitive query params) before sending, and provide `macy test-sentry` to verify end-to-end delivery (`F20 AC5`, `ADR-023`).
 
 #### Scenario: Scrubber strips credentials and authorization headers
 - **WHEN** an exception event contains API keys, passwords, Authorization headers, DSN userinfo passwords, or inline secret strings
@@ -61,7 +61,7 @@ The system SHALL initialize Sentry automatically across application, pipeline wo
 - **THEN** the event is tagged with `workspace_id` and (when active) `run_id` and captured via `capture_exception`
 
 #### Scenario: Forced Sentry verification CLI flushes a test exception
-- **WHEN** `content-engine test-sentry` executes with `SENTRY_DSN` set
+- **WHEN** `macy test-sentry` executes with `SENTRY_DSN` set
 - **THEN** it initializes Sentry, captures and flushes a forced test exception, and exits 0 (or exits non-zero when `SENTRY_DSN` is unset)
 
 ### Requirement: Heartbeat run monitoring
@@ -134,21 +134,21 @@ The `backup` service SHALL run a nightly `pg_dump` of the database, copy verifie
 - **THEN** the restore exits 0 and table row counts in the restored database match the source database
 
 ### Requirement: Nightly data retention purge under the retention role
-The system SHALL provide `content-engine purge` (`services.purge_expired_data`) that executes exclusively under the `retention` database role and purges expired data according to `ADR-024`: `llm_payloads` after 90 days, `documents.extracted_text` set to `NULL` (with `text_purged_at` stamped and metadata retained) after 365 days, `delivered` or `dead` `webhook_deliveries` after 30 days, and `events` after 24 months (`F20 AC7`).
+The system SHALL provide `macy purge` (`services.purge_expired_data`) that executes exclusively under the `retention` database role and purges expired data according to `ADR-024`: `llm_payloads` after 90 days, `documents.extracted_text` set to `NULL` (with `text_purged_at` stamped and metadata retained) after 365 days, `delivered` or `dead` `webhook_deliveries` after 30 days, and `events` after 24 months (`F20 AC7`).
 
 #### Scenario: Purge deletes and nulls expired data per ADR-024 while keeping fresh data and facts
-- **WHEN** `content-engine purge` runs as the `retention` role against seeded data with frozen timestamps spanning fresh and expired windows
+- **WHEN** `macy purge` runs as the `retention` role against seeded data with frozen timestamps spanning fresh and expired windows
 - **THEN** `llm_payloads` older than 90 days are deleted while `usage_ledger` rows remain, `documents.extracted_text` older than 365 days is set to `NULL` with `text_purged_at` populated and `title`/`url`/`published_at`/`content_hash` preserved, `delivered` and `dead` `webhook_deliveries` older than 30 days are deleted while `pending`/`retrying` stay, and `events` older than 24 months are deleted
 
 #### Scenario: Purge refuses execution when not connected as the retention role
-- **WHEN** `services.purge_expired_data` or `content-engine purge` is invoked using the `app` role connection
+- **WHEN** `services.purge_expired_data` or `macy purge` is invoked using the `app` role connection
 - **THEN** it raises a permission error and modifies 0 rows
 
 ### Requirement: LGPD user anonymisation command
-The system SHALL provide `content-engine anonymise-user <email>` (`services.anonymise_user`) that anonymises the user's `email` and `name`, removes workspace memberships, and scrubs PII fields from `events.payload` while preserving `actor_user_id` as an opaque UUID (`F20 AC8`, `ADR-024`).
+The system SHALL provide `macy anonymise-user <email>` (`services.anonymise_user`) that anonymises the user's `email` and `name`, removes workspace memberships, and scrubs PII fields from `events.payload` while preserving `actor_user_id` as an opaque UUID (`F20 AC8`, `ADR-024`).
 
 #### Scenario: Anonymising a user scrubs email and name while preserving opaque event actor IDs
-- **WHEN** `content-engine anonymise-user <email>` runs for an existing user
+- **WHEN** `macy anonymise-user <email>` runs for an existing user
 - **THEN** the user's `email` is replaced with an opaque `deleted-<id>@anonymised.invalid` address, `name` is set to `NULL`, their `memberships` are removed, and their `events` rows retain `actor_user_id` with personal email/name keys scrubbed from `payload`
 
 ### Requirement: Production deploys on release tags with J1 read-only smoke test and rollback

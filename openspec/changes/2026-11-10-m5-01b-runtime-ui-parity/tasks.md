@@ -18,7 +18,7 @@
 
 ## 4. `run-stage` Validation and Worker-Race-Free `run-now --offline` (Delivery KR: D4)
 
-- [ ] 4.1 Write failing tests in `tests/test_pipeline.py` and `tests/test_cli.py` asserting that `content-engine run-stage <id> --stage invalid_stage` raises `ValueError` and exits non-zero, and `content-engine run-now <ws> --offline` claims the run as `running` before execution completes so `run_worker_tick` never picks it up in live mode — verify: `uv run pytest tests/test_pipeline.py tests/test_cli.py -k "run_stage or run_now"` fails before implementation
+- [ ] 4.1 Write failing tests in `tests/test_pipeline.py` and `tests/test_cli.py` asserting that `macy run-stage <id> --stage invalid_stage` raises `ValueError` and exits non-zero, and `macy run-now <ws> --offline` claims the run as `running` before execution completes so `run_worker_tick` never picks it up in live mode — verify: `uv run pytest tests/test_pipeline.py tests/test_cli.py -k "run_stage or run_now"` fails before implementation
 - [ ] 4.2 Reject unsupported stages explicitly in `engine/pipeline.py:re_run_failed_stage_items`, add `initial_status` support across `engine/db.py`/`engine/scheduler.py`/`engine/services.py`/`engine/cli.py:_handle_run_now` for synchronous offline execution, and confirm `pipeline.execute_run` cleanly processes pre-claimed `running` runs — verify D4: `uv run pytest tests/test_pipeline.py tests/test_cli.py tests/test_services.py -k "run_stage or run_now" --no-cov` and `uv run complexipy engine --max-complexity-allowed 15` exit 0
 
 ## 5. Admin UI Development Fallback, Dynamic Monthly Cap, and Complete Translations (Delivery KR: D5)

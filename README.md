@@ -5,7 +5,7 @@
 <h1 align="center">Macy — Content Intelligence &amp; SEO/GEO Audit Engine</h1>
 
 <p align="center">
-  <a href="https://github.com/LesserWords/open-macy/actions/workflows/ci.yml"><img src="https://github.com/LesserWords/open-macy/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/LesserWords/Macy/actions/workflows/ci.yml"><img src="https://github.com/LesserWords/Macy/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-blue.svg" alt="License: Apache-2.0" /></a>
   <img src="https://img.shields.io/badge/Python-3.12%2B-3776AB.svg" alt="Python 3.12+" />
   <img src="https://img.shields.io/badge/PostgreSQL-18-336791.svg" alt="PostgreSQL 18" />

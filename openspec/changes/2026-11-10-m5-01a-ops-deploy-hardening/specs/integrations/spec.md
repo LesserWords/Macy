@@ -3,10 +3,10 @@
 ## ADDED Requirements
 
 ### Requirement: Atomic cross-table MultiFernet key rotation
-The system SHALL rotate Fernet-encrypted secrets atomically within a single database transaction across both `workspace_integrations.secrets` (incrementing `key_version`) and `webhook_subscriptions.secret` via `services.rotate_encryption_keys` when `content-engine rotate-key` runs, keeping `engine.cli` decoupled from `engine.db`.
+The system SHALL rotate Fernet-encrypted secrets atomically within a single database transaction across both `workspace_integrations.secrets` (incrementing `key_version`) and `webhook_subscriptions.secret` via `services.rotate_encryption_keys` when `macy rotate-key` runs, keeping `engine.cli` decoupled from `engine.db`.
 
 #### Scenario: Rotate-key re-encrypts integrations and webhooks atomically and permits old-key removal
-- **WHEN** `content-engine rotate-key --current-keys "<new>,<old>" --new-key "<new>"` runs against existing encrypted integration secrets and webhook signing secrets
+- **WHEN** `macy rotate-key --current-keys "<new>,<old>" --new-key "<new>"` runs against existing encrypted integration secrets and webhook signing secrets
 - **THEN** all integration secrets increment `key_version`, both integration and webhook ciphertexts decrypt under `<new>` alone after dropping `<old>`, and JSON summaries report counts for both tables
 
 #### Scenario: Failed rotation rolls back both tables cleanly
