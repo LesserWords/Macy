@@ -1,6 +1,6 @@
 # Delivery Plan: PRs, Checks and Milestone Gates
 
-The MVP is split into **40 core PRs across 6 milestones** (plus `BM-1`–`BM-6` benchmark PRs, `M5-03`–`M5-08` MCP/compliance PRs, `M6-01`–`M6-03` SEO/GEO audit & monitoring PRs, `M7-01`–`M7-04` Pocket & modular capability PRs, and `M8-01`–`M8-04` OSS public-readiness & context overlay PRs). Each PR is one vertical slice: it is specified in OpenSpec, built test-first, verified step by step, and merged to a protected `main` (ADR-019).
+The MVP is split into **40 core PRs across 6 milestones** (plus `BM-1`–`BM-6` benchmark PRs, `M5-03`–`M5-08` MCP/compliance PRs, `M6-01`–`M6-03` SEO/GEO audit & monitoring PRs, `M7-01`–`M7-04` Pocket & modular capability PRs, `M8-01`–`M8-04` OSS public-readiness & context overlay PRs, and `M9-01`–`M9-03` unified `macy` CLI & tooling rename PRs). Each PR is one vertical slice: it is specified in OpenSpec, built test-first, verified step by step, and merged to a protected `main` (ADR-019).
 
 | Milestone | Weeks | PRs | Plan | Exit gate (all must hold) |
 |---|---|---|---|---|
@@ -13,6 +13,7 @@ The MVP is split into **40 core PRs across 6 milestones** (plus `BM-1`–`BM-6` 
 | M6 SEO/GEO Audit, Schema & Monitoring | Post-M5 | 3 | [M6.md](M6.md) | Tiered bilingual readability & 5 JSON-LD schemas; CMS-agnostic URL & bounded site crawler (20/50/200 caps) with optional axe-core/PSI toggles; hybrid GSC, Standard-Webhook monitors & paid RankTrackerPort toggle |
 | M7 Pocket & Modular Plugins | Post-M6 | 4 | [M7.md](M7.md) | Path B zero-Docker stateless CLI/MCP (`--stateless`, `uvx macy[core]`); Path A `compose.pocket.yaml` zero-`.env` stack, local PBKDF2 auth, embedded worker, zero-key adapters (`ollama`, `gnews_rss`, `autocomplete`), capability switchboard & 3-step Setup Wizard (`J-POCKET`) |
 | M8 OSS Public-Readiness & Context Overlay | Post-M7 | 4 | [M8.md](M8.md) | Hybrid 3-layer context overlay (`MACY_CONTEXT_DIR` → Pocket `/data/context` → OSS) + `workspaces.config.industry_pack_snapshot` DB fallback & UI `.yaml` import/export; neutral `general` + `b2b-saas` starter packs & `seed_example.yaml`; domain-agnostic `prompts/score.md`; Apache-2.0 `LICENSE`/`CONTRIBUTING`/`SECURITY`; sanitized `openspec/changes/archive/`; `check_oss_hygiene.py` & clean `open-macy` orphan cutover green |
+| M9 Unified `macy` CLI & Tooling Rename | Post-M8 | 3 | [M9.md](M9.md) | Clean-break rename of Python package, CLI trigger (`macy`), `macy.*` plugin groups, scheduler crontabs, compliance agent, Compose default `APP_IMAGE=macy`, active OpenSpec specs, and docs with zero legacy `content-engine` references |
 | BM Claim-judge benchmark | Unscheduled | 6 | [BM.md](BM.md) | Delivered key results D1–D7 met and outcome computed from W1–W9 |
 
 ## Workflow for every PR
