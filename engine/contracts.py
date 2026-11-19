@@ -177,11 +177,29 @@ class Opportunity(BaseModel):
         return self.weighted_total
 
 
+def _validate_document_uuid(value: str | uuid.UUID) -> str | uuid.UUID:
+    """Require a UUID so LLM citations of source names fail validation and trigger a retry."""
+    try:
+        uuid.UUID(str(value))
+    except (ValueError, AttributeError, TypeError) as exc:
+        msg = (
+            "source_id must be a valid document UUID copied from evidence_documents[].id, "
+            "not a source name or title"
+        )
+        raise ValueError(msg) from exc
+    return value
+
+
 class RequiredFact(BaseModel):
     """Fact requirement from research evidence."""
 
     fact: str
     source_id: str | uuid.UUID
+
+    @field_validator("source_id")
+    @classmethod
+    def _require_uuid_source(cls, value: str | uuid.UUID) -> str | uuid.UUID:
+        return _validate_document_uuid(value)
 
 
 class EditorialBrief(BaseModel):
@@ -213,6 +231,8 @@ class DraftClaim(BaseModel):
         if self.kind == "fact" and not self.source_id:
             msg = "Facts must have a source_id for provenance"
             raise ValueError(msg)
+        if self.kind == "fact":
+            _validate_document_uuid(str(self.source_id))
         return self
 
 

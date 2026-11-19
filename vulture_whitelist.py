@@ -178,3 +178,4 @@ _.answer = contracts.FAQItem.answer
 _.button_text = contracts.DraftCTA.button_text
 _.intensity = contracts.DraftCTA.intensity
 _._coerce_legacy = contracts.FAQItem._coerce_legacy
+_._require_uuid_source = contracts.RequiredFact._require_uuid_source

@@ -168,6 +168,7 @@ def test_draft_claims_fact_requires_source_id() -> None:
         )
 
     # Fact with source_id succeeds
+    sample_doc_id = "00000000-0000-0000-0000-000000000123"
     valid_fact_draft = ContentDraft(
         title="Sample Title",
         meta_description="Sample Meta",
@@ -178,11 +179,11 @@ def test_draft_claims_fact_requires_source_id() -> None:
             DraftClaim(
                 text="72% of users prefer dark mode",
                 kind="fact",
-                source_id="src-123",
+                source_id=sample_doc_id,
             )
         ],
     )
-    assert valid_fact_draft.claims[0].source_id == "src-123"
+    assert valid_fact_draft.claims[0].source_id == sample_doc_id
 
 
 def test_all_contracts_serialization_and_schema_version() -> None:
@@ -241,7 +242,12 @@ def test_all_contracts_serialization_and_schema_version() -> None:
         target_audience="Eyewear buyers",
         primary_keyword="titanium frames",
         angle="Complete guide to durability",
-        required_facts=[RequiredFact(fact="Titanium is 40% lighter", source_id="doc-1")],
+        required_facts=[
+            RequiredFact(
+                fact="Titanium is 40% lighter",
+                source_id="00000000-0000-0000-0000-000000000001",
+            )
+        ],
         cta_goal="Visit catalog",
     )
     assert brief.schema_version == 1

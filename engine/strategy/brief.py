@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 import uuid
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -11,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import psycopg
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from engine import budget, config, db, events, llm, research, seo
 from engine.contracts import BrandProfile, EditorialBrief, KeywordData, ResearchRecord
@@ -19,6 +20,7 @@ from engine.integrations.config import plugin_config
 from engine.integrations.fakes import FakeExtractor, FakeKeywordProvider, FakeLLM, FakeNewsSearch
 from engine.integrations.ports import ExtractorPort, KeywordProviderPort, LLMPort, NewsSearchPort
 from engine.integrations.registry import IntegrationMissing
+from engine.safe_http import SafeHTTPError
 
 logger = logging.getLogger(__name__)
 PROMPT_FILE = Path(__file__).resolve().parent.parent.parent / "prompts" / "brief.md"
@@ -467,7 +469,30 @@ def _gather_evidence_documents(
     return formatted
 
 
+_SEED_PUNCTUATION = re.compile(r"[:;,.!?\"'“”‘’«»()\[\]{}|/\\—–]+")
+_SEED_MAX_CHARS = 60
+_keyword_log = logging.getLogger(__name__)
+
+
+def _sanitize_seed_term(raw: str) -> str:
+    """Strip punctuation that autocomplete endpoints reject and cap the term length."""
+    cleaned = " ".join(_SEED_PUNCTUATION.sub(" ", raw).split())
+    if len(cleaned) <= _SEED_MAX_CHARS:
+        return cleaned
+    clipped = cleaned[:_SEED_MAX_CHARS]
+    head, sep, _tail = clipped.rpartition(" ")
+    return (head if sep and head else clipped).strip()
+
+
 def _collect_candidate_seed_terms(opp_ctx: dict[str, Any]) -> list[str]:
+    return [
+        term
+        for term in (_sanitize_seed_term(c) for c in _raw_candidate_seed_terms(opp_ctx))
+        if term
+    ]
+
+
+def _raw_candidate_seed_terms(opp_ctx: dict[str, Any]) -> list[str]:
     payload = opp_ctx.get("record_payload") or {}
     has_explicit = "keywords" in payload or "seed_terms" in payload
     candidates: list[str] = list(seo.extract_seed_terms(payload)) if has_explicit else []
@@ -599,6 +624,23 @@ def _resolve_brief_keywords(
         return _estimate_keywords_with_cache(
             conn, seed_terms=seed_terms, locale=locale, market=market
         )
+    except (ValueError, SafeHTTPError, OSError) as exc:
+        _keyword_log.warning(
+            "keyword provider failed (%s); falling back to estimated keywords", exc
+        )
+        return _estimate_keywords_with_cache(
+            conn, seed_terms=seed_terms, locale=locale, market=market
+        )
+
+
+def _call_brief_llm(**kwargs: Any) -> EditorialBrief:
+    try:
+        return llm.structured_call(stage="brief", model_cls=EditorialBrief, **kwargs)
+    except ValidationError as exc:
+        if "source_id" in str(exc):
+            msg = f"Invalid document UUID in required_facts: {exc}"
+            raise InvalidEvidenceReferenceError(msg) from exc
+        raise
 
 
 def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> dict[str, Any]:
@@ -668,9 +710,7 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     )
 
     resolved_llm = spec.adapters.llm_adapter or (FakeLLM() if spec.offline else None)
-    editorial_brief: EditorialBrief = llm.structured_call(
-        stage="brief",
-        model_cls=EditorialBrief,
+    editorial_brief = _call_brief_llm(
         prompt=system_prompt,
         input=input_payload,
         workspace_id=spec.workspace_id,

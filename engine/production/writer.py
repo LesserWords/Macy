@@ -13,6 +13,7 @@ from typing import Any
 
 import frontmatter
 import psycopg
+from pydantic import ValidationError
 
 from engine import db, events, llm
 from engine.contracts import BrandProfile, ContentDraft, EditorialBrief, Finding
@@ -209,6 +210,21 @@ def validate_draft_claim_provenance(
     return normalized_rows
 
 
+def _call_write_llm(**kwargs: Any) -> ContentDraft:
+    try:
+        return llm.structured_call(
+            stage="write",
+            model_cls=ContentDraft,
+            reasoning_effort="high",
+            **kwargs,
+        )
+    except ValidationError as exc:
+        if "source_id" in str(exc):
+            msg = f"Invalid document UUID in draft claim: {exc}"
+            raise InvalidDraftProvenanceError(msg) from exc
+        raise
+
+
 def write_draft_with_prompt(  # noqa: PLR0913
     *,
     brief: EditorialBrief | dict[str, Any],
@@ -251,13 +267,10 @@ def write_draft_with_prompt(  # noqa: PLR0913
         )
     )
 
-    draft_model: ContentDraft = llm.structured_call(
-        stage="write",
-        model_cls=ContentDraft,
+    draft_model = _call_write_llm(
         prompt=system_prompt,
         input=input_payload,
         plugin=llm_adapter,
-        reasoning_effort="high",
         prompt_version=prompt_ver,
         model=model,
     )
@@ -369,16 +382,13 @@ def _execute_write(conn: psycopg.Connection[Any], spec: _WriteExecutionSpec) -> 
     )
 
     resolved_llm = spec.llm_adapter or (FakeLLM() if spec.offline else None)
-    draft_model: ContentDraft = llm.structured_call(
-        stage="write",
-        model_cls=ContentDraft,
+    draft_model = _call_write_llm(
         prompt=system_prompt,
         input=input_payload,
         workspace_id=spec.workspace_id,
         run_id=uuid.UUID(str(brief_ctx["run_id"])),
         conn=conn,
         plugin=resolved_llm,
-        reasoning_effort="high",
         prompt_version=prompt_ver,
         model=spec.model,
     )
