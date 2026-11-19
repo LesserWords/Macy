@@ -31,12 +31,12 @@ Verification against OpenRouter's live catalog (`https://openrouter.ai/api/v1/mo
 - **Files:** `engine/config.py`, `engine/scheduler.py`, `engine/__init__.py` (or `importlib.metadata`), `tests/test_config.py`, `tests/test_scheduler.py`.
 - Change `prompts_path.glob("*.md")` → `prompts_path.rglob("*.md")` in `engine/config.py:compute_pack_version`.
 - In `engine/scheduler.py`:
-  - Resolve runtime `code_version` via `os.environ.get("APP_TAG") or metadata.version("macy-content-engine")` (falling back safely to `"0.1.0"` in editable/uninstalled imports via `engine.__version__`).
+  - Resolve runtime `code_version` via `os.environ.get("APP_TAG") or metadata.version("macy-macy")` (falling back safely to `"0.1.0"` in editable/uninstalled imports via `engine.__version__`).
   - Resolve `workspace = db.get_workspace(conn, workspace_id=workspace_id)` in `trigger_campaign_run`, extract `industry_pack = str(workspace["industry_pack"])` and `format_slug = str((campaign.get("config") or {}).get("format") or "blog")`, and pass `pack_version = compute_pack_version(industry_pack, format_slug)` when `pack_version` is not explicitly supplied by the caller.
 
 ### Decision 5: `run-stage` Input Validation & Worker-Race-Free `run-now --offline`
 - **Files:** `engine/pipeline.py`, `engine/services.py`, `engine/scheduler.py`, `engine/db.py`, `engine/cli.py`, `tests/test_pipeline.py`, `tests/test_cli.py`.
-- **`re_run_failed_stage_items`:** Accept supported values `{"research", "score"}` explicitly; raise `ValueError(f"Unsupported stage '{stage}' for re-run; supported stages: research, score")` cleanly before exiting, causing `content-engine run-stage` to exit `1` and log the error. Keep helper modular so `complexipy` stays `<= 15`.
+- **`re_run_failed_stage_items`:** Accept supported values `{"research", "score"}` explicitly; raise `ValueError(f"Unsupported stage '{stage}' for re-run; supported stages: research, score")` cleanly before exiting, causing `macy run-stage` to exit `1` and log the error. Keep helper modular so `complexipy` stays `<= 15`.
 - **`run-now --offline` worker race guard:** Extend `db.create_run(..., status: str = "queued")` / `scheduler.trigger_campaign_run(..., initial_status: str = "queued")` / `services.run_now(..., offline: bool = False)` (or `initial_status="running"` when `args.offline` is True). When `initial_status="running"`, stamp `started_at=now()`, rely on `runs_one_active` (`status IN ('queued','running')`) for conflict prevention, and ensure `pipeline.execute_run` cleanly executes an already-`running` row when invoked synchronously in-process (`offline=True`). This prevents the background `worker` loop from claiming a newly inserted `queued` row in live mode before `_handle_run_now --offline` starts executing it.
 
 ### Decision 6: Admin UI Dev Offline Mode, Dynamic Dashboard Cap, and Translation Catalog

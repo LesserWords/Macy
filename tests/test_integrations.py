@@ -393,7 +393,7 @@ def test_discover_plugins_handles_entrypoint_load_failure(
             raise RuntimeError("Corrupted plugin")
 
     def mock_entry_points(*, group: str) -> list[Any]:
-        if group == "content_engine.llm":
+        if group == "macy.llm":
             return [BrokenEP()]
         return []
 

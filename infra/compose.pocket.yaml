@@ -21,7 +21,7 @@ services:
       start_period: 2s
 
   macy:
-    image: ${APP_IMAGE:-content-engine}:${APP_TAG:-latest}
+    image: ${APP_IMAGE:-macy}:${APP_TAG:-latest}
     build:
       context: ..
       dockerfile: infra/Dockerfile

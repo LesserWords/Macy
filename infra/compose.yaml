@@ -7,7 +7,7 @@ x-engine-env: &engine-env
   DATABASE_URL: ${DATABASE_URL:-postgres://app:app_secret@db:5432/${POSTGRES_DB:-macy}?sslmode=disable}
 
 x-engine-service: &engine-service
-  image: ${APP_IMAGE:-content-engine}:${APP_TAG:-latest}
+  image: ${APP_IMAGE:-macy}:${APP_TAG:-latest}
   build:
     context: ..
     dockerfile: infra/Dockerfile

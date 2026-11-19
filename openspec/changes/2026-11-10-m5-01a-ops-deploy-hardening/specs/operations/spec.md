@@ -7,7 +7,7 @@ The repository SHALL document deploy, migration-free rollback, logs, restart, ke
 
 #### Scenario: Runbook covers operational procedures
 - **WHEN** an operator opens `docs/runbook.md` or `docs/guides/environment-and-credentials.md`
-- **THEN** bootstrap steps run `scripts/deploy.sh` (`db` + `migrate`) before `dc run --rm --no-deps app content-engine create-workspace/add-owner/seed-brand/seed-sources`, OIDC setup reflects `.env` rendering without removed `deploy/*/secrets.toml.example` files, `rotate-key` documents `"<new>,<old>"` ordering across integrations and webhooks, `purge` documents `RETENTION_DATABASE_URL`, and `rclone` offsite sync is documented as a host-side step rather than an in-container `OFFSITE_SYNC_CMD`
+- **THEN** bootstrap steps run `scripts/deploy.sh` (`db` + `migrate`) before `dc run --rm --no-deps app macy create-workspace/add-owner/seed-brand/seed-sources`, OIDC setup reflects `.env` rendering without removed `deploy/*/secrets.toml.example` files, `rotate-key` documents `"<new>,<old>"` ordering across integrations and webhooks, `purge` documents `RETENTION_DATABASE_URL`, and `rclone` offsite sync is documented as a host-side step rather than an in-container `OFFSITE_SYNC_CMD`
 
 ### Requirement: Production Compose baseline and isolated environment configuration
 The repository SHALL align `.env.staging.example` and `.env.prod.example` on `.env`-driven OIDC rendering without `deploy/*/secrets.toml.example` or `STREAMLIT_SECRETS_FILE` deploy preflight checks, enforcing non-default `RETENTION_DB_PASSWORD`, explicit release-tag `APP_TAG` guidance, backup variables, and zero exposed database ports (`F20 AC1, AC4`, `ADR-012`).
@@ -40,14 +40,14 @@ The `backup` service SHALL run nightly `pg_dump`, verify archives, copy to `/off
 - **THEN** documentation specifies running `rclone` on the VPS host targeting `$OFFSITE_BACKUP_PATH` rather than invoking missing container binaries via `OFFSITE_SYNC_CMD`
 
 ### Requirement: Nightly data retention purge under the retention role
-The system SHALL run `content-engine purge` (`services.purge_expired_data`) connecting strictly via `RETENTION_DATABASE_URL` (never falling back to `DATABASE_URL`), require non-default `RETENTION_DB_PASSWORD` in staging/prod Compose and `scripts/deploy.sh`, and purge expired `llm_payloads`, `documents.extracted_text`, `webhook_deliveries`, and `events` per `ADR-024` under `retention` (`F20 AC7`).
+The system SHALL run `macy purge` (`services.purge_expired_data`) connecting strictly via `RETENTION_DATABASE_URL` (never falling back to `DATABASE_URL`), require non-default `RETENTION_DB_PASSWORD` in staging/prod Compose and `scripts/deploy.sh`, and purge expired `llm_payloads`, `documents.extracted_text`, `webhook_deliveries`, and `events` per `ADR-024` under `retention` (`F20 AC7`).
 
 #### Scenario: Purge deletes and nulls expired data per ADR-024 while keeping fresh data and facts
-- **WHEN** `content-engine purge` runs as the `retention` role against seeded data with frozen timestamps spanning fresh and expired windows
+- **WHEN** `macy purge` runs as the `retention` role against seeded data with frozen timestamps spanning fresh and expired windows
 - **THEN** `llm_payloads` older than 90 days are deleted while `usage_ledger` rows remain, `documents.extracted_text` older than 365 days is set to `NULL` with `text_purged_at` populated and `title`/`url`/`published_at`/`content_hash` preserved, `delivered` and `dead` `webhook_deliveries` older than 30 days are deleted while `pending`/`retrying` stay, and `events` older than 24 months are deleted
 
 #### Scenario: Purge refuses execution when not connected as the retention role
-- **WHEN** `services.purge_expired_data` or `content-engine purge` is invoked using the `app` role connection
+- **WHEN** `services.purge_expired_data` or `macy purge` is invoked using the `app` role connection
 - **THEN** it raises a permission error and modifies 0 rows
 
 #### Scenario: Retention connection never falls back to application DATABASE_URL

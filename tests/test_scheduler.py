@@ -106,14 +106,14 @@ def test_scheduled_run_creation_snapshot_f18_ac1(
 
 
 def test_generate_crontab_f18_ac1(db_conn: psycopg.Connection[Any]) -> None:
-    """Crontab output includes CRON_TZ and content-engine run-week invocation."""
+    """Crontab output includes CRON_TZ and macy run-week invocation."""
     slug, ws_id, user_id, camp_id = _setup_test_env(db_conn)
 
     crontab_txt = scheduler.generate_crontab(db_conn, workspace_id=ws_id)
     assert "Supercronic crontab" in crontab_txt
     assert "0 10 * * 2" in crontab_txt
-    assert f"content-engine run-week --workspace {ws_id} --campaign {camp_id}" in crontab_txt
-    assert "0 2 * * * content-engine purge" in crontab_txt
+    assert f"macy run-week --workspace {ws_id} --campaign {camp_id}" in crontab_txt
+    assert "0 2 * * * macy purge" in crontab_txt
 
 
 def test_trigger_due_scheduled_runs(db_conn: psycopg.Connection[Any]) -> None:
@@ -152,7 +152,7 @@ def test_cli_subcommands_offline(
     monkeypatch.setattr(sys, "stdout", stdout_buf)
     ret_cron = cli.main(["crontab", "--workspace", slug])
     assert ret_cron == 0
-    assert "content-engine run-week" in stdout_buf.getvalue()
+    assert "macy run-week" in stdout_buf.getvalue()
 
     # 4. CLI run-week
     # Mark existing run completed so partial unique index allows a new run

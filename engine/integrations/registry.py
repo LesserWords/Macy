@@ -45,7 +45,7 @@ def _load_pyproject_port_plugins(port: str, existing: dict[str, type[Any]]) -> N
     if not pyproject.is_file():  # pragma: no cover
         return
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
-    eps = data.get("project", {}).get("entry-points", {}).get(f"content_engine.{port}", {})
+    eps = data.get("project", {}).get("entry-points", {}).get(f"macy.{port}", {})
     for name, target in eps.items():
         if name in existing:
             continue
@@ -60,7 +60,7 @@ def discover_plugins(port: str | None = None) -> dict[str, dict[str, type[Any]]]
     discovered: dict[str, dict[str, type[Any]]] = {p: {} for p in target_ports}
 
     for p in target_ports:
-        group_name = f"content_engine.{p}"
+        group_name = f"macy.{p}"
         entry_points = importlib.metadata.entry_points(group=group_name)
         for ep in entry_points:
             try:

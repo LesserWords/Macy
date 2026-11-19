@@ -16,7 +16,7 @@ Macy splits configuration across three places by design:
 
 1. **Host env file (`.env` on VPS, `.env.staging` / `.env.prod` locally, never committed):** Database passwords, `APP_ENCRYPTION_KEY`, Google OIDC credentials, Caddy public domain/ports, backup settings, Sentry/heartbeat/alert URLs, and optional API fallbacks.
 2. **Encrypted Postgres DB (**Admin UI → Integrations**):** Per-workspace plugin choices and vendor credentials (`openrouter`, `brave`, `dataforseo`, `publisher`, `rss`, `trafilatura`), encrypted at rest with `APP_ENCRYPTION_KEY`.
-   - **Important:** Setting `OPENROUTER_API_KEY`, `BRAVE_API_KEY`, or `DATAFORSEO_*` in `.env` alone does **not** activate those plugins in pipeline runs—you must still save the integration in **Integrations** (or `content-engine integrations set`). Those env vars act only as fallbacks when a saved integration omits the secret, or for CLI/test utilities (`pytest -m eval`, `scripts/spike_openrouter.py`).
+   - **Important:** Setting `OPENROUTER_API_KEY`, `BRAVE_API_KEY`, or `DATAFORSEO_*` in `.env` alone does **not** activate those plugins in pipeline runs—you must still save the integration in **Integrations** (or `macy integrations set`). Those env vars act only as fallbacks when a saved integration omits the secret, or for CLI/test utilities (`pytest -m eval`, `scripts/spike_openrouter.py`).
 3. **GitHub Repository Variables & Environment Secrets:** Used only by `.github/workflows/deploy.yml` and `.github/workflows/e2e-live.yml` to build images, SSH onto the VPS, and run post-deploy smoke/E2E tests.
 
 ---
@@ -45,7 +45,7 @@ Never sourced from a third-party service—generate distinct random values per e
 | `POSTGRES_DB`, `POSTGRES_USER` | Database name (`macy` or `macy_prod`) and schema-owner PostgreSQL role (`owner`). | Keep template defaults unless customizing database naming. |
 | `POSTGRES_PASSWORD` | Password for the `owner` role (migrations and `pg_dump` backups). | Run `openssl rand -hex 32` (or Python `secrets.token_hex(32)`). Avoid URL-reserved characters (`@`, `:`, `/`, `?`, `#`) or use hex strings. |
 | `APP_DB_PASSWORD` | Password for the least-privilege `app` role (refused if left as `app_secret`). Applied by `scripts/deploy.sh` after migrations. | Generate a distinct 64-char hex string (`openssl rand -hex 32`). |
-| `RETENTION_DB_PASSWORD` | Password for the least-privilege `retention` role used by nightly `content-engine purge` (refused in prod if left as `retention_secret`). | Generate a distinct 64-char hex string (`openssl rand -hex 32`). |
+| `RETENTION_DB_PASSWORD` | Password for the least-privilege `retention` role used by nightly `macy purge` (refused in prod if left as `retention_secret`). | Generate a distinct 64-char hex string (`openssl rand -hex 32`). |
 | `APP_ENCRYPTION_KEY` | 32-byte URL-safe base64 **Fernet** key encrypting `workspace_integrations.secrets` and `webhook_subscriptions.secret` (supports comma-separated `<new>,<old>` during rotation). | Run `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`. **Back this up in your password vault separately from DB dumps.** |
 | `DATABASE_URL`, `RETENTION_DATABASE_URL` | Full PostgreSQL DSNs built automatically inside Compose from the passwords above. | Set directly only when running CLI commands, migrations, or `pytest` outside Compose on your host. |
 
@@ -75,7 +75,7 @@ Required for `APP_ENV=staging` and `production` (`engine/auth.py` renders `/tmp/
    - Production VPS (`443`): `https://macy.<yourdomain>/oauth2callback`
    - Staging VPS (`443`): `https://staging.<yourdomain>/oauth2callback`
    - Local prod/Caddy test (`8443`): `https://localhost:8443/oauth2callback`
-6. Click **Create** and copy **Client ID** and **Client Secret** into `.env` (`.env.staging` / `.env.prod`). Remember every signing user must also exist via `content-engine add-owner <workspace-slug> <google-email>`.
+6. Click **Create** and copy **Client ID** and **Client Secret** into `.env` (`.env.staging` / `.env.prod`). Remember every signing user must also exist via `macy add-owner <workspace-slug> <google-email>`.
 
 ---
 
@@ -101,7 +101,7 @@ Configured in `.env` on staging/prod VPS deployments (`ADR-023`, `F20 AC4–AC6`
 
 | Variable | Purpose | Where to Get / How to Configure |
 |---|---|---|
-| `SENTRY_DSN` | Sends runtime UI, CLI, and worker exceptions (scrubbed of secrets and tagged with `workspace_id`/`run_id`) to Sentry. Verify with `content-engine test-sentry`. | Sign in at [Sentry](https://sentry.io/) → **Projects → Create Project → Python** → **Settings → Client Keys (DSN)** → copy the HTTPS DSN (`https://<key>@o<org>.ingest.sentry.io/<id>`). |
+| `SENTRY_DSN` | Sends runtime UI, CLI, and worker exceptions (scrubbed of secrets and tagged with `workspace_id`/`run_id`) to Sentry. Verify with `macy test-sentry`. | Sign in at [Sentry](https://sentry.io/) → **Projects → Create Project → Python** → **Settings → Client Keys (DSN)** → copy the HTTPS DSN (`https://<key>@o<org>.ingest.sentry.io/<id>`). |
 | `HEARTBEAT_URL` | Dead-man's-switch URL pinged on `run.completed` (`GET <url>`) and on `run.failed`/`blocked` (`GET <url>/fail`). Production enforces HTTPS. | Create a **7-day period** (+ 1 day grace) check on [Healthchecks](https://healthchecks.io/), **Better Stack Heartbeats**, or a self-hosted **Uptime Kuma** Push monitor and paste its Ping URL without a trailing `/`. |
 | `BACKUP_HEARTBEAT_URL` | Daily check pinged by `scripts/backup.sh` on verified dump (`GET <url>`) or failure (`GET <url>/fail`). | Create a **1-day period** (+ 2 hour grace) check in Healthchecks / Better Stack / Uptime Kuma and paste its Ping URL. |
 | `BACKUP_ALERT_URL` | Webhook receiving a JSON `POST` (`{"service":"backup","db":...,"error":...}`) whenever `scripts/backup.sh` fails. | Create an **Incoming Webhook** in **Slack** (`api.slack.com/apps`), **Discord** (*Server Settings → Integrations → Webhooks*), or an **n8n** Webhook trigger URL. |

@@ -16,7 +16,7 @@ As an editor or operator working in an AI coding/assistant client (Antigravity, 
   - Spend cap preflight (`BUDGET_CAP_EXCEEDED`), `usage_ledger` recording, and Sentry `mcp_tool` tagging/scrubbing;
   - MCP resources (`macy://workspaces/{id}/brand`, `macy://workspaces/{id}/weekly-report`, `macy://drafts/{id}/claims`) and prompt (`macy_editorial_review`);
   - Explicit non-production `--mock` general demo mode (`acme-demo`);
-  - `content-engine mcp` and `content-engine import-draft` CLI, Docker Compose (`compose*.yaml`), `Caddyfile`, `scripts/deploy.sh`, `scripts/post_deploy_smoke.py`, workflows (`deploy.yml`, `e2e-live.yml`), `docs/MCP.md`, and `docs/runbook.md`.
+  - `macy mcp` and `macy import-draft` CLI, Docker Compose (`compose*.yaml`), `Caddyfile`, `scripts/deploy.sh`, `scripts/post_deploy_smoke.py`, workflows (`deploy.yml`, `e2e-live.yml`), `docs/MCP.md`, and `docs/runbook.md`.
 - Out:
   - Per-user OAuth 2.1 Dynamic Client Registration over public internet (deferred per ADR-027 revisit trigger);
   - Schema provisioning or destructive DB mutations (workspace/integration creation stays in UI/CLI);
@@ -33,14 +33,14 @@ As an editor or operator working in an AI coding/assistant client (Antigravity, 
 - **AC8 (Resources & Prompts):** WHEN clients read `macy://workspaces/{id}/brand`, `macy://workspaces/{id}/weekly-report`, `macy://drafts/{id}/claims`, or render `macy_editorial_review`, THEN member authorization is verified cleanly.
 - **AC9 (Deployment & Smoke):** WHEN deployed via Compose + `Caddyfile` + `scripts/deploy.sh`, THEN `mcp` publishes no raw port in `compose.prod.yaml`, isolates secrets from `x-app-env`, passes Docker healthcheck `/healthz`, validates `MCP_AUTH_TOKEN` in preflight, rolls back cleanly, and passes `post_deploy_smoke.py --check-mcp` (`401` unauthenticated, `200` authenticated).
 - **AC10 (Delivery Quality Gates):** WHEN all PRs (`M5-03`–`M5-07`) run `scripts/check.sh`, CI, and E2E suites, THEN branch coverage `>= 90%`, diff coverage `= 100%`, `complexipy <= 15`, `jscpd = 0%`, `lint-imports` = 0, `openspec validate --all --strict` = 0, and offline/live MCP E2E journeys pass.
-- **AC11 (Agent-Driven Research Ingestion, External Draft Import & Format Sizing — Agent-Driven Mode):** WHEN an authorized actor calls `macy_ingest_research_documents` or `macy_import_draft` (or CLI `content-engine import-draft <file.md|.pdf>`), THEN external source documents are persisted in `documents`/`research_records`, ready-made or agent-written drafts (with or without an existing `brief_id`) are persisted with FK-anchored `draft_claims` at revision `0..2`, `format_slug` (`blog-short`, `blog`, `blog-long`) enforces deterministic `check_word_count` bounds during `macy_evaluate_draft`, and `deterministic_only=True` executes compliance checks with zero LLM cost.
+- **AC11 (Agent-Driven Research Ingestion, External Draft Import & Format Sizing — Agent-Driven Mode):** WHEN an authorized actor calls `macy_ingest_research_documents` or `macy_import_draft` (or CLI `macy import-draft <file.md|.pdf>`), THEN external source documents are persisted in `documents`/`research_records`, ready-made or agent-written drafts (with or without an existing `brief_id`) are persisted with FK-anchored `draft_claims` at revision `0..2`, `format_slug` (`blog-short`, `blog`, `blog-long`) enforces deterministic `check_word_count` bounds during `macy_evaluate_draft`, and `deterministic_only=True` executes compliance checks with zero LLM cost.
 
 ## Data
 Uses existing Schema v1 tables (`users`, `workspaces`, `memberships`, `campaigns`, `runs`, `documents`, `research_records`, `opportunities`, `briefs`, `drafts`, `draft_claims`, `quality_reports`, `publications`, `usage_ledger`, `events`) with no new SQL migrations required.
 
 ## Interfaces
 - `engine/mcp/{__init__,auth,errors,mock_store,prompts,resources,server,tools_research,tools_editorial}.py`
-- `engine/quality/claims.py`, `engine/services.py`, `engine/cli.py` (`content-engine mcp`), `engine/observability.py`
+- `engine/quality/claims.py`, `engine/services.py`, `engine/cli.py` (`macy mcp`), `engine/observability.py`
 - `pyproject.toml`, `compose*.yaml`, `Caddyfile`, `.env.*.example`, `scripts/deploy.sh`, `scripts/post_deploy_smoke.py`, `.github/workflows/{deploy,e2e-live}.yml`, `docs/MCP.md`, `docs/runbook.md`
 
 ## Tests

@@ -64,7 +64,7 @@ def build_compliance_prompt(
 
 
 def run_compliance_agent(args: argparse.Namespace) -> int:
-    """Execute the Strands Agents MCPClient compliance loop against `content-engine mcp`."""
+    """Execute the Strands Agents MCPClient compliance loop against `macy mcp`."""
     try:
         from mcp.client.stdio import StdioServerParameters, stdio_client
 
@@ -81,7 +81,7 @@ def run_compliance_agent(args: argparse.Namespace) -> int:
 
     mcp_args = ["mcp", "--mock"] if args.mock else ["mcp"]
     mcp_client = mcp_client_cls(
-        lambda: stdio_client(StdioServerParameters(command="content-engine", args=mcp_args))
+        lambda: stdio_client(StdioServerParameters(command="macy", args=mcp_args))
     )
     prompt = build_compliance_prompt(
         workspace_id=args.workspace_id,

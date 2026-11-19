@@ -1,6 +1,6 @@
 # Contributing to Macy
 
-Thank you for your interest in contributing to **Macy** (`content-engine`).
+Thank you for your interest in contributing to **Macy** (`macy`).
 
 ## Development Setup
 

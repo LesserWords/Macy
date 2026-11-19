@@ -26,15 +26,15 @@ The system SHALL manage pipeline stage transitions via a PostgreSQL state machin
 - **THEN** the corresponding `run.completed` or `run.failed` event is emitted and an observability heartbeat ping (or `/fail` ping on failure) is sent
 
 #### Scenario: Unsupported stage name in run-stage fails non-zero
-- **WHEN** `re_run_failed_stage_items` or `content-engine run-stage <id> --stage unknown_stage` is invoked
+- **WHEN** `re_run_failed_stage_items` or `macy run-stage <id> --stage unknown_stage` is invoked
 - **THEN** a `ValueError` naming supported stages is raised and the CLI exits with non-zero status instead of claiming zero items re-processed
 
 #### Scenario: Offline run-now cannot be hijacked by background worker polling
-- **WHEN** `content-engine run-now <workspace> --offline` executes while a live worker loop could poll `queued` rows
+- **WHEN** `macy run-now <workspace> --offline` executes while a live worker loop could poll `queued` rows
 - **THEN** the run is claimed before returning control so `run_worker_tick` never executes an offline CLI run with live adapters
 
 ### Requirement: Production integration resolution, report compilation, and worker tick
-The system SHALL resolve workspace integrations via `plugin_config` for non-offline runs (`blocked(integration_missing)` with `run.blocked` event when `llm` or `news_search` is unconfigured), align `content-engine run-week --workspace`, compile `report()` on completion, and drive queued runs and webhooks in `run_worker_tick`.
+The system SHALL resolve workspace integrations via `plugin_config` for non-offline runs (`blocked(integration_missing)` with `run.blocked` event when `llm` or `news_search` is unconfigured), align `macy run-week --workspace`, compile `report()` on completion, and drive queued runs and webhooks in `run_worker_tick`.
 
 #### Scenario: Non-offline production run resolves configured plugins or blocks on integration_missing
 - **WHEN** `execute_run` executes with `offline=False` or in `staging`/`production` without explicit fake adapters
