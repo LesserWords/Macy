@@ -101,6 +101,7 @@ class ImportDraftRequest:
     topic: str | None = None
     primary_keyword: str | None = None
     deterministic_only: bool = True
+    offline: bool = False
 
 
 @dataclass(frozen=True)

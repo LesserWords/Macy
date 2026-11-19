@@ -5845,7 +5845,7 @@ def _execute_import_external_draft(
             "workspace_id": workspace_id,
             "draft_id": draft_id,
             "user_id": user_id,
-            "offline": True,
+            "offline": bool(params.get("offline", False)),
             "deterministic_only": bool(params.get("deterministic_only", True)),
         },
     )
@@ -5935,6 +5935,7 @@ def import_external_draft(  # noqa: PLR0913
     primary_keyword: str | None = None,
     sources: Sequence[dict[str, Any]] | None = None,
     deterministic_only: bool = True,
+    offline: bool = False,
 ) -> dict[str, Any]:
     """Import an external .md/.pdf or Markdown draft and evaluate compliance (M5-07)."""
     draft_model = _load_draft_model(
@@ -5952,6 +5953,7 @@ def import_external_draft(  # noqa: PLR0913
         "primary_keyword": primary_keyword,
         "sources": sources,
         "deterministic_only": deterministic_only,
+        "offline": offline,
     }
     if conn is not None:
         return _execute_import_external_draft(conn, params)

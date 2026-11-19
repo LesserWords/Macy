@@ -19,6 +19,7 @@ from engine.contracts import (
     BrandProfile,
     ContentDraft,
     DraftClaim,
+    DraftCTA,
     EditorialBrief,
     Finding,
 )
@@ -414,7 +415,7 @@ def test_write_fact_claim_without_document_or_invalid_source_rejected(
         slug="t",
         body_md="# T",
         faq=[],
-        cta={},
+        cta=DraftCTA(),
         claims=[bypassed_claim],
     )
     with pytest.raises(InvalidDraftProvenanceError, match="missing a source_id"):

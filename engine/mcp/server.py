@@ -195,6 +195,7 @@ class ServiceStoreAdapter:
             topic=request.topic,
             primary_keyword=request.primary_keyword,
             deterministic_only=request.deterministic_only,
+            offline=request.offline,
         )
 
     def list_drafts_for_review(

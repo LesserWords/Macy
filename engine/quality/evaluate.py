@@ -391,7 +391,9 @@ def _run_llm_rubric_call(  # noqa: PLR0913
         locale=locale,
         funnel_stage=funnel_stage,
     )
-    resolved_adapter = llm_adapter or (FakeLLM() if conn is None else None)
+    resolved_adapter = llm_adapter or (
+        FakeLLM() if conn is None else llm._resolve_llm_adapter(conn, workspace_id, None)
+    )
     raw_report: QualityReport = llm.structured_call(
         stage="evaluate",
         model_cls=QualityReport,

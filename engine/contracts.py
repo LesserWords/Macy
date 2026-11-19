@@ -216,6 +216,60 @@ class DraftClaim(BaseModel):
         return self
 
 
+class _DictAccessModel(BaseModel):
+    """Pydantic model that keeps dict-style read access for legacy consumers."""
+
+    def get(self, key: str, default: Any = None) -> Any:
+        value = getattr(self, key, None) if key in type(self).model_fields else None
+        return value if value else default
+
+    def items(self) -> list[tuple[str, Any]]:
+        return [(k, v) for k, v in self.model_dump().items() if v]
+
+    def values(self) -> list[Any]:
+        return [v for _, v in self.items()]
+
+
+def _rename_legacy_keys(raw: Any, aliases: dict[str, str]) -> Any:
+    if not isinstance(raw, dict):
+        return raw
+    out: dict[str, Any] = {}
+    for key, value in raw.items():
+        target = aliases.get(str(key), str(key))
+        out.setdefault(target, value)
+    return out
+
+
+class FAQItem(_DictAccessModel):
+    """One FAQ entry with explicit properties (keeps strict JSON schema non-empty)."""
+
+    question: str
+    answer: str
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_legacy(cls, raw: Any) -> Any:
+        return _rename_legacy_keys(raw, {"q": "question", "a": "answer"})
+
+
+class DraftCTA(_DictAccessModel):
+    """Call-to-action block with explicit properties."""
+
+    headline: str = ""
+    body: str = ""
+    button_text: str = ""
+    url: str = ""
+    intensity: str = ""
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_legacy(cls, raw: Any) -> Any:
+        return _rename_legacy_keys(
+            raw,
+            {"text": "body", "title": "headline", "button": "button_text", "action": "button_text"},
+        )
+
+
 class ContentDraft(BaseModel):
     """Generated article draft with claims and metadata."""
 
@@ -224,8 +278,8 @@ class ContentDraft(BaseModel):
     meta_description: str
     slug: str
     body_md: str
-    faq: list[dict[str, str]] = Field(default_factory=list)
-    cta: dict[str, str] = Field(default_factory=dict)
+    faq: list[FAQItem] = Field(default_factory=list)
+    cta: DraftCTA = Field(default_factory=DraftCTA)
     claims: list[DraftClaim] = Field(default_factory=list)
 
 

@@ -326,7 +326,7 @@ def test_opportunity_confidence_and_funnel_stage_fallbacks() -> None:
     opp_float_med = Opportunity(
         title="T",
         angle="A",
-        funnel_stage=None,  # type: ignore[arg-type]
+        funnel_stage=None,
         confidence=0.55,
         novelty=sub,
         audience_fit=sub,

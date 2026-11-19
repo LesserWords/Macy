@@ -420,6 +420,7 @@ def _handle_import_draft(args: argparse.Namespace) -> int:
             topic=args.topic,
             primary_keyword=args.primary_keyword,
             deterministic_only=bool(args.deterministic_only),
+            offline=bool(getattr(args, "offline", False)),
         )
         print(
             json.dumps(res, indent=2, default=str)
@@ -777,6 +778,12 @@ def _build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         action="store_true",
         default=False,
         help="Run deterministic compliance checks only (skip LLM rubric)",
+    )
+    import_draft_parser.add_argument(
+        "--offline",
+        action="store_true",
+        default=False,
+        help="Use the deterministic fake LLM for the rubric instead of the workspace LLM",
     )
     import_draft_parser.add_argument(
         "--stateless",
