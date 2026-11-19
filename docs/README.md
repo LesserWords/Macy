@@ -31,12 +31,12 @@ PRD (what/why) ──► Features F01–F23 (acceptance criteria) ──► Open
 4. **Milestone end** → close-out checklist in [plans/README.md](plans/README.md): statuses, trial outcomes, risks.
 5. **Implementation docs** (`runbook.md`, `guides/`) are updated alongside the behaviour they document.
 
-## Status (2026-11-19 — M8 Complete; M9 Unified `macy` Rename Planned)
+## Status (2026-11-19 — M9 Unified `macy` Rename Complete)
 
 | Area | State |
 |---|---|
 | PRD | Baseline MVP specification ([MVP-PRD.md](prd/MVP-PRD.md)); pilot criteria §3 evaluated in M5-02 |
 | ADRs | 33 accepted (`ADR-001`–`033`); all M0/M1/M3 spikes decided (DBOS dropped, OpenRouter confirmed, RSSHub dropped, GDELT dropped, Docling dropped) |
 | Features | `F01–F19`, `F21–F23` Done; `F20` (`M5-01`) verified locally/CI (live VPS awaiting external credentials) |
-| Plans | **M0–M4** (`38` PRs), **M5-03–M5-08** (MCP, Agent-Driven Mode `.md`/PDF compliance, Strands), **M6-01–M6-03** (readability, schema, audits, GSC, route monitors), **M7-01–M7-04** (`M7.md`, Pocket runtime, Path B stateless, adapters & Setup Wizard), and **M8-01–M8-04** (`M8.md`, OSS public-readiness, hybrid `./context` + DB snapshot overlay & clean public cutover) complete; **M9-01–M9-03** (`M9.md`, `ADR-033`, unified `macy` package/CLI/tooling rename) planned; `M5-01a`–`M5-01c` hardening and `M5-02` pilot remaining |
-| Remaining before live pilot / M9 execution | Execute `M9-01`–`M9-03` (`M9.md`, `ADR-033`) to replace `content-engine` with `macy`; optionally complete `M5-01a`–`M5-01c` hardening PRs, provision production VPS `/opt/macy/prod/.env` & `PROD_*` secrets, push `v0.1.0` (`M5-01`), and run `M5-02` 4-week pilot |
+| Plans | **M0–M4** (`38` PRs), **M5-03–M5-08** (MCP, Agent-Driven Mode `.md`/PDF compliance, Strands), **M6-01–M6-03** (readability, schema, audits, GSC, route monitors), **M7-01–M7-04** (`M7.md`, Pocket runtime, Path B stateless, adapters & Setup Wizard), **M8-01–M8-04** (`M8.md`, OSS public-readiness, hybrid `./context` + DB snapshot overlay & clean public cutover), and **M9-01–M9-03** (`M9.md`, `ADR-033`, unified `macy` package/CLI/tooling rename) complete; `M5-01a`–`M5-01c` hardening and `M5-02` pilot remaining |
+| Remaining before live pilot | Optionally complete `M5-01a`–`M5-01c` hardening PRs, provision production VPS `/opt/macy/prod/.env` & `PROD_*` secrets, push `v0.1.0` (`M5-01`), and run `M5-02` 4-week pilot |

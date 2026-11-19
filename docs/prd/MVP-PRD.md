@@ -142,7 +142,7 @@ Revision routing: findings tagged `brief` regenerate the brief; `write` regenera
 ### 5.5 Project structure
 
 ```
-content-engine/
+macy/
 ├── openspec/                 # specs/ (source of truth per capability) + changes/ (proposals, tasks, deltas)
 ├── engine/
 │   ├── contracts.py          # all Pydantic I/O models
@@ -208,7 +208,7 @@ Payload: `{event, event_id, workspace_id, occurred_at, data}` where `data` is th
 
 ```toml
 # pyproject.toml — first-party plugins register exactly like third-party ones
-[project.entry-points."content_engine.news_search"]
+[project.entry-points."macy.news_search"]
 brave = "plugins.brave:BraveSearch"
 exa   = "plugins.exa:ExaSearch"
 ```

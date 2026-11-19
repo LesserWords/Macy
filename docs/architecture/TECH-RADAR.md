@@ -82,7 +82,7 @@
 | `ty` / basedpyright (faster type checkers) | mypy `--strict` CI time > 2 min |
 | testcontainers-python | Need per-test isolated databases; until then, the Compose `db` service + transaction-rollback fixtures |
 | OpenRouter Broadcast → Langfuse **Cloud** | Prompt iteration volume makes the `usage_ledger` + Streamlit view insufficient; review the data-processing terms first |
-| **[Strands Agents SDK (`strands-agents`)](https://strandsagents.com/)** (`M5-08`) | Headless/autonomous **Agent-Driven Mode** execution where an external agent connects via `MCPClient` to `content-engine mcp` to research, write, and self-correct drafts (`revision 0..2`) without putting agent loops inside `engine/` (`ADR-002`, `ADR-027`) |
+| **[Strands Agents SDK (`strands-agents`)](https://strandsagents.com/)** (`M5-08`) | Headless/autonomous **Agent-Driven Mode** execution where an external agent connects via `MCPClient` to `macy mcp` to research, write, and self-correct drafts (`revision 0..2`) without putting agent loops inside `engine/` (`ADR-002`, `ADR-027`) |
 
 ### Hold
 

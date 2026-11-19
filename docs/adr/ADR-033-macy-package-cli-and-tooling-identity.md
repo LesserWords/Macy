@@ -78,6 +78,6 @@ Adopt **Option A** as a clean-break milestone (`M9-01`–`M9-03`) with **no back
 
 ## Action items
 
-- [ ] `M9-01` — Update `pyproject.toml` (`name = "macy"`, `macy` CLI script, `macy.*` entry-point groups), regenerate `uv.lock`, update `engine/cli.py`, `engine/capabilities/registry.py`, `engine/integrations/registry.py`, `engine/scheduler.py`, `scripts/compliance_agent.py`, and corresponding unit/package tests.
-- [ ] `M9-02` — Update `infra/compose*.yaml`, `.env*.example`, `secrets.toml.example`, active `openspec/specs/**` & `openspec/changes/2026-11-10-m5-01*/`, and leftover `LesserWords/open-macy` URLs to `LesserWords/Macy`.
-- [ ] `M9-03` — Complete doc sweep across `README.md`, `CONTRIBUTING.md`, `docs/**`, add zero-legacy-reference regression test, verify synced `macy` CLI / MCP smoke, and pass `sh scripts/check.sh` + `tests/e2e/test_j_pocket_onboarding.py`.
+- [x] `M9-01` — Update `pyproject.toml` (`name = "macy"`, `macy` CLI script, `macy.*` entry-point groups), regenerate `uv.lock`, update `engine/cli.py`, `engine/capabilities/registry.py`, `engine/integrations/registry.py`, `engine/scheduler.py`, `scripts/compliance_agent.py`, and corresponding unit/package tests.
+- [x] `M9-02` — Update `infra/compose*.yaml`, `.env*.example`, `secrets.toml.example`, active `openspec/specs/**` & `openspec/changes/2026-11-10-m5-01*/`, and leftover `LesserWords/open-macy` URLs to `LesserWords/Macy`.
+- [x] `M9-03` — Complete doc sweep across `README.md`, `CONTRIBUTING.md`, `docs/**`, add zero-legacy-reference regression test, verify synced `macy` CLI / MCP smoke, and pass `sh scripts/check.sh` + `tests/e2e/test_j_pocket_onboarding.py`.

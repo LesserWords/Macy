@@ -56,14 +56,14 @@ Minimum box: 2 vCPU, 4 GB RAM, 40 GB disk (ADR-012).
    - Bootstrap the workspace, owner, brand profile, and shared sources via CLI:
 
    ```sh
-   dc run --rm --no-deps app content-engine create-workspace acme-demo \
+   dc run --rm --no-deps app macy create-workspace acme-demo \
      --name "Acme Demo" --pack general --timezone America/Sao_Paulo
-   dc run --rm --no-deps app content-engine add-owner acme-demo <owner-google-email>
-   dc run --rm --no-deps app content-engine seed-brand acme-demo
-   dc run --rm --no-deps app content-engine seed-sources --pack general
+   dc run --rm --no-deps app macy add-owner acme-demo <owner-google-email>
+   dc run --rm --no-deps app macy seed-brand acme-demo
+   dc run --rm --no-deps app macy seed-sources --pack general
    ```
 
-   Optionally import an existing blog archive so weekly reports flag covered topics (`content-engine import-sitemap <sitemap-url> --workspace acme-demo`; see [guides/developer-guide.md](guides/developer-guide.md)).
+   Optionally import an existing blog archive so weekly reports flag covered topics (`macy import-sitemap <sitemap-url> --workspace acme-demo`; see [guides/developer-guide.md](guides/developer-guide.md)).
 
 7. **GitHub Environments & Variables.**
 
@@ -166,11 +166,11 @@ On the host: `dc ps --format '{{.Name}} {{.Ports}}'` must show published ports f
 
 ## MCP Server (`M5-06`, opt-in)
 
-The `mcp` service (`profiles: ["mcp"]`) runs `content-engine mcp --transport streamable-http --host 0.0.0.0 --port 8765` inside the internal Docker network, proxied at `/mcp*` by Caddy (`Caddyfile`). See [MCP.md](MCP.md) for AI client JSON snippets and error codes.
+The `mcp` service (`profiles: ["mcp"]`) runs `macy mcp --transport streamable-http --host 0.0.0.0 --port 8765` inside the internal Docker network, proxied at `/mcp*` by Caddy (`Caddyfile`). See [MCP.md](MCP.md) for AI client JSON snippets and error codes.
 
 1. **Enable on staging or prod:**
    - Generate a bearer token (`openssl rand -hex 32`) and set `MCP_ENABLED=true`, `COMPOSE_PROFILES=mcp`, `MCP_AUTH_TOKEN=<token>`, and `MCP_ACTOR_EMAIL=<owner-email>` in `/opt/macy/<env>/.env` (`chmod 600 .env`).
-   - Confirm `<owner-email>` exists in `users` with workspace membership (`dc exec -T app content-engine add-owner acme-demo <owner-email>`).
+   - Confirm `<owner-email>` exists in `users` with workspace membership (`dc exec -T app macy add-owner acme-demo <owner-email>`).
    - Set GitHub Actions variable `MCP_ENABLED=true` and environment secret `STAGING_MCP_AUTH_TOKEN` / `PROD_MCP_AUTH_TOKEN` so `deploy.yml` and `e2e-live.yml` execute `--check-mcp` and live MCP smoke tests automatically.
    - Deploy (`APP_TAG=<tag> sh scripts/deploy.sh`): preflight rejects empty/`CHANGE_ME` `MCP_AUTH_TOKEN` or missing `MCP_ACTOR_EMAIL` before touching containers, starts `mcp`, and checks unauthenticated `POST /mcp -> 401`.
 2. **Smoke check & inspect logs:**
@@ -198,7 +198,7 @@ The `mcp` service (`profiles: ["mcp"]`) runs `content-engine mcp --transport str
 - `APP_ENCRYPTION_KEY` accepts a comma-separated key list for zero-downtime rotation:
   1. Prepend the new key alongside the old one (`"<new>,<old>"`), deploy, and run:
      ```sh
-     dc run --rm --no-deps app content-engine rotate-key --current-keys "<old>,<new>" --new-key "<new>"
+     dc run --rm --no-deps app macy rotate-key --current-keys "<old>,<new>" --new-key "<new>"
      ```
   2. Drop `<old>` from `.env` and redeploy.
 - The GHCR pull token in CI is the workflow's short-lived `GITHUB_TOKEN` piped over SSH stdin; no long-lived registry credentials are stored on the host.
@@ -215,22 +215,22 @@ Both `macy-staging` and `macy-prod` share `compose.yaml` + `compose.prod.yaml` a
 
 ## Scheduled weekly runs and nightly purge (cron wiring)
 
-The `worker` container (`python -m engine`) polls PostgreSQL every `15 s` for queued manual runs (**Run now**), compiles reports, and delivers outbound webhooks, **but the container image does not bundle or start `supercronic`**. Generate schedule definitions with `content-engine crontab` and run them via host cron or an external Supercronic container:
+The `worker` container (`python -m engine`) polls PostgreSQL every `15 s` for queued manual runs (**Run now**), compiles reports, and delivers outbound webhooks, **but the container image does not bundle or start `supercronic`**. Generate schedule definitions with `macy crontab` and run them via host cron or an external Supercronic container:
 
 ```sh
 # 1. Inspect generated cron entries (workspace-timezone campaign schedules + 02:00 UTC purge):
-dc_prod exec -T app content-engine crontab
+dc_prod exec -T app macy crontab
 
 # 2. Example host crontab entries for /opt/macy/prod:
 # Weekly Monday 09:00 workspace time:
 0 9 * * 1 cd /opt/macy/prod && \
   docker compose -p macy-prod --env-file .env -f compose.yaml -f compose.prod.yaml \
-  exec -T app content-engine run-week --workspace acme-demo
+  exec -T app macy run-week --workspace acme-demo
 
 # Nightly 02:00 UTC retention purge (container already injects RETENTION_DATABASE_URL):
 0 2 * * * cd /opt/macy/prod && \
   docker compose -p macy-prod --env-file .env -f compose.yaml -f compose.prod.yaml \
-  exec -T app content-engine purge
+  exec -T app macy purge
 ```
 
 ## Backups and restore (M4-06, F20 AC4)
@@ -280,16 +280,16 @@ dc exec -T db psql -U owner -d macy_restore_scratch -c "$ROW_COUNT_SQL"
 
 ## Data retention and LGPD user anonymisation (M4-06, ADR-024, F20 AC7–AC8)
 
-- **Nightly retention purge (`content-engine purge`):** Runs under the least-privilege `retention` database role (`RETENTION_DATABASE_URL`, pre-configured on `app` in `compose.prod.yaml`). Deletes `llm_payloads` `>90` days (retaining `usage_ledger`), nulls `documents.extracted_text` + stamps `text_purged_at` `>365` days (retaining metadata/hash), deletes `delivered`/`dead` `webhook_deliveries` `>30` days, and deletes `events` `>24` months:
+- **Nightly retention purge (`macy purge`):** Runs under the least-privilege `retention` database role (`RETENTION_DATABASE_URL`, pre-configured on `app` in `compose.prod.yaml`). Deletes `llm_payloads` `>90` days (retaining `usage_ledger`), nulls `documents.extracted_text` + stamps `text_purged_at` `>365` days (retaining metadata/hash), deletes `delivered`/`dead` `webhook_deliveries` `>30` days, and deletes `events` `>24` months:
 
   ```sh
-  dc run --rm --no-deps app content-engine purge
+  dc run --rm --no-deps app macy purge
   ```
 
-- **LGPD user deletion (`content-engine anonymise-user <email>`):** Replaces `users.email` with `deleted-<user_id>@anonymised.invalid`, clears `users.name`, removes `memberships`, and scrubs personal email/name keys from `events.payload` while preserving opaque `actor_user_id`:
+- **LGPD user deletion (`macy anonymise-user <email>`):** Replaces `users.email` with `deleted-<user_id>@anonymised.invalid`, clears `users.name`, removes `memberships`, and scrubs personal email/name keys from `events.payload` while preserving opaque `actor_user_id`:
 
   ```sh
-  dc run --rm --no-deps app content-engine anonymise-user user@example.com
+  dc run --rm --no-deps app macy anonymise-user user@example.com
   ```
 
 ## Live E2E testing (M2-07)
@@ -311,7 +311,7 @@ Live E2E tests execute Playwright journeys `J0–J4` (plus extended journeys whe
 - **Sentry (`SENTRY_DSN`):** `app.py`, CLI, and worker initialize Sentry automatically when `SENTRY_DSN` is set, tagging events with `workspace_id`, `run_id`, and release (`APP_TAG` or package version) while scrubbing DSN passwords, `Bearer` tokens, query secrets, secret prefixes, and sensitive keys. Verify delivery after deploy:
 
   ```sh
-  dc_prod exec app content-engine test-sentry
+  dc_prod exec app macy test-sentry
   ```
 
 - **Weekly pipeline heartbeat (`HEARTBEAT_URL`):** `execute_run` sends `GET $HEARTBEAT_URL` on completion and `GET ${HEARTBEAT_URL%/}/fail` on failure or `blocked(integration_missing)` (HTTPS required in production).
@@ -340,18 +340,18 @@ Live E2E tests execute Playwright journeys `J0–J4` (plus extended journeys whe
 
    ```sh
    docker compose -f infra/compose.pocket.yaml exec app \
-     content-engine init --email admin@example.com --password '<secret>' \
+     macy init --email admin@example.com --password '<secret>' \
      --slug my-ws --name "My Workspace" --preset pocket_free --non-interactive
    ```
 
 ### Path B — Zero-Docker Stateless CLI & MCP
 
-Install lightweight core extras (`uvx --from "content-engine[core]" content-engine ...` or local `.venv`) and run without `DATABASE_URL` or Docker:
+Install lightweight core extras (`uvx --from "macy[core]" macy ...` or local `.venv`) and run without `DATABASE_URL` or Docker:
 
 ```sh
-content-engine audit https://example.com --stateless --json
-content-engine import-draft --file ./draft.md --format blog-short --stateless --json
-content-engine mcp --transport stdio --stateless --check
+macy audit https://example.com --stateless --json
+macy import-draft --file ./draft.md --format blog-short --stateless --json
+macy mcp --transport stdio --stateless --check
 ```
 
 ## Private Context Overlay & Clean OSS Release (`M8`, `ADR-032`, `F23`)
@@ -379,7 +379,7 @@ content-engine mcp --transport stdio --stateless --check
    uv run python scripts/check_oss_hygiene.py --check-git-history --branch oss-main
    ```
 
-3. Push `oss-main` to the public repository (maintaining app/CLI name `macy` / `content-engine`):
+3. Push `oss-main` to the public repository (maintaining app/CLI name `macy`):
 
    ```sh
    git remote add open-macy https://github.com/LesserWords/Macy.git
@@ -387,3 +387,11 @@ content-engine mcp --transport stdio --stateless --check
    ```
 
 4. Validate `macy` locally and in Pocket/Docker against `./context/` before swapping GitHub repository names, retaining the current private repo (`private-context-v0.2` / `dev`) as the full-history & private context backup.
+
+### Upgrading Pre-M9 Crontabs, MCP Clients & Compose Defaults (`M9`, `ADR-033`)
+
+`M9` standardized the Python package (`macy`), CLI binary (`macy`), plugin entry-point groups (`macy.*`), and default Compose `APP_IMAGE` (`macy`) as a clean break without backwards-compatibility aliases. When upgrading an existing pre-M9 host:
+
+1. Regenerate host crontabs via `macy crontab --workspace <slug>` so scheduled commands invoke `macy run-week` and `macy purge`.
+2. Update local/remote AI client MCP configs (Antigravity, Claude Desktop, Claude Code, Cursor) to invoke `macy mcp`.
+3. Pin `APP_IMAGE` explicitly in existing VPS `.env` files if pulling a historical pre-M9 container image tag.

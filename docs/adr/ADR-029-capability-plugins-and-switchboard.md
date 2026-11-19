@@ -4,7 +4,7 @@
 **Related:** features F01, F05, F19, F21, F22 · ADR-005, ADR-014, ADR-027, ADR-028
 
 ## Context
-Macy currently supports vendor adapter plugins via `typing.Protocol` ports and `importlib.metadata` entry points (`content_engine.<port>`, `ADR-005`), while product capabilities (`audit`, `crawl`, `monitors`, `research`, `strategy`, `production`, `quality`) are bundled in a single runtime where all 10 Admin UI screens (`app.py`), 20 CLI commands (`engine/cli.py`), and 17 MCP tools (`engine/mcp/`) are always exposed. Users who only want deterministic `.md`/PDF compliance or CMS-agnostic SEO/GEO audits must still install every dependency (`pymupdf4llm`, `lingua-language-detector`, `trafilatura`, `streamlit`, `psycopg`) and run PostgreSQL even for stateless single-URL audits or draft checks.
+Macy currently supports vendor adapter plugins via `typing.Protocol` ports and `importlib.metadata` entry points (`macy.<port>`, `ADR-005`), while product capabilities (`audit`, `crawl`, `monitors`, `research`, `strategy`, `production`, `quality`) are bundled in a single runtime where all 10 Admin UI screens (`app.py`), 20 CLI commands (`engine/cli.py`), and 17 MCP tools (`engine/mcp/`) are always exposed. Users who only want deterministic `.md`/PDF compliance or CMS-agnostic SEO/GEO audits must still install every dependency (`pymupdf4llm`, `lingua-language-detector`, `trafilatura`, `streamlit`, `psycopg`) and run PostgreSQL even for stateless single-URL audits or draft checks.
 
 ## Options considered
 | Option | Complexity | Cost | Fit |
@@ -14,7 +14,7 @@ Macy currently supports vendor adapter plugins via `typing.Protocol` ports and `
 | C. Hard-coded UI flags only | Low | `$0` | Incomplete — does not filter MCP tools, CLI commands, required ports, or pip dependencies |
 
 ## Decision
-1. **Tier 1 — Capability Plugins (`content_engine.capabilities` entry point group):**
+1. **Tier 1 — Capability Plugins (`macy.capabilities` entry point group):**
    - Introduce `CapabilityPlugin` (`Protocol` in `engine/capabilities/ports.py`) declaring `slug`, `title_msgid`, `always_enabled`, `required_ports`, `optional_ports`, `ui_screens`, `cli_commands`, and `mcp_tools`.
    - Ship 4 built-in capability plugins registered in `pyproject.toml`:
      - `core-compliance` (`always_enabled=True`): deterministic quality checks (`engine/quality/checks.py`) and 5 JSON-LD generators (`engine/production/schema.py`). Requires `0` external ports.
@@ -26,7 +26,7 @@ Macy currently supports vendor adapter plugins via `typing.Protocol` ports and `
    - **Dynamic Surface Filtering:** `app.py` renders only sidebar screens belonging to `enabled_capabilities`; `engine/mcp/` exposes only tools belonging to `enabled_capabilities` (returning structured `CAPABILITY_DISABLED` error if a disabled tool is invoked directly); `Integrations` screen highlights only ports required by enabled capabilities.
 3. **Path B — Zero-Docker Stateless CLI/MCP Package (`uvx macy[core]`) & Composable Extras:**
    - Group optional heavy dependencies under extras (`[core]`, `[editorial]`, `[ui]`, `[audit-browser]`, `[full]`).
-   - Support `--stateless` (or automatic fallback when `MACY_STATELESS=true`) to decouple `core-compliance` and `seo-audit` from `engine/db.py` across **both CLI (`content-engine audit <url> [--crawl] --stateless`, `content-engine import-draft <file> --stateless`) and `stdio` MCP (`content-engine mcp --stateless` exposing `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, `macy_import_draft`)**, executing with zero PostgreSQL or Docker required and installable via `uvx --from macy[core] content-engine ...`.
+   - Support `--stateless` (or automatic fallback when `MACY_STATELESS=true`) to decouple `core-compliance` and `seo-audit` from `engine/db.py` across **both CLI (`macy audit <url> [--crawl] --stateless`, `macy import-draft <file> --stateless`) and `stdio` MCP (`macy mcp --stateless` exposing `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, `macy_import_draft`)**, executing with zero PostgreSQL or Docker required and installable via `uvx --from macy[core] macy ...`.
 
 ## Consequences
 - Easier: Users can run `uvx macy audit <url>` without Docker or Postgres, or toggle off editorial screens in the UI when using Macy purely as an SEO/GEO auditor.

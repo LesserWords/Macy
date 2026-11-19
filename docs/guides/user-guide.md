@@ -14,7 +14,7 @@ This guide explains how workspace owners and editors configure **Macy** and run 
 ## 1. Signing In & UI Language
 
 ### Authentication
-- **Staging & Production (`APP_ENV=staging` or `production`):** Click **Sign in with Google** (`st.login("google")`). Your Google account email must already hold an `owner` membership in a workspace (seeded by an operator with `content-engine add-owner <workspace-slug> <email>`). Accounts without membership see an access-denied message and zero workspace data.
+- **Staging & Production (`APP_ENV=staging` or `production`):** Click **Sign in with Google** (`st.login("google")`). Your Google account email must already hold an `owner` membership in a workspace (seeded by an operator with `macy add-owner <workspace-slug> <email>`). Accounts without membership see an access-denied message and zero workspace data.
 - **Local Development / Testing (`APP_ENV=development` or `test`):** Set `MACY_TEST_USER_EMAIL=<email>` in your environment before launching the UI to bypass OIDC locally. This test identity is strictly refused when `APP_ENV` / `ENV` is `production` or `prod`.
 
 ### Bilingual Interface (`pt-BR` / `en-US`)
@@ -72,7 +72,7 @@ Your Brand Profile steers editorial briefs, article tone, and deterministic proh
    - **CTA Rules** (one per line — e.g. TOFU vs MOFU vs BOFU call-to-action rules)
 2. Click **Save Brand Profile**.
    - Every save creates an immutable new version (`v1`, `v2`, …). Generated briefs record exact `brand_version` provenance.
-   - Operators can also seed the initial Acme Demo profile with `content-engine seed-brand <workspace-slug>`.
+   - Operators can also seed the initial Acme Demo profile with `macy seed-brand <workspace-slug>`.
 
 ### Step 4: Trusted Sources (`Sources`)
 Sources drive what Macy reads during research and brief evidence gathering.
@@ -85,7 +85,7 @@ Sources drive what Macy reads during research and brief evidence gathering.
   - `feed`: Polls an RSS/Atom **Feed URL** directly (validated on save via `safe_http`).
   - `site_search`: Queries your configured `news_search` plugin scoped to the source **Domain**.
 - Use the **Select Source to Edit** dropdown (`Add New Source` or pick an existing source) to add/edit entries, or click **Enable / Disable** in the source list below.
-- **Tip (Prevent Duplicate Topic Proposals):** Have an operator run `content-engine import-sitemap <blog-sitemap-url> --workspace <slug>` so previously published blog posts are flagged as **already covered** in future reports.
+- **Tip (Prevent Duplicate Topic Proposals):** Have an operator run `macy import-sitemap <blog-sitemap-url> --workspace <slug>` so previously published blog posts are flagged as **already covered** in future reports.
 
 ### Step 5: Outbound Webhooks (`Webhooks`) — Optional
 Subscribe external automation tools (such as n8n or Slack) to engine lifecycle events:
@@ -102,9 +102,9 @@ Subscribe external automation tools (such as n8n or Slack) to engine lifecycle e
 Open **Runs** to inspect the active campaign's schedule, spend caps, run history, and **Cost & Spend Overview**.
 - **In the UI:** Clicking **Run now** creates a `queued` run row (refused if a run is already queued/running, or if monthly spend has reached `monthly_cap_usd`).
 - **Execution & Adapter Resolution:**
-  - The `worker` container (`python -m engine`) polls queued runs every `15 s` (`run_worker_tick()`), compiles weekly reports on completion, and delivers pending webhooks continuously. Operators can also trigger runs synchronously via CLI (`content-engine run-week <workspace> [--offline]` or `content-engine run-now <workspace> [--offline]`).
+  - The `worker` container (`python -m engine`) polls queued runs every `15 s` (`run_worker_tick()`), compiles weekly reports on completion, and delivers pending webhooks continuously. Operators can also trigger runs synchronously via CLI (`macy run-week <workspace> [--offline]` or `macy run-now <workspace> [--offline]`).
   - **Live vs Fake Plugins:** Any port configured under **Integrations** (`openrouter`, `brave`, `dataforseo`, `rss`, `trafilatura`, `markdown_export`, `http_webhook`) runs live even in `APP_ENV=development`. In `development`, unconfigured ports fall back to `Fake*` adapters; in `staging`/`production` (or `--offline=false`), `feed_source`/`extractor` default to `rss`/`trafilatura` and missing `llm` or `news_search` transitions the run cleanly to `blocked` (`integration_missing`).
-  - **Scheduled Weekly Cron:** `schedule_cron` is exported by `content-engine crontab` for host cron / Supercronic; clicking **Run now** uses the background `worker` immediately without external cron setup.
+  - **Scheduled Weekly Cron:** `schedule_cron` is exported by `macy crontab` for host cron / Supercronic; clicking **Run now** uses the background `worker` immediately without external cron setup.
 - **Cost & Spend Overview** (also shown on **Dashboard**) displays:
   - Current month spend vs monthly cap and remaining budget
   - Average cost per run and average cost per published article
@@ -125,7 +125,7 @@ Once a run completes research and scoring, click **View Weekly Report** (or sele
    - The brief panel shows `Brand Version`, `Format`, `Topic`, `Target Audience`, `Angle`, **Target Keywords** (with search volume or `(Estimated)` label), numbered **Outline**, **CTA Goal**, and **Verified Facts** linked to evidence document IDs.
 4. **Write & Evaluate the Draft:**
    - Click **Write & Evaluate Draft** below the brief. Macy drafts the article, runs all free deterministic checks (source provenance, freshness, URL status, primary keyword placement, meta/slug format, prohibited brand phrases, CTA intensity, language match via `lingua-py`, FormatPack `word_count` bounds across `blog-short`/`blog`/`blog-long`, plus optional extended SEO checks: keyword/subheading density and tiered bilingual Flesch readability using `en-US` and Martins et al. `pt-BR`), and invokes the isolated LLM evaluator (routing up to 2 automatic revisions to `brief` or `write` if needed).
-   - Ready-made `.md` or `.pdf` drafts can also be imported for audit via CLI `content-engine import-draft` or MCP `macy_import_draft` (`deterministic_only=True` or full rubric), while structured JSON-LD (`Article`, `FAQPage`, `Product`, `LocalBusiness`, `HowTo`) and modular LLM rewrite modes (`improve`, `simplify`, `seo_optimize`) operate independently.
+   - Ready-made `.md` or `.pdf` drafts can also be imported for audit via CLI `macy import-draft` or MCP `macy_import_draft` (`deterministic_only=True` or full rubric), while structured JSON-LD (`Article`, `FAQPage`, `Product`, `LocalBusiness`, `HowTo`) and modular LLM rewrite modes (`improve`, `simplify`, `seo_optimize`) operate independently.
    - When finished, click **Open Draft Review** (or open **Draft Review** in the sidebar). If the evaluator returns `reject` (`research`), the topic is returned to the pool.
 
 ### C. Reviewing Drafts & Publishing (`Draft Review` — Gate 2)
@@ -152,8 +152,8 @@ Open **SEO & GEO Audit** in the sidebar to audit any public blog post, landing p
 
 | Message / Symptom | Cause | Resolution |
 |---|---|---|
-| `Access denied: '<email>' is not a member of any workspace` | Signed-in Google email is not registered as an owner in any workspace | Ask an operator to run `content-engine add-owner <workspace-slug> <email>` |
-| Run status becomes `blocked` (`integration_missing`) | Live/production run lacked configured `llm` (`openrouter`) or `news_search` (`brave`) plugin | Configure the missing port in **Integrations** (verify **Test Connection**), then resume via `content-engine run-stage <run-id>` |
+| `Access denied: '<email>' is not a member of any workspace` | Signed-in Google email is not registered as an owner in any workspace | Ask an operator to run `macy add-owner <workspace-slug> <email>` |
+| Run status becomes `blocked` (`integration_missing`) | Live/production run lacked configured `llm` (`openrouter`) or `news_search` (`brave`) plugin | Configure the missing port in **Integrations** (verify **Test Connection**), then resume via `macy run-stage <run-id>` |
 | `Integration missing for port '<port>'` | A stage requires a port (`llm`, `news_search`, `keyword_provider`, `publisher`, etc.) that has no saved row | Open **Integrations**, configure the named port, save, and click **Test Connection** |
 | `Plugin '<plugin>' does not support locale '<locale>'` | Selected plugin cannot serve the campaign's `Content Locale` / `Target Market` | Switch the campaign locale/market (e.g. `pt-BR`/`BR` or `en-US`/`US`) or choose a compatible plugin |
 | `Monthly budget cap reached. New runs are refused.` | Cumulative monthly spend in `usage_ledger` reached `monthly_cap_usd` | Raise `Monthly Spend Cap (USD)` in **Campaigns** or wait for the next month |
@@ -168,4 +168,4 @@ Open **SEO & GEO Audit** in the sidebar to audit any public blog post, landing p
 
 - **First-Boot Setup Wizard:** Starting Macy against a fresh database opens a 3-step bilingual wizard (`pt-BR` / `en-US`) to create your local admin login, toggle active capabilities (`core-compliance`, `seo-audit`, `editorial-pipeline`, `route-monitors`), pick a stack preset, and auto-seed your brand profile and sitemap from an existing website URL.
 - **Stack Presets (`Integrations -> Stack Presets`):** Switch between `pocket_free` (zero API keys: `gnews_rss`, `autocomplete`, `rss`, `trafilatura`, `markdown_export`), `local_ollama` (`ollama` + free search/keywords), or `pro_cloud` (`openrouter`, `brave`, `dataforseo`, `http_webhook`) in one click.
-- **Capability Switchboard (`content-engine capabilities`):** Hide unused sidebar pages and MCP tools (`editorial-pipeline`, `route-monitors`) when you only want Compliance Auditing and Brand Checking.
+- **Capability Switchboard (`macy capabilities`):** Hide unused sidebar pages and MCP tools (`editorial-pipeline`, `route-monitors`) when you only want Compliance Auditing and Brand Checking.

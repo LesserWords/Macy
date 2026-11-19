@@ -52,7 +52,7 @@ Furthermore:
    - Retain and sanitize all historical specs under `openspec/changes/archive/**` (replacing identifying personal/company references with neutral examples) so OSS contributors and evaluators retain full spec-driven engineering visibility without context leaks.
    - Enforce `scripts/check_oss_hygiene.py` inside `scripts/check.sh` to fail deterministically on forbidden proprietary tokens, local workstation `file://` filesystem URIs, forbidden context directories (`founder/`), or missing governance files.
 6. **Dual-Repo Public Release to `https://github.com/LesserWords/Macy.git` & Private Context Cutover:**
-   - Maintain the application/project name as **`macy`** (`content-engine` / `Macy`).
+   - Maintain the application/project name as **`macy`** (`macy` / `Macy`).
    - Preserve the current private repository (`macy`) as the private full-history & business-context repository (`founder/`, private product brand fixtures, private vertical pack, `.env.prod`, `.env.staging`, and `compose.private.yaml`).
    - Publish the sanitized OSS codebase as a clean orphan initial release history to `https://github.com/LesserWords/Macy.git`, verify `scripts/check_oss_hygiene.py --check-git-history` and `uv build` cleanliness, run the OSS `macy` engine locally/in production consuming private context via `MACY_CONTEXT_DIR` / `./context`, and swap GitHub repository names once cutover is verified.
 

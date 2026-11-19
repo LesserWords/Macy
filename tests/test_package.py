@@ -211,3 +211,57 @@ def test_wheel_and_sdist_exclude_private_context(tmp_path: Path) -> None:
     with tarfile.open(sdists[0], "r:gz") as tf:
         sdist_members = tf.getnames()
     _assert_archive_clean(sdist_members, "sdist")
+
+
+def _iter_macy_tracked_paths(repo_root: Path) -> list[Path]:
+    git_exe = shutil.which("git") or "git"
+    proc = subprocess.run(  # noqa: S603
+        [git_exe, "-c", "core.quotePath=false", "ls-files"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=True,
+    )
+    excluded_exact = {
+        "docs/adr/ADR-033-macy-package-cli-and-tooling-identity.md",
+        "docs/plans/M9.md",
+        "uv.lock",
+    }
+    scopes = (
+        "pyproject.toml",
+        "README.md",
+        "CONTRIBUTING.md",
+        "engine/",
+        "scripts/",
+        "infra/",
+        "docs/",
+    )
+    openspec_prefix = "openspec/"
+    archive_prefix = "openspec/changes/archive/"
+    selected: list[Path] = []
+    for rel in proc.stdout.splitlines():
+        norm = rel.strip().replace("\\", "/")
+        if not norm or norm in excluded_exact:
+            continue
+        in_scope = (
+            norm in scopes
+            or norm.startswith(scopes)
+            or (norm.startswith(openspec_prefix) and not norm.startswith(archive_prefix))
+        )
+        if in_scope and (repo_root / norm).is_file():
+            selected.append(repo_root / norm)
+    return selected
+
+
+def test_repo_uses_macy_instead_of_legacy_cli_name() -> None:
+    """M9-03 D2: Zero legacy CLI or entry-point group names remain outside M9/archive docs."""
+    repo_root = Path(__file__).resolve().parent.parent
+    legacy_cli = "content" + "-engine"
+    legacy_mod = "content" + "_engine"
+    hits: list[str] = []
+    for path in _iter_macy_tracked_paths(repo_root):
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        if legacy_cli in text or legacy_mod in text:
+            hits.append(str(path.relative_to(repo_root)))
+    assert hits == [], f"Legacy naming references remain: {hits}"
