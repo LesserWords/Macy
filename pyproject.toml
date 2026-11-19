@@ -1,5 +1,5 @@
 [project]
-name = "content-engine"
+name = "macy"
 version = "0.2.0"
 description = "Content Intelligence Engine: research, score, brief, write and evaluate sourced articles"
 requires-python = ">=3.12"
@@ -47,7 +47,7 @@ ui = [
 agent = ["strands-agents>=0.1.0"]
 audit-browser = ["playwright>=1.49.0", "axe-playwright-python>=0.1.5"]
 full = [
-    "content-engine[core,editorial,ui,audit-browser]",
+    "macy[core,editorial,ui,audit-browser]",
 ]
 
 [dependency-groups]
@@ -75,42 +75,42 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-content-engine = "engine.cli:main"
+macy = "engine.cli:main"
 
-[project.entry-points."content_engine.llm"]
+[project.entry-points."macy.llm"]
 fake = "engine.integrations.fakes:FakeLLM"
 openrouter = "engine.integrations.openrouter:OpenRouterLLM"
 openai_compat = "engine.integrations.openai_compat:UniversalOpenAILLM"
 ollama = "engine.integrations.openai_compat:OllamaLLM"
 
-[project.entry-points."content_engine.feed_source"]
+[project.entry-points."macy.feed_source"]
 fake = "engine.integrations.fakes:FakeFeedSource"
 rss = "engine.integrations.rss:RSSFeedSource"
 
-[project.entry-points."content_engine.news_search"]
+[project.entry-points."macy.news_search"]
 fake = "engine.integrations.fakes:FakeNewsSearch"
 brave = "engine.integrations.brave:BraveNewsSearch"
 gnews_rss = "engine.integrations.gnews_rss:GoogleNewsRSSSearch"
 
-[project.entry-points."content_engine.extractor"]
+[project.entry-points."macy.extractor"]
 fake = "engine.integrations.fakes:FakeExtractor"
 trafilatura = "engine.integrations.trafilatura_extractor:TrafilaturaExtractor"
 
-[project.entry-points."content_engine.keyword_provider"]
+[project.entry-points."macy.keyword_provider"]
 fake = "engine.integrations.fakes:FakeKeywordProvider"
 dataforseo = "engine.integrations.dataforseo:DataForSEOKeywordProvider"
 autocomplete = "engine.integrations.autocomplete_keywords:AutocompleteKeywordProvider"
 
-[project.entry-points."content_engine.publisher"]
+[project.entry-points."macy.publisher"]
 fake = "engine.integrations.fakes:FakePublisher"
 markdown_export = "engine.integrations.markdown_export:MarkdownExportPublisher"
 http_webhook = "engine.integrations.http_webhook:HttpWebhookPublisher"
 
-[project.entry-points."content_engine.analytics_source"]
+[project.entry-points."macy.analytics_source"]
 fake = "engine.integrations.fakes:FakeAnalyticsSource"
 gsc = "engine.integrations.gsc:GSCAnalyticsSource"
 
-[project.entry-points."content_engine.capabilities"]
+[project.entry-points."macy.capabilities"]
 core-compliance = "engine.capabilities.builtins:CoreComplianceCapability"
 seo-audit = "engine.capabilities.builtins:SeoAuditCapability"
 editorial-pipeline = "engine.capabilities.builtins:EditorialPipelineCapability"

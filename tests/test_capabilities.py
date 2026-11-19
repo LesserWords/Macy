@@ -50,7 +50,7 @@ def test_pyproject_extras_cover_composable_profiles() -> None:
     extras = data.get("project", {}).get("optional-dependencies", {})
     for name in ("core", "editorial", "ui", "audit-browser", "full"):
         assert name in extras, f"Missing optional dependency extra '{name}'"
-    assert "content_engine.capabilities" in data.get("project", {}).get("entry-points", {})
+    assert "macy.capabilities" in data.get("project", {}).get("entry-points", {})
 
 
 def test_switchboard_persists_capabilities_and_protects_core(db_conn: object) -> None:

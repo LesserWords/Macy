@@ -1,4 +1,4 @@
-"""Tests for M7-04 D1-D3 first-boot onboarding, URL auto-seed, and `content-engine init`."""
+"""Tests for M7-04 D1-D3 first-boot onboarding, URL auto-seed, and `macy init`."""
 
 from __future__ import annotations
 
@@ -108,7 +108,7 @@ def test_bootstrap_onboarding_managed_conn_and_cli_init(
     isolated_empty_db: str,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """D1 & D3: bootstrap_onboarding(conn=None) and `content-engine init` work on empty DB."""
+    """D1 & D3: bootstrap_onboarding(conn=None) and `macy init` work on empty DB."""
     from engine import cli, services
 
     assert services.needs_first_boot_wizard() is True

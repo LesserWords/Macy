@@ -525,7 +525,7 @@ def _handle_mcp(args: argparse.Namespace) -> int:
 
 
 def _build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
-    parser = argparse.ArgumentParser(prog="content-engine")
+    parser = argparse.ArgumentParser(prog="macy")
     subparsers = parser.add_subparsers(dest="subcommand")
 
     # plugins list

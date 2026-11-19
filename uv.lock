@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
@@ -717,157 +717,6 @@ wheels = [
 ]
 
 [[package]]
-name = "content-engine"
-version = "0.2.0"
-source = { editable = "." }
-dependencies = [
-    { name = "babel" },
-    { name = "cryptography" },
-    { name = "defusedxml" },
-    { name = "feedparser" },
-    { name = "instructor" },
-    { name = "lingua-language-detector" },
-    { name = "mcp" },
-    { name = "openai" },
-    { name = "psycopg", extra = ["binary"] },
-    { name = "pydantic" },
-    { name = "pymupdf4llm" },
-    { name = "python-frontmatter" },
-    { name = "pyyaml" },
-    { name = "sentry-sdk" },
-    { name = "standardwebhooks" },
-    { name = "streamlit", extra = ["auth"] },
-    { name = "trafilatura" },
-]
-
-[package.optional-dependencies]
-agent = [
-    { name = "strands-agents" },
-]
-audit-browser = [
-    { name = "axe-playwright-python" },
-    { name = "playwright" },
-]
-core = [
-    { name = "cryptography" },
-    { name = "defusedxml" },
-    { name = "mcp" },
-    { name = "pydantic" },
-    { name = "python-frontmatter" },
-    { name = "pyyaml" },
-]
-editorial = [
-    { name = "feedparser" },
-    { name = "instructor" },
-    { name = "lingua-language-detector" },
-    { name = "openai" },
-    { name = "pymupdf4llm" },
-    { name = "trafilatura" },
-]
-full = [
-    { name = "axe-playwright-python" },
-    { name = "babel" },
-    { name = "cryptography" },
-    { name = "defusedxml" },
-    { name = "feedparser" },
-    { name = "instructor" },
-    { name = "lingua-language-detector" },
-    { name = "mcp" },
-    { name = "openai" },
-    { name = "playwright" },
-    { name = "pydantic" },
-    { name = "pymupdf4llm" },
-    { name = "python-frontmatter" },
-    { name = "pyyaml" },
-    { name = "streamlit", extra = ["auth"] },
-    { name = "trafilatura" },
-]
-ui = [
-    { name = "babel" },
-    { name = "streamlit", extra = ["auth"] },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "complexipy" },
-    { name = "dbos" },
-    { name = "diff-cover" },
-    { name = "hypothesis" },
-    { name = "import-linter" },
-    { name = "mypy" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-playwright" },
-    { name = "pytest-recording" },
-    { name = "pytest-rerunfailures" },
-    { name = "ruff" },
-    { name = "types-defusedxml" },
-    { name = "types-pyyaml" },
-    { name = "vulture" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "axe-playwright-python", marker = "extra == 'audit-browser'", specifier = ">=0.1.5" },
-    { name = "babel", specifier = ">=2.18.0" },
-    { name = "babel", marker = "extra == 'ui'", specifier = ">=2.18.0" },
-    { name = "content-engine", extras = ["core", "editorial", "ui", "audit-browser"], marker = "extra == 'full'" },
-    { name = "cryptography", specifier = ">=44.0" },
-    { name = "cryptography", marker = "extra == 'core'", specifier = ">=44.0" },
-    { name = "defusedxml", specifier = ">=0.7.1" },
-    { name = "defusedxml", marker = "extra == 'core'", specifier = ">=0.7.1" },
-    { name = "feedparser", specifier = ">=6.0.14" },
-    { name = "feedparser", marker = "extra == 'editorial'", specifier = ">=6.0.14" },
-    { name = "instructor", specifier = ">=1.17.0" },
-    { name = "instructor", marker = "extra == 'editorial'", specifier = ">=1.17.0" },
-    { name = "lingua-language-detector", specifier = ">=2.2.0" },
-    { name = "lingua-language-detector", marker = "extra == 'editorial'", specifier = ">=2.2.0" },
-    { name = "mcp", specifier = ">=1.2.0" },
-    { name = "mcp", marker = "extra == 'core'", specifier = ">=1.2.0" },
-    { name = "openai", specifier = ">=3.3.0" },
-    { name = "openai", marker = "extra == 'editorial'", specifier = ">=3.3.0" },
-    { name = "playwright", marker = "extra == 'audit-browser'", specifier = ">=1.49.0" },
-    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.8" },
-    { name = "pydantic", specifier = ">=2.10" },
-    { name = "pydantic", marker = "extra == 'core'", specifier = ">=2.10" },
-    { name = "pymupdf4llm", specifier = ">=0.0.17" },
-    { name = "pymupdf4llm", marker = "extra == 'editorial'", specifier = ">=0.0.17" },
-    { name = "python-frontmatter", specifier = ">=1.1.0" },
-    { name = "python-frontmatter", marker = "extra == 'core'", specifier = ">=1.1.0" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "pyyaml", marker = "extra == 'core'", specifier = ">=6.0" },
-    { name = "sentry-sdk", specifier = ">=2.73.0" },
-    { name = "standardwebhooks", specifier = ">=1.1.0" },
-    { name = "strands-agents", marker = "extra == 'agent'", specifier = ">=0.1.0" },
-    { name = "streamlit", extras = ["auth"], specifier = ">=1.66.1" },
-    { name = "streamlit", extras = ["auth"], marker = "extra == 'ui'", specifier = ">=1.66.1" },
-    { name = "trafilatura", specifier = ">=2.3.1" },
-    { name = "trafilatura", marker = "extra == 'editorial'", specifier = ">=2.3.1" },
-]
-provides-extras = ["core", "editorial", "ui", "agent", "audit-browser", "full"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "complexipy", specifier = ">=8.3.0" },
-    { name = "dbos", specifier = ">=3.4.0" },
-    { name = "diff-cover", specifier = ">=11.0.0" },
-    { name = "hypothesis", specifier = ">=6.170.14" },
-    { name = "import-linter", specifier = ">=2.15" },
-    { name = "mypy", specifier = ">=1.13" },
-    { name = "pre-commit", specifier = ">=4.0" },
-    { name = "pytest", specifier = ">=8.3" },
-    { name = "pytest-cov", specifier = ">=7.1.0" },
-    { name = "pytest-playwright", specifier = ">=0.10.0" },
-    { name = "pytest-recording", specifier = ">=0.14.1" },
-    { name = "pytest-rerunfailures", specifier = ">=16.7" },
-    { name = "ruff", specifier = ">=0.8" },
-    { name = "types-defusedxml", specifier = ">=0.7.0.20260504" },
-    { name = "types-pyyaml", specifier = ">=6.0.12.20261103" },
-    { name = "vulture", specifier = ">=2.16" },
-]
-
-[[package]]
 name = "courlan"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1472,8 +1321,8 @@ name = "httpcore2"
 version = "2.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "h11" },
-    { name = "truststore" },
+    { name = "h11", marker = "sys_platform != 'emscripten'" },
+    { name = "truststore", marker = "sys_platform != 'emscripten'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c0/61/afa9d6b7452f9eca73f73d45324eb0bb52f098fd5e6049bf6b8263be9b4e/httpcore2-2.16.0.tar.gz", hash = "sha256:c72cd0413563b17e1cd8354677dff887466f8ec2551679759e93126534428643", size = 69886, upload-time = "2026-10-21T07:09:45.31Z" }
 wheels = [
@@ -2079,6 +1928,157 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ac/7e/2b7118b28d5bb69dfc4f349e1ca92334cf986601d3c809caa62cfa3bfab6/lxml_html_clean-0.4.6.tar.gz", hash = "sha256:ea9db067c3053854fd87f8d5a1cf01221dc893b54dbf6019c689052e05c64f22", size = 26385, upload-time = "2026-10-26T11:14:45.978Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f5/36/4898b5e3951635846ed0e445e042fadf02b7c5e811a9e43da5b3557bc8d2/lxml_html_clean-0.4.6-py3-none-any.whl", hash = "sha256:cc037270ba500a65e7235409dcddcae8ef37300f26dea826b61d917bf0236880", size = 14952, upload-time = "2026-10-26T11:14:44.73Z" },
+]
+
+[[package]]
+name = "macy"
+version = "0.2.0"
+source = { editable = "." }
+dependencies = [
+    { name = "babel" },
+    { name = "cryptography" },
+    { name = "defusedxml" },
+    { name = "feedparser" },
+    { name = "instructor" },
+    { name = "lingua-language-detector" },
+    { name = "mcp" },
+    { name = "openai" },
+    { name = "psycopg", extra = ["binary"] },
+    { name = "pydantic" },
+    { name = "pymupdf4llm" },
+    { name = "python-frontmatter" },
+    { name = "pyyaml" },
+    { name = "sentry-sdk" },
+    { name = "standardwebhooks" },
+    { name = "streamlit", extra = ["auth"] },
+    { name = "trafilatura" },
+]
+
+[package.optional-dependencies]
+agent = [
+    { name = "strands-agents" },
+]
+audit-browser = [
+    { name = "axe-playwright-python" },
+    { name = "playwright" },
+]
+core = [
+    { name = "cryptography" },
+    { name = "defusedxml" },
+    { name = "mcp" },
+    { name = "pydantic" },
+    { name = "python-frontmatter" },
+    { name = "pyyaml" },
+]
+editorial = [
+    { name = "feedparser" },
+    { name = "instructor" },
+    { name = "lingua-language-detector" },
+    { name = "openai" },
+    { name = "pymupdf4llm" },
+    { name = "trafilatura" },
+]
+full = [
+    { name = "axe-playwright-python" },
+    { name = "babel" },
+    { name = "cryptography" },
+    { name = "defusedxml" },
+    { name = "feedparser" },
+    { name = "instructor" },
+    { name = "lingua-language-detector" },
+    { name = "mcp" },
+    { name = "openai" },
+    { name = "playwright" },
+    { name = "pydantic" },
+    { name = "pymupdf4llm" },
+    { name = "python-frontmatter" },
+    { name = "pyyaml" },
+    { name = "streamlit", extra = ["auth"] },
+    { name = "trafilatura" },
+]
+ui = [
+    { name = "babel" },
+    { name = "streamlit", extra = ["auth"] },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "complexipy" },
+    { name = "dbos" },
+    { name = "diff-cover" },
+    { name = "hypothesis" },
+    { name = "import-linter" },
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-playwright" },
+    { name = "pytest-recording" },
+    { name = "pytest-rerunfailures" },
+    { name = "ruff" },
+    { name = "types-defusedxml" },
+    { name = "types-pyyaml" },
+    { name = "vulture" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "axe-playwright-python", marker = "extra == 'audit-browser'", specifier = ">=0.1.5" },
+    { name = "babel", specifier = ">=2.18.0" },
+    { name = "babel", marker = "extra == 'ui'", specifier = ">=2.18.0" },
+    { name = "cryptography", specifier = ">=44.0" },
+    { name = "cryptography", marker = "extra == 'core'", specifier = ">=44.0" },
+    { name = "defusedxml", specifier = ">=0.7.1" },
+    { name = "defusedxml", marker = "extra == 'core'", specifier = ">=0.7.1" },
+    { name = "feedparser", specifier = ">=6.0.14" },
+    { name = "feedparser", marker = "extra == 'editorial'", specifier = ">=6.0.14" },
+    { name = "instructor", specifier = ">=1.17.0" },
+    { name = "instructor", marker = "extra == 'editorial'", specifier = ">=1.17.0" },
+    { name = "lingua-language-detector", specifier = ">=2.2.0" },
+    { name = "lingua-language-detector", marker = "extra == 'editorial'", specifier = ">=2.2.0" },
+    { name = "macy", extras = ["core", "editorial", "ui", "audit-browser"], marker = "extra == 'full'" },
+    { name = "mcp", specifier = ">=1.2.0" },
+    { name = "mcp", marker = "extra == 'core'", specifier = ">=1.2.0" },
+    { name = "openai", specifier = ">=3.3.0" },
+    { name = "openai", marker = "extra == 'editorial'", specifier = ">=3.3.0" },
+    { name = "playwright", marker = "extra == 'audit-browser'", specifier = ">=1.49.0" },
+    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.8" },
+    { name = "pydantic", specifier = ">=2.10" },
+    { name = "pydantic", marker = "extra == 'core'", specifier = ">=2.10" },
+    { name = "pymupdf4llm", specifier = ">=0.0.17" },
+    { name = "pymupdf4llm", marker = "extra == 'editorial'", specifier = ">=0.0.17" },
+    { name = "python-frontmatter", specifier = ">=1.1.0" },
+    { name = "python-frontmatter", marker = "extra == 'core'", specifier = ">=1.1.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "pyyaml", marker = "extra == 'core'", specifier = ">=6.0" },
+    { name = "sentry-sdk", specifier = ">=2.73.0" },
+    { name = "standardwebhooks", specifier = ">=1.1.0" },
+    { name = "strands-agents", marker = "extra == 'agent'", specifier = ">=0.1.0" },
+    { name = "streamlit", extras = ["auth"], specifier = ">=1.66.1" },
+    { name = "streamlit", extras = ["auth"], marker = "extra == 'ui'", specifier = ">=1.66.1" },
+    { name = "trafilatura", specifier = ">=2.3.1" },
+    { name = "trafilatura", marker = "extra == 'editorial'", specifier = ">=2.3.1" },
+]
+provides-extras = ["core", "editorial", "ui", "agent", "audit-browser", "full"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "complexipy", specifier = ">=8.3.0" },
+    { name = "dbos", specifier = ">=3.4.0" },
+    { name = "diff-cover", specifier = ">=11.0.0" },
+    { name = "hypothesis", specifier = ">=6.170.14" },
+    { name = "import-linter", specifier = ">=2.15" },
+    { name = "mypy", specifier = ">=1.13" },
+    { name = "pre-commit", specifier = ">=4.0" },
+    { name = "pytest", specifier = ">=8.3" },
+    { name = "pytest-cov", specifier = ">=7.1.0" },
+    { name = "pytest-playwright", specifier = ">=0.10.0" },
+    { name = "pytest-recording", specifier = ">=0.14.1" },
+    { name = "pytest-rerunfailures", specifier = ">=16.7" },
+    { name = "ruff", specifier = ">=0.8" },
+    { name = "types-defusedxml", specifier = ">=0.7.0.20260504" },
+    { name = "types-pyyaml", specifier = ">=6.0.12.20261103" },
+    { name = "vulture", specifier = ">=2.16" },
 ]
 
 [[package]]

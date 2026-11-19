@@ -1,3 +1,4 @@
+import configparser
 import contextlib
 import shutil
 import subprocess
@@ -170,7 +171,7 @@ def _assert_archive_clean(members: list[str], kind: str) -> None:
 
 
 def test_wheel_and_sdist_exclude_private_context(tmp_path: Path) -> None:
-    """M8-04 D2: Built wheel and sdist preserve content-engine package and exclude private files."""
+    """M8-04 & M9-01: Built wheel/sdist use macy package identity and exclude private files."""
     repo_root = Path(__file__).resolve().parent.parent
     out_dir = tmp_path / "dist"
     uv_exe = shutil.which("uv") or "uv"
@@ -187,12 +188,25 @@ def test_wheel_and_sdist_exclude_private_context(tmp_path: Path) -> None:
     sdists = list(out_dir.glob("*.tar.gz"))
     assert len(wheels) == 1
     assert len(sdists) == 1
-    assert wheels[0].name.startswith("content_engine-")
+    assert wheels[0].name.startswith("macy-")
+    assert sdists[0].name.startswith("macy-")
 
     with zipfile.ZipFile(wheels[0]) as zf:
         wheel_members = zf.namelist()
+        ep_files = [m for m in wheel_members if m.endswith(".dist-info/entry_points.txt")]
+        assert len(ep_files) == 1
+        ep_text = zf.read(ep_files[0]).decode("utf-8")
     assert any(m.startswith("engine/") for m in wheel_members)
     _assert_archive_clean(wheel_members, "wheel")
+
+    ep_parser = configparser.ConfigParser()
+    ep_parser.read_string(ep_text)
+    assert ep_parser["console_scripts"]["macy"] == "engine.cli:main"
+    assert ("content" + "-engine") not in ep_parser["console_scripts"]
+    assert "macy.capabilities" in ep_parser
+    assert "macy.llm" in ep_parser
+    legacy_ep_prefix = "content" + "_engine."
+    assert not any(sec.startswith(legacy_ep_prefix) for sec in ep_parser.sections())
 
     with tarfile.open(sdists[0], "r:gz") as tf:
         sdist_members = tf.getnames()

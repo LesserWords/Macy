@@ -10,7 +10,7 @@ from pathlib import Path
 
 from engine.capabilities.ports import CapabilityManifest
 
-CAPABILITY_GROUP = "content_engine.capabilities"
+CAPABILITY_GROUP = "macy.capabilities"
 CORE_CAPABILITY_SLUG = "core-compliance"
 
 
