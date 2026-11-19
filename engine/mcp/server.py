@@ -154,6 +154,8 @@ class ServiceStoreAdapter:
             user_id=request.user_id,
             force_regenerate=request.force_regenerate,
             offline=request.offline,
+            format_slug=request.format_slug,
+            funnel_stage=request.funnel_stage,
         )
 
     def generate_draft(self, request: GenerateDraftRequest) -> dict[str, Any]:

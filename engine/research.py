@@ -433,6 +433,7 @@ def collect_feed_sources(  # noqa: PLR0913
     )
     seen = seen_canonicals if seen_canonicals is not None else set()
     results: list[dict[str, Any]] = []
+    failures: list[Exception] = []
 
     for src in source_rows:
         feed_url = src.get("feed_url")
@@ -441,6 +442,7 @@ def collect_feed_sources(  # noqa: PLR0913
         try:
             items = feed_adapter.fetch_feed(str(feed_url), since=since)
         except Exception as exc:
+            failures.append(exc)
             _LOG.warning("research feed source skipped (%s): %s", feed_url, exc)
             continue
         results.extend(
@@ -456,6 +458,8 @@ def collect_feed_sources(  # noqa: PLR0913
             )
         )
 
+    if failures and not results and len(failures) == len(source_rows):
+        raise failures[0]
     return results
 
 
@@ -476,6 +480,7 @@ def collect_site_search_sources(  # noqa: PLR0913
     """Query enabled site_search sources scoped to their domain through NewsSearchPort."""
     seen = set() if seen_canonicals is None else seen_canonicals
     collected_rows: list[dict[str, Any]] = []
+    failures: list[Exception] = []
     target_sources = _resolve_sources_by_mode(
         conn,
         workspace_id=workspace_id,
@@ -498,6 +503,7 @@ def collect_site_search_sources(  # noqa: PLR0913
                 since=since,
             )
         except Exception as exc:
+            failures.append(exc)
             _LOG.warning("research site search skipped (%s): %s", domain, exc)
             continue
         batch = _process_collected_items(
@@ -512,6 +518,8 @@ def collect_site_search_sources(  # noqa: PLR0913
         )
         collected_rows.extend(batch)
 
+    if failures and not collected_rows and len(failures) == len(target_sources):
+        raise failures[0]
     return collected_rows
 
 

@@ -174,6 +174,8 @@ class _BriefExecutionSpec:
     actor_user_id: uuid.UUID | None
     offline: bool
     adapters: BriefAdapters
+    format_slug: str = "blog"
+    funnel_stage: str | None = None
 
 
 def _prepare_brief_input(ctx: _BriefPromptContext) -> dict[str, Any]:
@@ -643,6 +645,11 @@ def _call_brief_llm(**kwargs: Any) -> EditorialBrief:
         raise
 
 
+def _resolve_opp_funnel_stage(opp_ctx: dict[str, Any], override: str | None) -> str:
+    raw = override or opp_ctx.get("funnel_stage") or "mofu"
+    return str(raw).strip().lower() or "mofu"
+
+
 def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> dict[str, Any]:
     opp_ctx = db.get_opportunity_context(
         conn, workspace_id=spec.workspace_id, opportunity_id=spec.opportunity_id
@@ -678,7 +685,7 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     industry_pack = _safe_load_industry_pack(
         opp_ctx.get("industry_pack"), opp_ctx.get("workspace_config")
     )
-    format_pack = _safe_load_format_pack("blog")
+    format_pack = _safe_load_format_pack(spec.format_slug)
     base_prompt, prompt_ver = get_brief_prompt_and_version()
     system_prompt = build_brief_system_prompt(
         base_prompt=base_prompt,
@@ -692,7 +699,7 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     opp_summary = {
         "title": str(record_payload.get("headline") or opp_ctx.get("document_title") or ""),
         "angle": str(opp_ctx.get("angle") or ""),
-        "funnel_stage": str(opp_ctx.get("funnel_stage") or "mofu"),
+        "funnel_stage": _resolve_opp_funnel_stage(opp_ctx, spec.funnel_stage),
         "decision_note": opp_ctx.get("decision_note") or "",
         "summary": str(record_payload.get("summary") or ""),
     }
@@ -722,6 +729,7 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     )
     editorial_brief.brand_profile_id = brand_profile_id
     editorial_brief.brand_version = brand_version
+    editorial_brief.format = str(format_pack.get("slug", spec.format_slug))
 
     validate_brief_evidence_references(editorial_brief, conn=conn, workspace_id=spec.workspace_id)
 
@@ -770,6 +778,8 @@ def brief(  # noqa: PLR0913
     news_search_adapter: NewsSearchPort | None = None,
     extractor_adapter: ExtractorPort | None = None,
     model: str | None = None,
+    format_slug: str = "blog",
+    funnel_stage: str | None = None,
 ) -> dict[str, Any]:
     """Generate and persist a grounded, brand-pinned editorial brief for an approved topic."""
     if isinstance(opportunity, dict):
@@ -797,6 +807,8 @@ def brief(  # noqa: PLR0913
             extractor_adapter=extractor_adapter,
             model=model,
         ),
+        format_slug=format_slug or "blog",
+        funnel_stage=funnel_stage,
     )
     if conn is not None:
         return _execute_brief(conn, spec)

@@ -11,7 +11,7 @@ import pytest
 from pydantic import ValidationError
 
 from engine import research
-from engine.contracts import DraftClaim, KeywordData, RequiredFact
+from engine.contracts import DraftClaim, EditorialBrief, KeywordData, RequiredFact
 from engine.integrations.autocomplete_keywords import AutocompleteKeywordProvider
 
 brief_mod = importlib.import_module("engine.strategy.brief")
@@ -34,6 +34,37 @@ def test_fact_claim_rejects_non_uuid_source_id_but_analysis_is_free() -> None:
     good = DraftClaim(text="c", kind="fact", source_id=str(uuid.uuid4()))
     assert good.source_id
 
+    writer_mod = importlib.import_module("engine.production.writer")
+    try:
+        DraftClaim(text="c", kind="fact", source_id="Some Title")
+    except ValidationError as exc:
+        val_err = exc
+    with (
+        patch.object(brief_mod.llm, "structured_call", side_effect=val_err),
+        pytest.raises(brief_mod.InvalidEvidenceReferenceError),
+    ):
+        brief_mod._call_brief_llm(prompt="p", input={})
+    with (
+        patch.object(writer_mod.llm, "structured_call", side_effect=val_err),
+        pytest.raises(writer_mod.InvalidDraftProvenanceError),
+    ):
+        writer_mod._call_write_llm(prompt="p", input={})
+
+    try:
+        EditorialBrief.model_validate({})
+    except ValidationError as exc:
+        other_err = exc
+    with (
+        patch.object(brief_mod.llm, "structured_call", side_effect=other_err),
+        pytest.raises(ValidationError),
+    ):
+        brief_mod._call_brief_llm(prompt="p", input={})
+    with (
+        patch.object(writer_mod.llm, "structured_call", side_effect=other_err),
+        pytest.raises(ValidationError),
+    ):
+        writer_mod._call_write_llm(prompt="p", input={})
+
 
 # --- BUG-05: seed term sanitization and keyword fallback --------------------
 
@@ -43,7 +74,7 @@ def test_candidate_seed_terms_are_sanitized_and_capped() -> None:
     ctx = {
         "record_payload": {
             "headline": 'Black Friday: fim da escala 6x1 — "o que muda"? sim!',
-            "entities": [long_entity, "Kero: Ótica"],
+            "entities": [long_entity, "Rede: Varejo"],
         }
     }
     terms = brief_mod._collect_candidate_seed_terms(ctx)
@@ -112,7 +143,11 @@ def test_collect_feed_sources_isolates_failing_source() -> None:
         return [{"url": url}]
 
     feed.fetch_feed.side_effect = _fetch
-    sources = [{"feed_url": "https://bad.example/rss"}, {"feed_url": "https://ok.example/rss"}]
+    sources = [
+        {"feed_url": ""},
+        {"feed_url": "https://bad.example/rss"},
+        {"feed_url": "https://ok.example/rss"},
+    ]
     with patch.object(
         research, "_process_collected_items", side_effect=lambda *_a, **kw: kw["items"]
     ):
@@ -126,6 +161,16 @@ def test_collect_feed_sources_isolates_failing_source() -> None:
             sources=sources,
         )
     assert out == [{"url": "https://ok.example/rss"}]
+    with pytest.raises(RuntimeError, match="HTTP 429"):
+        research.collect_feed_sources(
+            MagicMock(),
+            workspace_id=uuid.uuid4(),
+            run_id=uuid.uuid4(),
+            since=None,
+            feed_adapter=feed,
+            extractor_adapter=MagicMock(),
+            sources=[{"feed_url": "https://bad.example/rss"}],
+        )
 
 
 def test_collect_site_search_sources_isolates_failing_source() -> None:
@@ -137,7 +182,7 @@ def test_collect_site_search_sources_isolates_failing_source() -> None:
         return [{"query": query}]
 
     news.search.side_effect = _search
-    sources = [{"domain": "bad.example"}, {"domain": "ok.example"}]
+    sources = [{"domain": ""}, {"domain": "bad.example"}, {"domain": "ok.example"}]
     with patch.object(
         research, "_process_collected_items", side_effect=lambda *_a, **kw: kw["items"]
     ):
@@ -153,3 +198,15 @@ def test_collect_site_search_sources_isolates_failing_source() -> None:
             sources=sources,
         )
     assert out == [{"query": "site:ok.example"}]
+    with pytest.raises(RuntimeError, match="HTTP 429"):
+        research.collect_site_search_sources(
+            MagicMock(),
+            locale="pt-BR",
+            market="BR",
+            since=None,
+            news_search_adapter=news,
+            extractor_adapter=MagicMock(),
+            workspace_id=uuid.uuid4(),
+            run_id=uuid.uuid4(),
+            sources=[{"domain": "bad.example"}],
+        )

@@ -251,13 +251,15 @@ class _DictAccessModel(BaseModel):
 
 
 def _rename_legacy_keys(raw: Any, aliases: dict[str, str]) -> Any:
-    if not isinstance(raw, dict):
-        return raw
-    out: dict[str, Any] = {}
-    for key, value in raw.items():
-        target = aliases.get(str(key), str(key))
-        out.setdefault(target, value)
-    return out
+    return (
+        {
+            aliases.get(str(k), str(k)): v
+            for k, v in raw.items()
+            if aliases.get(str(k), str(k)) not in raw or str(k) == aliases.get(str(k), str(k))
+        }
+        if isinstance(raw, dict)
+        else raw
+    )
 
 
 class FAQItem(_DictAccessModel):
@@ -286,7 +288,13 @@ class DraftCTA(_DictAccessModel):
     def _coerce_legacy(cls, raw: Any) -> Any:
         return _rename_legacy_keys(
             raw,
-            {"text": "body", "title": "headline", "button": "button_text", "action": "button_text"},
+            {
+                "text": "body",
+                "goal": "body",
+                "title": "headline",
+                "button": "button_text",
+                "action": "button_text",
+            },
         )
 
 

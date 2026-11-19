@@ -52,6 +52,34 @@ def test_content_draft_coerces_legacy_faq_and_cta_dicts() -> None:
     assert draft.cta.get("body") == "Book a demo"
     assert draft.cta.get("url") == "https://example.com"
     assert draft.cta.get("intensity") is None
+    # Passing an already-constructed DraftCTA hits the non-dict passthrough in _rename_legacy_keys
+    revalidated = ContentDraft(
+        title="t",
+        meta_description="m",
+        slug="s",
+        body_md="b",
+        faq=[draft.faq[0]],
+        cta=draft.cta,
+    )
+    assert revalidated.cta == draft.cta
+
+    goal_cta = ContentDraft(
+        title="t",
+        meta_description="m",
+        slug="s",
+        body_md="b",
+        cta={"headline": "H", "goal": "G"},
+    )
+    assert goal_cta.cta.get("body") == "G"
+
+    precedence_cta = ContentDraft(
+        title="t",
+        meta_description="m",
+        slug="s",
+        body_md="b",
+        cta={"headline": "Real", "title": "Legacy"},
+    )
+    assert precedence_cta.cta.get("headline") == "Real"
 
 
 def test_content_draft_accepts_empty_defaults_and_cta_intensity() -> None:
