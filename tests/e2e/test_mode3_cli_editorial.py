@@ -7,7 +7,6 @@ import json
 import os
 import subprocess
 import sys
-import tempfile
 import uuid
 from decimal import Decimal
 from pathlib import Path
@@ -74,7 +73,10 @@ def _run_cli(*args: str, env_map: dict[str, str]) -> subprocess.CompletedProcess
     )
 
 
-def test_e2e_mode3a_cli_db_backed_editorial_flow(isolated_modes_e2e_db: str) -> None:
+def test_e2e_mode3a_cli_db_backed_editorial_flow(
+    isolated_modes_e2e_db: str,
+    tmp_path: Path,
+) -> None:
     """Mode 3A E2E: DB-backed CLI workflow (Path A) from workspace creation to draft import."""
     md_text = _build_seasonal_mofu_markdown()
 
@@ -143,57 +145,55 @@ def test_e2e_mode3a_cli_db_backed_editorial_flow(isolated_modes_e2e_db: str) -> 
     }
 
     _run_cli("run-week", slug, "--offline", "--window-days", "7", env_map=env_db)
-    with tempfile.TemporaryDirectory(prefix="macy_cli_") as cli_dir:
-        md_file = Path(cli_dir) / "seasonal_mofu_post.md"
-        md_file.write_text(md_text, encoding="utf-8")
+    md_file = tmp_path / "seasonal_mofu_post.md"
+    md_file.write_text(md_text, encoding="utf-8")
 
-        import_out = _run_cli(
-            "import-draft",
-            "--workspace",
-            slug,
-            "--file",
-            str(md_file),
-            "--format",
-            "blog",
-            "--topic",
-            "Black Friday e fim de ano no varejo",
-            "--primary-keyword",
-            SEASONAL_PRIMARY_KEYWORD,
-            "--deterministic-only",
-            "--json",
-            env_map=env_db,
-        )
-        import_payload = json.loads(import_out.stdout)
-        assert import_payload["verdict"] == "PASS"
-        assert import_payload["draft_id"]
+    import_out = _run_cli(
+        "import-draft",
+        "--workspace",
+        slug,
+        "--file",
+        str(md_file),
+        "--format",
+        "blog",
+        "--topic",
+        "Black Friday e fim de ano no varejo",
+        "--primary-keyword",
+        SEASONAL_PRIMARY_KEYWORD,
+        "--deterministic-only",
+        "--json",
+        env_map=env_db,
+    )
+    import_payload = json.loads(import_out.stdout)
+    assert import_payload["verdict"] == "PASS"
+    assert import_payload["draft_id"]
 
 
-def test_e2e_mode3b_cli_and_mcp_stateless_path_b_flow() -> None:
+def test_e2e_mode3b_cli_and_mcp_stateless_path_b_flow(tmp_path: Path) -> None:
     """Mode 3B E2E: Zero-DB stateless CLI + MCP stdio (Path B)."""
     md_text = _build_seasonal_mofu_markdown()
     env_stateless = {k: v for k, v in os.environ.items() if k not in {"DATABASE_URL", "ENV"}}
     env_stateless["APP_ENV"] = "test"
 
-    with tempfile.TemporaryDirectory(prefix="macy_cli_stateless_") as cli_dir:
-        md_file = Path(cli_dir) / "seasonal_mofu_post.md"
-        md_file.write_text(md_text, encoding="utf-8")
+    md_file = tmp_path / "seasonal_mofu_post.md"
+    md_file.write_text(md_text, encoding="utf-8")
 
-        stateless_cli_out = _run_cli(
-            "import-draft",
-            "--file",
-            str(md_file),
-            "--format",
-            "blog",
-            "--primary-keyword",
-            SEASONAL_PRIMARY_KEYWORD,
-            "--stateless",
-            "--json",
-            env_map=env_stateless,
-        )
-        stateless_cli_json = json.loads(stateless_cli_out.stdout)
-        assert stateless_cli_json["stateless"] is True
-        assert stateless_cli_json["verdict"] == "PASS"
-        assert stateless_cli_json["schema_json_ld"]["@type"] == "Article"
+    stateless_cli_out = _run_cli(
+        "import-draft",
+        "--file",
+        str(md_file),
+        "--format",
+        "blog",
+        "--primary-keyword",
+        SEASONAL_PRIMARY_KEYWORD,
+        "--stateless",
+        "--json",
+        env_map=env_stateless,
+    )
+    stateless_cli_json = json.loads(stateless_cli_out.stdout)
+    assert stateless_cli_json["stateless"] is True
+    assert stateless_cli_json["verdict"] == "PASS"
+    assert stateless_cli_json["schema_json_ld"]["@type"] == "Article"
 
     stateless_params = StdioServerParameters(
         command=sys.executable,

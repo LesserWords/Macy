@@ -129,6 +129,7 @@ def _register_import_draft_tool(bundle: MCPBundleProtocol) -> None:
         topic: str | None = None,
         primary_keyword: str | None = None,
         deterministic_only: bool = True,
+        offline: bool = False,
         actor_email: str | None = None,
         actor_user_id: str | None = None,
     ) -> dict[str, Any]:
@@ -157,6 +158,7 @@ def _register_import_draft_tool(bundle: MCPBundleProtocol) -> None:
                     topic=topic,
                     primary_keyword=primary_keyword,
                     deterministic_only=deterministic_only,
+                    offline=offline,
                 )
             )
 

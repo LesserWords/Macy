@@ -11,7 +11,7 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict
 
-from engine.contracts import PublishedContent, PublishRequest
+from engine.contracts import DraftCTA, PublishedContent, PublishRequest
 
 _SEGMENT_RE = re.compile(r"[^a-zA-Z0-9_-]+")
 
@@ -21,7 +21,7 @@ def _sanitize_segment(value: str, fallback: str) -> str:
     return cleaned or fallback
 
 
-def _format_cta_section(cta: dict[str, str]) -> str:
+def _format_cta_section(cta: DraftCTA | dict[str, str]) -> str:
     if not cta:
         return ""
     headline = str(cta.get("headline") or "").strip()

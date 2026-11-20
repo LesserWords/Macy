@@ -194,7 +194,8 @@ def _fetch_verified_records_for_scoring(
               ON s.workspace_id = d.workspace_id AND s.id = d.source_id
             WHERE rr.workspace_id = %(workspace_id)s
               AND rr.run_id = %(run_id)s
-              AND rr.status != 'duplicate'
+              AND rr.status NOT IN ('duplicate', 'failed')
+              AND d.fetch_status = 'ok'
               AND (
                   rr.status = 'verified'
                   OR d.date_status = 'verified'

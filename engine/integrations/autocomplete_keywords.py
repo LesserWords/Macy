@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from engine.contracts import KeywordData
 from engine.integrations.registry import UnsupportedLocale
-from engine.safe_http import safe_request, validate_safe_url
+from engine.safe_http import SafeHTTPError, safe_request, validate_safe_url
 
 AUTOCOMPLETE_LOCALE_MAP: dict[tuple[str, str], tuple[str, str]] = {
     ("pt-BR", "br"): ("pt", "BR"),
@@ -96,8 +96,23 @@ class AutocompleteKeywordProvider:
         _ = kwargs
 
         results: list[KeywordData] = []
+        failures: list[Exception] = []
         for term in terms:
-            suggestions = self.suggest_related(term, locale, market)
+            try:
+                suggestions = self.suggest_related(term, locale, market)
+            except (ValueError, SafeHTTPError, OSError) as exc:
+                failures.append(exc)
+                results.append(
+                    KeywordData(
+                        keyword=term,
+                        search_volume=0,
+                        difficulty=0.0,
+                        cpc_usd=0.0,
+                        intent="informational",
+                        is_estimate=True,
+                    )
+                )
+                continue
             count = len(suggestions)
             results.append(
                 KeywordData(
@@ -109,4 +124,6 @@ class AutocompleteKeywordProvider:
                     is_estimate=True,
                 )
             )
+        if failures and len(failures) == len(terms):
+            raise failures[0]
         return results

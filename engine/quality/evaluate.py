@@ -391,7 +391,9 @@ def _run_llm_rubric_call(  # noqa: PLR0913
         locale=locale,
         funnel_stage=funnel_stage,
     )
-    resolved_adapter = llm_adapter or (FakeLLM() if conn is None else None)
+    resolved_adapter = llm_adapter or (
+        FakeLLM() if conn is None else llm._resolve_llm_adapter(conn, workspace_id, None)
+    )
     raw_report: QualityReport = llm.structured_call(
         stage="evaluate",
         model_cls=QualityReport,
@@ -598,7 +600,8 @@ def evaluate_persisted_draft(
     )
 
     locale = str(ctx.get("campaign_locale") or "pt-BR")
-    funnel_stage = str(ctx.get("funnel_stage") or "mofu")
+    raw_funnel = brief_model.funnel_stage or ctx.get("funnel_stage") or "mofu"
+    funnel_stage = str(raw_funnel).strip().lower()
     fmt_slug = brief_model.format or "blog"
     resolved_options = _resolve_word_bounds(fmt_slug, spec.options)
     det_report = checks.run(

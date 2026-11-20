@@ -2934,6 +2934,8 @@ def _execute_generate_brief(
         keyword_provider=params.get("keyword_provider"),
         news_search_adapter=params.get("news_search_adapter"),
         extractor_adapter=params.get("extractor_adapter"),
+        format_slug=str(params.get("format_slug") or "blog"),
+        funnel_stage=params.get("funnel_stage"),
     )
 
 
@@ -2948,6 +2950,8 @@ def generate_brief(  # noqa: PLR0913
     keyword_provider: KeywordProviderPort | None = None,
     news_search_adapter: NewsSearchPort | None = None,
     extractor_adapter: ExtractorPort | None = None,
+    format_slug: str = "blog",
+    funnel_stage: str | None = None,
 ) -> dict[str, Any]:
     """Generate a grounded, brand-pinned editorial brief for an approved topic (F12 AC1-AC3)."""
     params = {
@@ -2959,6 +2963,8 @@ def generate_brief(  # noqa: PLR0913
         "keyword_provider": keyword_provider,
         "news_search_adapter": news_search_adapter,
         "extractor_adapter": extractor_adapter,
+        "format_slug": format_slug,
+        "funnel_stage": funnel_stage,
     }
     if conn is not None:
         return _execute_generate_brief(conn, params)
@@ -5313,6 +5319,35 @@ def _resolve_brief_cited_documents(
     return cited
 
 
+def _brief_needs_regeneration(
+    existing: dict[str, Any] | None,
+    opp_ctx: dict[str, Any],
+    params: dict[str, Any],
+) -> bool:
+    if existing is None or params.get("force_regenerate"):
+        return True
+    req_format = str(params.get("format_slug") or "blog").strip().lower()
+    existing_payload = existing.get("payload") or {}
+    existing_format = str(existing_payload.get("format") or "blog").strip().lower()
+    if existing_format != req_format:
+        return True
+    req_funnel = params.get("funnel_stage")
+    if req_funnel:
+        cur_funnel = (
+            str(
+                existing_payload.get("funnel_stage")
+                or existing.get("funnel_stage")
+                or opp_ctx.get("funnel_stage")
+                or "mofu"
+            )
+            .strip()
+            .lower()
+        )
+        if cur_funnel != str(req_funnel).strip().lower():
+            return True
+    return False
+
+
 def _execute_get_or_create_mcp_brief(
     conn: psycopg.Connection[Any],
     params: dict[str, Any],
@@ -5336,7 +5371,7 @@ def _execute_get_or_create_mcp_brief(
         conn, workspace_id=workspace_id, opportunity_id=opportunity_id
     )
     created = False
-    if existing is None or params.get("force_regenerate"):
+    if existing is None or _brief_needs_regeneration(existing, opp_ctx, params):
         _execute_preflight_mcp_spend(
             conn, workspace_id=workspace_id, run_id=run_id, estimated_cost=Decimal("0.000000")
         )
@@ -5358,6 +5393,8 @@ def _execute_get_or_create_mcp_brief(
                 "keyword_provider": params.get("keyword_provider"),
                 "news_search_adapter": params.get("news_search_adapter"),
                 "extractor_adapter": params.get("extractor_adapter"),
+                "format_slug": str(params.get("format_slug") or "blog"),
+                "funnel_stage": params.get("funnel_stage"),
             },
         )
         created = True
@@ -5365,10 +5402,18 @@ def _execute_get_or_create_mcp_brief(
         brief_row = existing
 
     payload = brief_row.get("payload") or {}
+    eff_funnel = str(
+        params.get("funnel_stage")
+        or payload.get("funnel_stage")
+        or brief_row.get("funnel_stage")
+        or opp_ctx.get("funnel_stage")
+        or "mofu"
+    )
     return {
         **brief_row,
         "run_id": run_id,
         "created": created,
+        "funnel_stage": eff_funnel,
         "primary_keyword": payload.get("primary_keyword"),
         "outline": payload.get("outline"),
         "cited_documents": _resolve_brief_cited_documents(
@@ -5386,6 +5431,8 @@ def get_or_create_mcp_brief(  # noqa: PLR0913
     force_regenerate: bool = False,
     offline: bool | None = None,
     llm_adapter: LLMPort | None = None,
+    format_slug: str = "blog",
+    funnel_stage: str | None = None,
 ) -> dict[str, Any]:
     """Return latest brief or generate a budget-preflighted editorial brief via MCP (M5-05)."""
     params: dict[str, Any] = {
@@ -5395,6 +5442,8 @@ def get_or_create_mcp_brief(  # noqa: PLR0913
         "force_regenerate": force_regenerate,
         "offline": offline,
         "llm_adapter": llm_adapter,
+        "format_slug": format_slug,
+        "funnel_stage": funnel_stage,
     }
     if conn is not None:
         return _execute_get_or_create_mcp_brief(conn, params)
@@ -5769,6 +5818,7 @@ def _ensure_external_brief(  # noqa: PLR0913
         target_audience="General",
         primary_keyword=resolved_kw,
         format=format_slug,
+        funnel_stage="mofu",
         angle=resolved_topic,
         outline=["Introduction"],
         cta_goal=str(draft_model.cta.get("headline") or "Saiba mais"),
@@ -5845,7 +5895,7 @@ def _execute_import_external_draft(
             "workspace_id": workspace_id,
             "draft_id": draft_id,
             "user_id": user_id,
-            "offline": True,
+            "offline": bool(params.get("offline", False)),
             "deterministic_only": bool(params.get("deterministic_only", True)),
         },
     )
@@ -5935,6 +5985,7 @@ def import_external_draft(  # noqa: PLR0913
     primary_keyword: str | None = None,
     sources: Sequence[dict[str, Any]] | None = None,
     deterministic_only: bool = True,
+    offline: bool = False,
 ) -> dict[str, Any]:
     """Import an external .md/.pdf or Markdown draft and evaluate compliance (M5-07)."""
     draft_model = _load_draft_model(
@@ -5952,6 +6003,7 @@ def import_external_draft(  # noqa: PLR0913
         "primary_keyword": primary_keyword,
         "sources": sources,
         "deterministic_only": deterministic_only,
+        "offline": offline,
     }
     if conn is not None:
         return _execute_import_external_draft(conn, params)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 import uuid
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -11,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import psycopg
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from engine import budget, config, db, events, llm, research, seo
 from engine.contracts import BrandProfile, EditorialBrief, KeywordData, ResearchRecord
@@ -19,6 +20,7 @@ from engine.integrations.config import plugin_config
 from engine.integrations.fakes import FakeExtractor, FakeKeywordProvider, FakeLLM, FakeNewsSearch
 from engine.integrations.ports import ExtractorPort, KeywordProviderPort, LLMPort, NewsSearchPort
 from engine.integrations.registry import IntegrationMissing
+from engine.safe_http import SafeHTTPError
 
 logger = logging.getLogger(__name__)
 PROMPT_FILE = Path(__file__).resolve().parent.parent.parent / "prompts" / "brief.md"
@@ -172,6 +174,8 @@ class _BriefExecutionSpec:
     actor_user_id: uuid.UUID | None
     offline: bool
     adapters: BriefAdapters
+    format_slug: str = "blog"
+    funnel_stage: str | None = None
 
 
 def _prepare_brief_input(ctx: _BriefPromptContext) -> dict[str, Any]:
@@ -462,12 +466,36 @@ def _gather_evidence_documents(
     docs = db.list_evidence_documents(conn, workspace_id=ws_id, roles=EVIDENCE_ROLES, limit=20)
     formatted = [_format_evidence_doc(d) for d in docs]
     primary_id = str(opp_ctx["primary_document_id"])
-    if all(item["id"] != primary_id for item in formatted):
+    primary_fetch_ok = str(opp_ctx.get("document_fetch_status") or "ok").strip().lower() == "ok"
+    if primary_fetch_ok and all(item["id"] != primary_id for item in formatted):
         formatted.append(_build_primary_fallback_doc(opp_ctx))
     return formatted
 
 
+_SEED_PUNCTUATION = re.compile(r"[:;,.!?\"'“”‘’«»()\[\]{}|/\\—–]+")
+_SEED_MAX_CHARS = 60
+_keyword_log = logging.getLogger(__name__)
+
+
+def _sanitize_seed_term(raw: str) -> str:
+    """Strip punctuation that autocomplete endpoints reject and cap the term length."""
+    cleaned = " ".join(_SEED_PUNCTUATION.sub(" ", raw).split())
+    if len(cleaned) <= _SEED_MAX_CHARS:
+        return cleaned
+    clipped = cleaned[:_SEED_MAX_CHARS]
+    head, sep, _tail = clipped.rpartition(" ")
+    return (head if sep and head else clipped).strip()
+
+
 def _collect_candidate_seed_terms(opp_ctx: dict[str, Any]) -> list[str]:
+    return [
+        term
+        for term in (_sanitize_seed_term(c) for c in _raw_candidate_seed_terms(opp_ctx))
+        if term
+    ]
+
+
+def _raw_candidate_seed_terms(opp_ctx: dict[str, Any]) -> list[str]:
     payload = opp_ctx.get("record_payload") or {}
     has_explicit = "keywords" in payload or "seed_terms" in payload
     candidates: list[str] = list(seo.extract_seed_terms(payload)) if has_explicit else []
@@ -599,6 +627,28 @@ def _resolve_brief_keywords(
         return _estimate_keywords_with_cache(
             conn, seed_terms=seed_terms, locale=locale, market=market
         )
+    except (ValueError, SafeHTTPError, OSError) as exc:
+        _keyword_log.warning(
+            "keyword provider failed (%s); falling back to estimated keywords", exc
+        )
+        return _estimate_keywords_with_cache(
+            conn, seed_terms=seed_terms, locale=locale, market=market
+        )
+
+
+def _call_brief_llm(**kwargs: Any) -> EditorialBrief:
+    try:
+        return llm.structured_call(stage="brief", model_cls=EditorialBrief, **kwargs)
+    except ValidationError as exc:
+        if "source_id" in str(exc):
+            msg = f"Invalid document UUID in required_facts: {exc}"
+            raise InvalidEvidenceReferenceError(msg) from exc
+        raise
+
+
+def _resolve_opp_funnel_stage(opp_ctx: dict[str, Any], override: str | None) -> str:
+    raw = override or opp_ctx.get("funnel_stage") or "mofu"
+    return str(raw).strip().lower() or "mofu"
 
 
 def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> dict[str, Any]:
@@ -636,7 +686,7 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     industry_pack = _safe_load_industry_pack(
         opp_ctx.get("industry_pack"), opp_ctx.get("workspace_config")
     )
-    format_pack = _safe_load_format_pack("blog")
+    format_pack = _safe_load_format_pack(spec.format_slug)
     base_prompt, prompt_ver = get_brief_prompt_and_version()
     system_prompt = build_brief_system_prompt(
         base_prompt=base_prompt,
@@ -647,10 +697,11 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     )
 
     record_payload = opp_ctx.get("record_payload") or {}
+    resolved_funnel_stage = _resolve_opp_funnel_stage(opp_ctx, spec.funnel_stage)
     opp_summary = {
         "title": str(record_payload.get("headline") or opp_ctx.get("document_title") or ""),
         "angle": str(opp_ctx.get("angle") or ""),
-        "funnel_stage": str(opp_ctx.get("funnel_stage") or "mofu"),
+        "funnel_stage": resolved_funnel_stage,
         "decision_note": opp_ctx.get("decision_note") or "",
         "summary": str(record_payload.get("summary") or ""),
     }
@@ -668,9 +719,7 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     )
 
     resolved_llm = spec.adapters.llm_adapter or (FakeLLM() if spec.offline else None)
-    editorial_brief: EditorialBrief = llm.structured_call(
-        stage="brief",
-        model_cls=EditorialBrief,
+    editorial_brief = _call_brief_llm(
         prompt=system_prompt,
         input=input_payload,
         workspace_id=spec.workspace_id,
@@ -682,6 +731,8 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     )
     editorial_brief.brand_profile_id = brand_profile_id
     editorial_brief.brand_version = brand_version
+    editorial_brief.format = str(format_pack.get("slug", spec.format_slug))
+    editorial_brief.funnel_stage = resolved_funnel_stage
 
     validate_brief_evidence_references(editorial_brief, conn=conn, workspace_id=spec.workspace_id)
 
@@ -730,6 +781,8 @@ def brief(  # noqa: PLR0913
     news_search_adapter: NewsSearchPort | None = None,
     extractor_adapter: ExtractorPort | None = None,
     model: str | None = None,
+    format_slug: str = "blog",
+    funnel_stage: str | None = None,
 ) -> dict[str, Any]:
     """Generate and persist a grounded, brand-pinned editorial brief for an approved topic."""
     if isinstance(opportunity, dict):
@@ -757,6 +810,8 @@ def brief(  # noqa: PLR0913
             extractor_adapter=extractor_adapter,
             model=model,
         ),
+        format_slug=format_slug or "blog",
+        funnel_stage=funnel_stage,
     )
     if conn is not None:
         return _execute_brief(conn, spec)
