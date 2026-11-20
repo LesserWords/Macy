@@ -5334,7 +5334,12 @@ def _brief_needs_regeneration(
     req_funnel = params.get("funnel_stage")
     if req_funnel:
         cur_funnel = (
-            str(existing.get("funnel_stage") or opp_ctx.get("funnel_stage") or "mofu")
+            str(
+                existing_payload.get("funnel_stage")
+                or existing.get("funnel_stage")
+                or opp_ctx.get("funnel_stage")
+                or "mofu"
+            )
             .strip()
             .lower()
         )
@@ -5399,6 +5404,7 @@ def _execute_get_or_create_mcp_brief(
     payload = brief_row.get("payload") or {}
     eff_funnel = str(
         params.get("funnel_stage")
+        or payload.get("funnel_stage")
         or brief_row.get("funnel_stage")
         or opp_ctx.get("funnel_stage")
         or "mofu"
@@ -5812,6 +5818,7 @@ def _ensure_external_brief(  # noqa: PLR0913
         target_audience="General",
         primary_keyword=resolved_kw,
         format=format_slug,
+        funnel_stage="mofu",
         angle=resolved_topic,
         outline=["Introduction"],
         cta_goal=str(draft_model.cta.get("headline") or "Saiba mais"),

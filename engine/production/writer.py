@@ -320,7 +320,7 @@ def _resolve_brief_evidence_docs(
     docs: list[dict[str, Any]] = []
     for doc_uuid in candidate_ids:
         doc_row = db.get_document(conn, workspace_id=ws_id, document_id=doc_uuid)
-        if doc_row is not None:
+        if doc_row is not None and str(doc_row.get("fetch_status") or "ok").strip().lower() == "ok":
             docs.append(_format_doc_row_for_writer(doc_row))
     return docs
 

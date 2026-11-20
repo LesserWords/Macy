@@ -466,7 +466,8 @@ def _gather_evidence_documents(
     docs = db.list_evidence_documents(conn, workspace_id=ws_id, roles=EVIDENCE_ROLES, limit=20)
     formatted = [_format_evidence_doc(d) for d in docs]
     primary_id = str(opp_ctx["primary_document_id"])
-    if all(item["id"] != primary_id for item in formatted):
+    primary_fetch_ok = str(opp_ctx.get("document_fetch_status") or "ok").strip().lower() == "ok"
+    if primary_fetch_ok and all(item["id"] != primary_id for item in formatted):
         formatted.append(_build_primary_fallback_doc(opp_ctx))
     return formatted
 
@@ -696,10 +697,11 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     )
 
     record_payload = opp_ctx.get("record_payload") or {}
+    resolved_funnel_stage = _resolve_opp_funnel_stage(opp_ctx, spec.funnel_stage)
     opp_summary = {
         "title": str(record_payload.get("headline") or opp_ctx.get("document_title") or ""),
         "angle": str(opp_ctx.get("angle") or ""),
-        "funnel_stage": _resolve_opp_funnel_stage(opp_ctx, spec.funnel_stage),
+        "funnel_stage": resolved_funnel_stage,
         "decision_note": opp_ctx.get("decision_note") or "",
         "summary": str(record_payload.get("summary") or ""),
     }
@@ -730,6 +732,7 @@ def _execute_brief(conn: psycopg.Connection[Any], spec: _BriefExecutionSpec) -> 
     editorial_brief.brand_profile_id = brand_profile_id
     editorial_brief.brand_version = brand_version
     editorial_brief.format = str(format_pack.get("slug", spec.format_slug))
+    editorial_brief.funnel_stage = resolved_funnel_stage
 
     validate_brief_evidence_references(editorial_brief, conn=conn, workspace_id=spec.workspace_id)
 

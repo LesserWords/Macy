@@ -2805,6 +2805,7 @@ def get_opportunity_context(
                    d.extracted_text AS document_extracted_text,
                    d.published_at AS document_published_at,
                    d.date_status AS document_date_status,
+                   d.fetch_status AS document_fetch_status,
                    d.meta AS document_meta,
                    s.name AS source_name,
                    s.role AS source_role,

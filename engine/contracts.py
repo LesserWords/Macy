@@ -122,6 +122,15 @@ class SubScore(BaseModel):
         return val
 
 
+def _parse_funnel_stage(v: Any) -> str | None:
+    """Normalize valid funnel stage tokens or return None."""
+    if isinstance(v, str):
+        cleaned = v.strip().lower()
+        if cleaned in ("tofu", "mofu", "bofu"):
+            return cleaned
+    return None
+
+
 class Opportunity(BaseModel):
     """Scored content opportunity candidate."""
 
@@ -157,11 +166,7 @@ class Opportunity(BaseModel):
     @field_validator("funnel_stage", mode="before")
     @classmethod
     def validate_funnel_stage(cls, v: Any) -> str:
-        if isinstance(v, str):
-            cleaned = v.strip().lower()
-            if cleaned in ("tofu", "mofu", "bofu"):
-                return cleaned
-        return "mofu"
+        return _parse_funnel_stage(v) or "mofu"
 
     def compute_weighted_total(self, weights: ScoringWeights | None = None) -> float:
         w = weights or ScoringWeights()
@@ -213,10 +218,16 @@ class EditorialBrief(BaseModel):
     primary_keyword: str
     secondary_keywords: list[str] = Field(default_factory=list)
     format: str = "blog"
+    funnel_stage: str | None = None
     angle: str
     outline: list[str] = Field(default_factory=list)
     required_facts: list[RequiredFact] = Field(default_factory=list)
     cta_goal: str
+
+    @field_validator("funnel_stage", mode="before")
+    @classmethod
+    def _normalize_brief_funnel_stage(cls, v: Any) -> str | None:
+        return _parse_funnel_stage(v)
 
 
 class DraftClaim(BaseModel):
