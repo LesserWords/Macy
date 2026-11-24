@@ -143,6 +143,7 @@ def _build_fake_editorial_brief(prompt: str) -> dict[str, Any]:
         "primary_keyword": primary_kw,
         "secondary_keywords": kw_names[1:5],
         "format": str(payload.get("format") or "blog"),
+        "funnel_stage": funnel,
         "angle": full_angle,
         "outline": outline,
         "required_facts": _build_fake_required_facts(

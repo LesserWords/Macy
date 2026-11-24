@@ -142,6 +142,47 @@ Both the interface and content generation work in **Portuguese (Brazil)** and **
 
 ---
 
+## Operating Modes & Expected Cost per Post
+
+Macy supports **six distinct operating modes** depending on whether you run a full database-backed editorial pipeline, collaborate with external AI agents via MCP, or execute zero-database compliance checks.
+
+### Mode Comparison Matrix
+
+| Mode | Best For | Infrastructure & Auth | Who Writes the Draft | Governance, Gates & Ledger | Expected Cost / Post | Zero-Spend Option |
+|---|---|---|---|---|---|---|
+| **1. Web UI** (`app.py`) | Editorial teams, founders, and agencies reviewing visually | PostgreSQL + `app` + `worker`; Google OIDC or local PBKDF2 | Macy `write` stage (`LLMPort`) | Gate 1 & Gate 2 UI approvals + full `usage_ledger` | **`~$0.18–$0.35`** (`Haiku 5.5` + `Sonnet 5.5`) | `--offline` or `local_ollama` (`$0.00` API) |
+| **2A. MCP Streamable HTTP** (`/mcp`) | Remote AI clients or team assistants over HTTPS | PostgreSQL + MCP HTTP server (`Bearer` token + pinned actor) | Macy `macy_generate_draft` via MCP | Gate 1 & Gate 2 + `macy_publish_draft` + `usage_ledger` | **`~$0.18–$0.35`** | `local_ollama` (`$0.00` API) |
+| **2B. MCP `stdio` Agent-Driven** | Coding agents (Claude Code, Cursor, Antigravity) writing externally | PostgreSQL + local `macy mcp` `stdio` process | External AI agent writes; Macy scores, briefs & checks | Gate 1 & Gate 2 + FK `draft_claims` + `usage_ledger` | **`~$0.04–$0.10`** in Macy *(+ client agent tokens)* | `deterministic_only=True` (`$0.00` Macy LLM) |
+| **3A. DB-Backed CLI** (`macy`) | Automated weekly crons (`run-week`), scripted stages, or CLI `import-draft` | PostgreSQL + CLI (`macy`) | Macy `run-week` / `write`, or external `.md`/`.pdf` | Gate 1 & Gate 2 + `usage_ledger` | **`~$0.18–$0.35`** *(or `~$0.04–$0.05` `import-draft` live eval)* | `--offline`, `--deterministic-only`, or `local_ollama` (`$0.00` API) |
+| **3B. Stateless Path B** (`--stateless`) | Instant local SEO/GEO audits (`audit`) and deterministic draft checks | Zero DB, zero Docker (`pip/uv` `[core]`) | External author or agent | Stateless rules + JSON-LD only (no gates/ledger) | **`$0.00`** | Built-in (`$0.00`) |
+| **4. MCP `--mock` Sandbox** | Local dev/testing in an in-memory `acme-demo` workspace *(blocked in staging/prod)* | Zero DB, zero API keys | In-memory mock store | Simulated in-memory Gate 1 & Gate 2 | **`$0.00`** | Built-in (`$0.00`) |
+
+### Expected Cost per Post (Observed Cloud Benchmarks)
+
+Measured stage-by-stage on live OpenRouter runs using `anthropic/claude-haiku-5.5` for high-volume `research` and `score`, `anthropic/claude-sonnet-5.5` for `brief`, `write`, and `evaluate`, and zero-key RSS + `trafilatura` + Autocomplete discovery:
+
+| Pipeline Stage | Engine / Model | 0-Revision Post | 1 Auto-Revision + 10-Topic Scoring | Agent-Driven Mode 2B |
+|---|---|---|---|---|
+| `research` *(live RSS / normalization)* | `Haiku 5.5` / `trafilatura` | `$0.00–$0.01` | `~$0.007–$0.01` | `$0.00` *(agent ingests docs)* |
+| `score` *(3–10 candidate opportunities)* | `Haiku 5.5` | `~$0.01` | `~$0.04` *(10 candidates)* | `~$0.01` |
+| `brief` *(keywords, outline, required facts)* | `Sonnet 5.5` | `~$0.035–$0.05` | `~$0.05` | `~$0.035` |
+| `write` *(draft + FK-linked claims)* | `Sonnet 5.5` | `~$0.08–$0.09` | `~$0.16` *(initial + 1 revision)* | `$0.00` *(written by host agent)* |
+| `verify_claims` + deterministic checks | Deterministic Python (`lingua-py`, SEO, brand) | `$0.00` | `$0.00` | `$0.00` |
+| `evaluate` *(isolated editorial rubric)* | `Sonnet 5.5` | `~$0.05–$0.06` | `~$0.09–$0.10` *(2 passes)* | `~$0.05` *(or `$0.04` CLI `import-draft`)* |
+| **Total Macy API Spend** | **Tracked in `usage_ledger`** | **`~$0.18–$0.21`** | **`~$0.35`** | **`~$0.09–$0.10`** *(`~$0.04` import-only)* |
+
+### Stack & Model Tier Comparison
+
+| Stack / Tier | Stages Covered by Macy | Typical Cost per Post | Notes |
+|---|---|---|---|
+| **Path B Stateless / Deterministic-Only** | Deterministic SEO/compliance + JSON-LD + `audit` | **`$0.00`** | No LLM or PostgreSQL required; external agent writes prose. |
+| **Zero-Key `local_ollama`** | Full pipeline on local models (`ollama` + RSS + Autocomplete) | **`$0.00` API** | Only local CPU/GPU electricity; ideal for private/air-gapped stacks. |
+| **Balanced Cloud** *(Recommended default)* | `Haiku 5.5` (`research`/`score`) + `Sonnet 5.5` (`brief`/`write`/`evaluate`) + RSS | **`~$0.18–$0.35`** | Well below the `< $5.00` per-article pilot target (`F17`). |
+| **Agent-Driven Hybrid (Mode 2B)** | `Haiku 5.5` (`score`) + `Sonnet 5.5` (`brief`/`evaluate`) over `macy mcp` | **`~$0.04–$0.10`** | Writing runs inside your IDE/coding agent session; Macy enforces evidence & rubric. |
+| **Pro Cloud** *(Opus + Paid Search/Keywords)* | `Opus 5.5` (`brief`/`write`/`evaluate`) + Brave + DataForSEO (0–2 revisions) | **`~$0.60–$1.50`** | Aligns with the conservative Campaign UI estimator (`$6.00` per article/week + `$10.00` fixed monthly research = `~$1.50/article` buffer). |
+
+---
+
 ## Getting started
 
 1. **Create your workspace** and invite your team.

@@ -160,6 +160,7 @@ quote-style = "double"
 
 [tool.mypy]
 strict = true
+plugins = ["pydantic.mypy"]
 python_version = "3.12"
 files = ["app.py", "engine", "evals", "scripts", "spikes", "tests", "vulture_whitelist.py"]
 # Private, git-ignored holdout tooling (copyrighted sources); not part of the codebase.

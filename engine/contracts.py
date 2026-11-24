@@ -122,6 +122,15 @@ class SubScore(BaseModel):
         return val
 
 
+def _parse_funnel_stage(v: Any) -> str | None:
+    """Normalize valid funnel stage tokens or return None."""
+    if isinstance(v, str):
+        cleaned = v.strip().lower()
+        if cleaned in ("tofu", "mofu", "bofu"):
+            return cleaned
+    return None
+
+
 class Opportunity(BaseModel):
     """Scored content opportunity candidate."""
 
@@ -157,11 +166,7 @@ class Opportunity(BaseModel):
     @field_validator("funnel_stage", mode="before")
     @classmethod
     def validate_funnel_stage(cls, v: Any) -> str:
-        if isinstance(v, str):
-            cleaned = v.strip().lower()
-            if cleaned in ("tofu", "mofu", "bofu"):
-                return cleaned
-        return "mofu"
+        return _parse_funnel_stage(v) or "mofu"
 
     def compute_weighted_total(self, weights: ScoringWeights | None = None) -> float:
         w = weights or ScoringWeights()
@@ -177,11 +182,29 @@ class Opportunity(BaseModel):
         return self.weighted_total
 
 
+def _validate_document_uuid(value: str | uuid.UUID) -> str | uuid.UUID:
+    """Require a UUID so LLM citations of source names fail validation and trigger a retry."""
+    try:
+        uuid.UUID(str(value))
+    except (ValueError, AttributeError, TypeError) as exc:
+        msg = (
+            "source_id must be a valid document UUID copied from evidence_documents[].id, "
+            "not a source name or title"
+        )
+        raise ValueError(msg) from exc
+    return value
+
+
 class RequiredFact(BaseModel):
     """Fact requirement from research evidence."""
 
     fact: str
     source_id: str | uuid.UUID
+
+    @field_validator("source_id")
+    @classmethod
+    def _require_uuid_source(cls, value: str | uuid.UUID) -> str | uuid.UUID:
+        return _validate_document_uuid(value)
 
 
 class EditorialBrief(BaseModel):
@@ -195,10 +218,16 @@ class EditorialBrief(BaseModel):
     primary_keyword: str
     secondary_keywords: list[str] = Field(default_factory=list)
     format: str = "blog"
+    funnel_stage: str | None = None
     angle: str
     outline: list[str] = Field(default_factory=list)
     required_facts: list[RequiredFact] = Field(default_factory=list)
     cta_goal: str
+
+    @field_validator("funnel_stage", mode="before")
+    @classmethod
+    def _normalize_brief_funnel_stage(cls, v: Any) -> str | None:
+        return _parse_funnel_stage(v)
 
 
 class DraftClaim(BaseModel):
@@ -213,7 +242,71 @@ class DraftClaim(BaseModel):
         if self.kind == "fact" and not self.source_id:
             msg = "Facts must have a source_id for provenance"
             raise ValueError(msg)
+        if self.kind == "fact":
+            _validate_document_uuid(str(self.source_id))
         return self
+
+
+class _DictAccessModel(BaseModel):
+    """Pydantic model that keeps dict-style read access for legacy consumers."""
+
+    def get(self, key: str, default: Any = None) -> Any:
+        value = getattr(self, key, None) if key in type(self).model_fields else None
+        return value if value else default
+
+    def items(self) -> list[tuple[str, Any]]:
+        return [(k, v) for k, v in self.model_dump().items() if v]
+
+    def values(self) -> list[Any]:
+        return [v for _, v in self.items()]
+
+
+def _rename_legacy_keys(raw: Any, aliases: dict[str, str]) -> Any:
+    return (
+        {
+            aliases.get(str(k), str(k)): v
+            for k, v in raw.items()
+            if aliases.get(str(k), str(k)) not in raw or str(k) == aliases.get(str(k), str(k))
+        }
+        if isinstance(raw, dict)
+        else raw
+    )
+
+
+class FAQItem(_DictAccessModel):
+    """One FAQ entry with explicit properties (keeps strict JSON schema non-empty)."""
+
+    question: str
+    answer: str
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_legacy(cls, raw: Any) -> Any:
+        return _rename_legacy_keys(raw, {"q": "question", "a": "answer"})
+
+
+class DraftCTA(_DictAccessModel):
+    """Call-to-action block with explicit properties."""
+
+    headline: str = ""
+    body: str = ""
+    button_text: str = ""
+    url: str = ""
+    intensity: str = ""
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_legacy(cls, raw: Any) -> Any:
+        return _rename_legacy_keys(
+            raw,
+            {
+                "text": "body",
+                "goal": "body",
+                "title": "headline",
+                "button": "button_text",
+                "action": "button_text",
+            },
+        )
 
 
 class ContentDraft(BaseModel):
@@ -224,8 +317,8 @@ class ContentDraft(BaseModel):
     meta_description: str
     slug: str
     body_md: str
-    faq: list[dict[str, str]] = Field(default_factory=list)
-    cta: dict[str, str] = Field(default_factory=dict)
+    faq: list[FAQItem] = Field(default_factory=list)
+    cta: DraftCTA = Field(default_factory=DraftCTA)
     claims: list[DraftClaim] = Field(default_factory=list)
 
 

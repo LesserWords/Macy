@@ -169,6 +169,31 @@ def _seed_e2e_workspace(
     return ws
 
 
+def _post_mcp_json_resilient(
+    mcp_url: str,
+    *,
+    payload: dict[str, Any],
+    headers: dict[str, str] | None = None,
+    timeout: float = 30.0,
+) -> tuple[int, dict[str, str], str]:
+    last_exc: Exception | None = None
+    for attempt in range(4):
+        try:
+            return _post_mcp_json(
+                mcp_url,
+                payload=payload,
+                insecure=False,
+                headers=headers,
+                timeout=timeout,
+            )
+        except Exception as exc:
+            last_exc = exc
+            if attempt < 3:
+                time.sleep(0.2 * (attempt + 1))
+    assert last_exc is not None
+    raise last_exc
+
+
 def _mcp_tool_call(
     mcp_url: str,
     session_headers: dict[str, str],
@@ -177,7 +202,7 @@ def _mcp_tool_call(
     name: str,
     arguments: dict[str, Any],
 ) -> dict[str, Any]:
-    status, _hdrs, body = _post_mcp_json(
+    status, _hdrs, body = _post_mcp_json_resilient(
         mcp_url,
         payload={
             "jsonrpc": "2.0",
@@ -198,14 +223,14 @@ def _assert_health_and_fail_closed(base_url: str, bad_token: str) -> None:
         assert getattr(health_resp, "status", 200) == 200
         assert json.loads(health_resp.read().decode("utf-8"))["status"] == "ok"
 
-    unauth_status, unauth_hdrs, _ = _post_mcp_json(
+    unauth_status, unauth_hdrs, _ = _post_mcp_json_resilient(
         mcp_url,
         payload={"jsonrpc": "2.0", "id": 1, "method": "ping"},
     )
     assert unauth_status == 401
     assert "bearer" in unauth_hdrs.get("www-authenticate", "").lower()
 
-    bad_status, _, _ = _post_mcp_json(
+    bad_status, _, _ = _post_mcp_json_resilient(
         mcp_url,
         payload={"jsonrpc": "2.0", "id": 1, "method": "ping"},
         headers={"Authorization": f"Bearer {bad_token}"},
@@ -222,7 +247,7 @@ def _exercise_http_mcp_journey(
 ) -> tuple[str, str]:
     mcp_url = f"{base_url}/mcp"
     hdrs = _init_mcp_session(mcp_url, token=token, timeout=10.0, insecure=False)
-    notif_status, _, _ = _post_mcp_json(
+    notif_status, _, _ = _post_mcp_json_resilient(
         mcp_url,
         payload={"jsonrpc": "2.0", "method": "notifications/initialized"},
         headers=hdrs,

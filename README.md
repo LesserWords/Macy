@@ -31,7 +31,7 @@ Unlike single-prompt AI writers that fabricate statistics or lock you into a sin
 
 ## Core Workflows
 
-Macy runs cleanly across three complementary modes:
+Macy runs cleanly across three complementary workflow models — see the full **[6-Mode Comparison Matrix & Expected Cost per Post](docs/PRODUCT-OVERVIEW.md#operating-modes--expected-cost-per-post)** (`~$0.18–$0.35/post` balanced cloud, `~$0.04–$0.10/post` agent-driven MCP, `$0.00/post` stateless/local Ollama):
 
 ### 1. Sourced Editorial Pipeline (Human-Gated)
 

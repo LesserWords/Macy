@@ -142,8 +142,8 @@ def test_hypothesis_scoring_bounds(statuses: list[tuple[str, str]]) -> None:
     checks = [
         AuditCheckResult(
             check=f"chk_{i}",
-            category=cat,  # type: ignore[arg-type]
-            status=st_name,  # type: ignore[arg-type]
+            category=cat,
+            status=st_name,
             score=mult[st_name],
             detail="hyp",
         )

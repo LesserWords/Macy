@@ -18,8 +18,8 @@ _.positioning = contracts.BrandProfile.positioning
 _.capabilities = contracts.BrandProfile.capabilities
 _.prohibited_claims = contracts.BrandProfile.prohibited_claims
 _.cta_rules = contracts.BrandProfile.cta_rules
-_.validate_non_empty_text = contracts.BrandProfile.validate_non_empty_text
-_.validate_list_entries = contracts.BrandProfile.validate_list_entries
+_.validate_non_empty_text = contracts.BrandProfile.validate_non_empty_text  # type: ignore[misc]
+_.validate_list_entries = contracts.BrandProfile.validate_list_entries  # type: ignore[misc]
 
 _.headline = contracts.ResearchRecord.headline
 _.canonical_url = contracts.ResearchRecord.canonical_url
@@ -171,3 +171,12 @@ _.RouteMonitorsCapability = cap_builtins.RouteMonitorsCapability
 
 # Test fixtures (uvicorn.Server.should_exit shutdown flag)
 _.should_exit
+
+# M10 typed draft schema
+_.question = contracts.FAQItem.question
+_.answer = contracts.FAQItem.answer
+_.button_text = contracts.DraftCTA.button_text
+_.intensity = contracts.DraftCTA.intensity
+_._coerce_legacy = contracts.FAQItem._coerce_legacy
+_._require_uuid_source = contracts.RequiredFact._require_uuid_source
+_._normalize_brief_funnel_stage = contracts.EditorialBrief._normalize_brief_funnel_stage

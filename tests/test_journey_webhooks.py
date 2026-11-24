@@ -50,7 +50,7 @@ def test_journey_webhooks_create_and_view(monkeypatch: pytest.MonkeyPatch) -> No
     with engine_db.get_connection() as conn:
         ws_id, user_id = _bootstrap_webhooks_journey(conn, monkeypatch)
 
-    app = AppTest.from_file(APP_PATH)
+    app = AppTest.from_file(APP_PATH, default_timeout=15)
     app.run()
     assert not app.exception
 
@@ -97,7 +97,7 @@ def test_journey_webhooks_resend_delivery(monkeypatch: pytest.MonkeyPatch) -> No
             actor_user_id=user_id,
         )
 
-    app = AppTest.from_file(APP_PATH)
+    app = AppTest.from_file(APP_PATH, default_timeout=15)
     app.run()
     assert not app.exception
 

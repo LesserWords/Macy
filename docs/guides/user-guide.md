@@ -46,7 +46,7 @@ Macy connects to external services through swappable **ports**. Secrets are Fern
 > **Optional Audit & Rank-Tracking Toggles (`ADR-028`):** Browser accessibility (`BrowserAuditPort` / `axe-core` via `--extra audit-browser`), Google PageSpeed Insights (`PageSpeedPort`), and paid SERP rank tracking (`RankTrackerPort` gated by workspace `rank_tracking_enabled` and `usage_ledger` spend caps) toggle cleanly per workspace without changing the core pipeline.
 
 2. Click **Save Integration**, then click **Test Connection** to verify credentials (`healthcheck()`).
-   - **Tip:** For cost control, use a fast, low-cost model (such as `anthropic/claude-haiku-5.5`) for bulk `research` and `score` stages, and a stronger reasoning/writing model (`anthropic/claude-opus-5.5`) for `brief`, `write`, and `evaluate`.
+   - **Tip:** For the best cost-to-quality balance, use a fast, low-cost model (`anthropic/claude-haiku-5.5`) for bulk `research` and `score` stages, and `anthropic/claude-sonnet-5.5` (`~$0.18–$0.35/post`) or `anthropic/claude-opus-5.5` (`~$0.60–$1.50/post`) for `brief`, `write`, and `evaluate`.
    - **SSRF protection:** Any private, loopback (`127.0.0.1`, `::1`), or cloud-metadata (`169.254.169.254`) URL is refused. Production URLs must use HTTPS.
 
 ### Step 2: Campaigns (`Campaigns`)
@@ -169,3 +169,23 @@ Open **SEO & GEO Audit** in the sidebar to audit any public blog post, landing p
 - **First-Boot Setup Wizard:** Starting Macy against a fresh database opens a 3-step bilingual wizard (`pt-BR` / `en-US`) to create your local admin login, toggle active capabilities (`core-compliance`, `seo-audit`, `editorial-pipeline`, `route-monitors`), pick a stack preset, and auto-seed your brand profile and sitemap from an existing website URL.
 - **Stack Presets (`Integrations -> Stack Presets`):** Switch between `pocket_free` (zero API keys: `gnews_rss`, `autocomplete`, `rss`, `trafilatura`, `markdown_export`), `local_ollama` (`ollama` + free search/keywords), or `pro_cloud` (`openrouter`, `brave`, `dataforseo`, `http_webhook`) in one click.
 - **Capability Switchboard (`macy capabilities`):** Hide unused sidebar pages and MCP tools (`editorial-pipeline`, `route-monitors`) when you only want Compliance Auditing and Brand Checking.
+
+---
+
+## 6. Expected Cost per Post & Budget Cap Planning
+
+Real OpenRouter runs with the balanced stack (`anthropic/claude-haiku-5.5` for `research`/`score`, `anthropic/claude-sonnet-5.5` for `brief`/`write`/`evaluate`, zero-key RSS + `trafilatura` discovery) average **`~$0.18–$0.21` per post** cleanly passing on revision 0, and **`~$0.35` per post** with 10 scored candidates plus one automatic revision round. For the full **6-mode and stack comparison matrix**, see [Operating Modes & Expected Cost per Post](../PRODUCT-OVERVIEW.md#operating-modes--expected-cost-per-post).
+
+### Recommended Budget Caps by Weekly Volume
+
+| Weekly Cadence | Balanced Stack (`Haiku 5.5` + `Sonnet 5.5`) | Pro Stack (`Opus 5.5` + Brave/DataForSEO) | Suggested `Per-Run Cap` | Suggested `Monthly Cap` |
+|---|---|---|---|---|
+| **1 article / week** (~4/mo) | `~$0.80–$1.40 / month` | `~$2.40–$6.00 / month` (+ paid search/keywords) | `$3.00–$5.00` | `$15.00–$25.00` |
+| **2–3 articles / week** (~8–12/mo) | `~$1.60–$4.20 / month` | `~$4.80–$18.00 / month` (+ paid search/keywords) | `$5.00–$10.00` | `$25.00–$40.00` |
+| **5 articles / week** (~20/mo) | `~$4.00–$7.00 / month` | `~$12.00–$30.00 / month` (+ paid search/keywords) | `$10.00–$15.00` | `$50.00–$75.00` |
+
+### Main Cost Levers
+- **Stage model split:** Keep `anthropic/claude-haiku-5.5` on high-volume `research` and `score`, reserving `anthropic/claude-sonnet-5.5` (or `opus-5.5`) for `brief`, `write`, and `evaluate`.
+- **Agent-Driven drafting (Mode 2B / `macy import-draft`):** When an IDE coding agent writes the article externally, Macy API cost drops to **`~$0.04–$0.10` per post** (scoring/briefing/evaluation only), or **`$0.00`** with `deterministic_only=True` / `--stateless`.
+- **Pre-LLM deterministic gates & keyword caching:** All structural/SEO/brand checks run for `$0.00` before `evaluate`, DataForSEO lookups cache for 30 days, and imported blog sitemaps skip duplicate topics automatically.
+- **Conservative UI estimator:** The **Campaigns** screen estimates `articles_per_week * $6.00 + $10.00` monthly headroom so hard caps still comfortably absorb 2-revision cycles and multi-source research spikes.

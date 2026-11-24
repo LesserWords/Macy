@@ -194,7 +194,8 @@ def _fetch_verified_records_for_scoring(
               ON s.workspace_id = d.workspace_id AND s.id = d.source_id
             WHERE rr.workspace_id = %(workspace_id)s
               AND rr.run_id = %(run_id)s
-              AND rr.status != 'duplicate'
+              AND rr.status NOT IN ('duplicate', 'failed')
+              AND d.fetch_status = 'ok'
               AND (
                   rr.status = 'verified'
                   OR d.date_status = 'verified'
@@ -247,7 +248,9 @@ def score_run(
         weights = ScoringWeights()
 
     brand_row = db.get_current_brand_profile(conn, workspace_id=ws_id)
-    brand_profile = brand_row.get("profile", {}) if brand_row else {}
+    brand_profile = (
+        (brand_row.get("payload") or brand_row.get("profile") or {}) if brand_row else {}
+    )
 
     ws_row = db.get_workspace(conn, workspace_id=ws_id)
     ind_slug = ws_row.get("industry_pack") if ws_row else config.get_default_industry_pack()
