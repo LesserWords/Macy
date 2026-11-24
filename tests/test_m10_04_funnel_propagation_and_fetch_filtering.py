@@ -14,7 +14,7 @@ import psycopg
 import pytest
 import yaml
 
-from engine import db, services
+from engine import db, llm, services
 from engine.contracts import CampaignConfig, ContentDraft, EditorialBrief, RequiredFact
 from engine.integrations.fakes import FakeExtractor, FakeKeywordProvider, FakeLLM, FakeNewsSearch
 from engine.production import writer
@@ -513,3 +513,39 @@ def test_brief_and_writer_filter_non_ok_evidence_documents() -> None:
             brief_model=brief_model,
         )
     assert [d["id"] for d in filtered] == [str(primary_id)]
+
+
+def test_score_run_forwards_brand_profile_payload(db_conn: psycopg.Connection[Any]) -> None:
+    ctx = _seed_workspace_and_opportunity(db_conn, funnel_stage="mofu")
+    ws_id = ctx["workspace_id"]
+    run_row = db.get_run(db_conn, workspace_id=ws_id, run_id=ctx["run_id"])
+    assert run_row is not None
+
+    captured_brands: list[dict[str, Any]] = []
+    real_call = llm.structured_call
+
+    def _capture_call(**kwargs: Any) -> Any:
+        captured_brands.append(dict((kwargs.get("input") or {}).get("brand") or {}))
+        return real_call(**kwargs)
+
+    with patch.object(llm, "structured_call", side_effect=_capture_call):
+        score.score_run(db_conn, run_row, llm_adapter=FakeLLM())
+
+    assert len(captured_brands) == 1
+    assert captured_brands[0]["voice"] == ctx["brand_row"]["payload"]["voice"]
+    assert captured_brands[0]["positioning"] == ctx["brand_row"]["payload"]["positioning"]
+
+    # When no active brand profile exists, score_run falls back cleanly to {}
+    captured_empty: list[dict[str, Any]] = []
+
+    def _capture_empty(**kwargs: Any) -> Any:
+        captured_empty.append(dict((kwargs.get("input") or {}).get("brand") or {}))
+        return real_call(**kwargs)
+
+    with (
+        patch.object(db, "get_current_brand_profile", return_value=None),
+        patch.object(llm, "structured_call", side_effect=_capture_empty),
+    ):
+        score.score_run(db_conn, run_row, llm_adapter=FakeLLM())
+
+    assert captured_empty == [{}]

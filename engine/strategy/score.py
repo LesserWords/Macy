@@ -248,7 +248,9 @@ def score_run(
         weights = ScoringWeights()
 
     brand_row = db.get_current_brand_profile(conn, workspace_id=ws_id)
-    brand_profile = brand_row.get("profile", {}) if brand_row else {}
+    brand_profile = (
+        (brand_row.get("payload") or brand_row.get("profile") or {}) if brand_row else {}
+    )
 
     ws_row = db.get_workspace(conn, workspace_id=ws_id)
     ind_slug = ws_row.get("industry_pack") if ws_row else config.get_default_industry_pack()
