@@ -12,6 +12,7 @@ PRD (what/why) ──► Features F01–F23 (acceptance criteria) ──► Open
 
 | Folder / Doc | Contents | Start here |
 |---|---|---|
+| [PRODUCT-OVERVIEW.md](PRODUCT-OVERVIEW.md) | Product overview, 6-mode comparison matrix, and expected cost per post | [PRODUCT-OVERVIEW.md](PRODUCT-OVERVIEW.md#operating-modes--expected-cost-per-post) |
 | [guides/](guides/user-guide.md) | User & Editorial Guide, Developer & CLI Guide, Environment Variables & External Credentials, n8n Webhooks & CMS Publishing Guides | [user-guide.md](guides/user-guide.md) · [environment-and-credentials.md](guides/environment-and-credentials.md) |
 | [MCP.md](MCP.md) | MCP server guide (`stdio`, HTTPS `streamable-http` behind Caddy, 17 tools, Agent-Driven Mode compliance loop, URL/site audits) | [MCP.md](MCP.md) |
 | [runbook.md](runbook.md) | Staging & prod VPS setup, deploy, rollback, logs, backups, restore, retention purge, LGPD anonymisation | [runbook.md](runbook.md) |
