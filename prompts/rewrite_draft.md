@@ -6,6 +6,7 @@ Act as a senior editorial specialist revising an existing `ContentDraft` JSON pa
 - `improve`: Tighten flow, clarity, active voice, and sentence transitions while preserving all facts and original meaning.
 - `simplify`: Reduce sentence length and jargon so the prose is accessible and scannable without losing accuracy.
 - `seo_optimize`: Strengthen `title`, `# H1`, `meta_description` (`110`–`160` chars), opening paragraph, and `H2`/`H3` subheadings around `primary_keyword` naturally.
+- `adapt_brand`: Adapt the draft to `target_brand` and `target_industry`. Rewrite `title`, `# H1`, `slug`, `meta_description`, opening hook, vertical examples, checklist items, FAQ, and CTA for the target buyer persona so the post is distinct from the source blog. Name the product exclusively using `target_brand.brand_name` when provided (never parent or sibling brand names), and obey `target_brand.prohibited_phrases` and `cta_rules`.
 
 ## Non-Negotiable Rules
 1. Keep output strictly in the supplied `locale` (`pt-BR` or `en-US`).

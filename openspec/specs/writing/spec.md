@@ -30,3 +30,14 @@ The system SHALL support importing ready-made `.md` (`python-frontmatter`) and `
 #### Scenario: Importing draft revisions respects the two-revision cap
 - **WHEN** `services.import_external_draft` is called repeatedly for the same `brief_id`
 - **THEN** revisions `0`, `1`, and `2` are persisted in `drafts` with `draft_claims`, and attempting a fourth import (`revision = 3`) is rejected cleanly
+
+### Requirement: Pass-by-value cross-workspace brand and persona adaptation
+The system SHALL provide a pass-by-value `adapt_brand` rewrite mode (`engine/production/rewrite.py`, `prompts/rewrite_draft.md`), zero-DB stateless helper (`services.adapt_draft_stateless`), and tenant-isolated workspace adapter (`services.adapt_draft_for_workspace`) so an article authored for one brand or workspace can be adapted to another brand's `BrandProfile` and `IndustryPack` without cross-workspace database foreign keys (`ADR-034`, `M11-02`).
+
+#### Scenario: Workspace adaptation re-ingests cited URLs into target tenant without cross-tenant FKs
+- **WHEN** `services.adapt_draft_for_workspace` receives a source Markdown draft by value plus target `workspace_id`, `user_id`, and optional source documents/URLs
+- **THEN** cited public URLs are ingested into the target workspace's own `documents` table, `claims` are rebound to target-workspace document IDs, `rewrite_draft(mode="adapt_brand")` produces a persona-adapted draft, and the draft is evaluated and queued at Gate 2 inside the target workspace
+
+#### Scenario: Stateless brand adaptation transforms draft without database access
+- **WHEN** `services.adapt_draft_stateless` runs with a Markdown file or string, resolved `BrandProfile` fixture, and `IndustryPack`
+- **THEN** it produces an adapted Markdown draft, compliance verdict, and anti-cannibalization uniqueness metrics with zero PostgreSQL connection

@@ -77,3 +77,10 @@ The system SHALL generate and validate `Article` and `FAQPage` JSON-LD structure
 #### Scenario: Article draft emits valid Article JSON-LD
 - **WHEN** `generate_article_schema` runs for a `ContentDraft` with `BrandProfile` metadata
 - **THEN** it produces a JSON-LD object with `@context = "https://schema.org"`, `@type = "Article"`, `headline`, `author`, `publisher`, and `inLanguage` passing `validate_schema`
+
+### Requirement: Cross-domain adaptation anti-cannibalization check
+The system SHALL provide a deterministic `check_adaptation_uniqueness` check (`engine/quality/checks.py`) comparing a source draft and an adapted draft to require distinct `slug`, distinct normalized `title`, and 3-word shingle Jaccard body similarity at or below `max_similarity` (`0.65` default) (`ADR-034`, `M11-02`).
+
+#### Scenario: Identical slug or excessive text overlap fails adaptation uniqueness deterministically
+- **WHEN** `check_adaptation_uniqueness` evaluates a candidate adaptation sharing the source `slug`, matching the source `title`, or exceeding `max_similarity`
+- **THEN** it returns `passed = False` with `check = "adaptation_uniqueness"` and similarity metadata without invoking any LLM call
