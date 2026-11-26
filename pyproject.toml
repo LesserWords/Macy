@@ -1,6 +1,6 @@
 [project]
 name = "macy"
-version = "0.2.0"
+version = "0.3.0"
 description = "Content Intelligence Engine: research, score, brief, write and evaluate sourced articles"
 requires-python = ">=3.12"
 dependencies = [

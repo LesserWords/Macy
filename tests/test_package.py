@@ -17,11 +17,11 @@ from engine.__main__ import main, run_worker_loop, run_worker_tick
 def test_package_exposes_version() -> None:
     from pathlib import Path
 
-    assert engine.__version__ == "0.2.0"
+    assert engine.__version__ == "0.3.0"
     pyproject = (Path(__file__).resolve().parent.parent / "pyproject.toml").read_text(
         encoding="utf-8"
     )
-    assert 'version = "0.2.0"' in pyproject
+    assert 'version = "0.3.0"' in pyproject
 
 
 def test_main_entrypoint_returns_zero() -> None:
