@@ -110,6 +110,7 @@ Install the slim core extra (`[core]`) and run single-URL SEO/GEO audits, bounde
 ```sh
 macy audit https://example.com --stateless --json
 macy import-draft --file ./draft.md --format blog-short --stateless --json
+macy adapt-draft --file ./draft.md --stateless --brand-fixture seed_vertical.yaml --industry-pack b2b-saas --json
 macy mcp --transport stdio --stateless --check
 ```
 
@@ -180,14 +181,14 @@ Database migrations create the schema and roles without seeding tenant rows. To 
 Run via `docker compose exec app macy <command>` or `uv run macy <command>`:
 
 - **Bootstrap & Sources:** `init`, `create-workspace`, `add-owner`, `seed-brand`, `seed-sources`, `verify-sources`, `import-sitemap`
-- **Capabilities & Compliance / SEO Audits:** `capabilities {list,enable,disable}`, `import-draft [--stateless]`, `audit [--stateless]`
+- **Capabilities & Compliance / SEO Audits:** `capabilities {list,enable,disable}`, `import-draft [--stateless]`, `adapt-draft [--stateless]`, `audit [--stateless]`
 - **Runs & Delivery:** `run-week`, `run-now`, `run-stage`, `crontab`, `webhooks-deliver`
 - **Integrations, MCP & Ops:** `plugins list`, `integrations set`, `integrations preset {list,apply}`, `rotate-key`, `test-sentry`, `mcp [--stateless]`
 - **Retention & LGPD:** `purge`, `anonymise-user`
 
 ### Model Context Protocol (`macy mcp`)
 
-Macy exposes **17 MCP tools**, **3 JSON resources**, and **1 review prompt** over `stdio` (Antigravity, Claude Desktop, Claude Code, Cursor) and fail-closed Bearer HTTPS `streamable-http` (`/mcp` behind Caddy) — see **[MCP Server Guide](docs/MCP.md)**.
+Macy exposes **18 MCP tools**, **3 JSON resources**, and **1 review prompt** over `stdio` (Antigravity, Claude Desktop, Claude Code, Cursor) and fail-closed Bearer HTTPS `streamable-http` (`/mcp` behind Caddy) — see **[MCP Server Guide](docs/MCP.md)**.
 
 ---
 

@@ -88,3 +88,10 @@ The repository SHALL provide a live E2E test suite executing journeys J0 through
 #### Scenario: Direct or transitive DB import inside engine.mcp is blocked
 - **WHEN** `uv run lint-imports` runs via `scripts/check.sh` or CI
 - **THEN** `engine.mcp` satisfies `"MCP imports services and contracts only"` (`forbidden_modules = ["engine.db"]`), and introducing an `import engine.db` in `engine/mcp/` causes `lint-imports` to exit non-zero
+
+### Requirement: Multi-mode CLI parity for pass-by-value brand adaptation
+`engine/cli.py` SHALL expose `macy adapt-draft` under `core-compliance` supporting both DB-backed target workspace adaptation (`--workspace`) and zero-DB stateless adaptation (`--stateless --brand-fixture --industry-pack`) with optional `--output` Markdown export and `--json` telemetry (`ADR-034`).
+
+#### Scenario: CLI adapts draft deterministically in stateless mode and writes Markdown output
+- **WHEN** `macy adapt-draft --file <draft.md> --stateless --brand-fixture <yaml> --industry-pack <slug> --offline --output <out.md> --json` runs
+- **THEN** it SHALL adapt the draft cleanly with zero database queries, write `adapted_markdown` to `<out.md>`, and emit structured JSON exiting `0`

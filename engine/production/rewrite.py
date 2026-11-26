@@ -11,11 +11,11 @@ from typing import Any
 import psycopg
 
 from engine import llm
-from engine.contracts import ContentDraft
+from engine.contracts import BrandProfile, ContentDraft
 from engine.integrations.fakes import FakeLLM
 from engine.integrations.ports import LLMPort
 
-SUPPORTED_REWRITE_MODES: tuple[str, ...] = ("improve", "simplify", "seo_optimize")
+SUPPORTED_REWRITE_MODES: tuple[str, ...] = ("improve", "simplify", "seo_optimize", "adapt_brand")
 REWRITE_VERSION_PREFIX = "rewrite_draft.md"
 PROMPT_FILE = Path(__file__).resolve().parent.parent.parent / "prompts" / "rewrite_draft.md"
 
@@ -27,19 +27,21 @@ def get_rewrite_prompt_and_version() -> tuple[str, str]:
     return body, f"{REWRITE_VERSION_PREFIX}:{digest}"
 
 
-def _build_rewrite_payload(
+def _build_rewrite_payload(  # noqa: PLR0913
     draft_model: ContentDraft,
     *,
     mode: str,
     primary_keyword: str | None,
     locale: str,
+    target_brand: BrandProfile | Mapping[str, Any] | None = None,
+    target_industry: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     required_facts = [
         {"fact": c.text, "source_id": str(c.source_id)}
         for c in draft_model.claims
         if c.kind == "fact" and c.source_id
     ]
-    return {
+    payload: dict[str, Any] = {
         "rewrite_mode": mode,
         "locale": locale,
         "draft": draft_model.model_dump(mode="json"),
@@ -49,6 +51,15 @@ def _build_rewrite_payload(
             "required_facts": required_facts,
         },
     }
+    if target_brand is not None:
+        payload["target_brand"] = (
+            target_brand.model_dump(mode="json")
+            if isinstance(target_brand, BrandProfile)
+            else dict(target_brand)
+        )
+    if target_industry is not None:
+        payload["target_industry"] = dict(target_industry)
+    return payload
 
 
 def rewrite_draft(  # noqa: PLR0913
@@ -57,6 +68,8 @@ def rewrite_draft(  # noqa: PLR0913
     mode: str = "improve",
     primary_keyword: str | None = None,
     locale: str = "pt-BR",
+    target_brand: BrandProfile | Mapping[str, Any] | None = None,
+    target_industry: Mapping[str, Any] | None = None,
     llm_adapter: LLMPort | None = None,
     model: str | None = None,
     workspace_id: uuid.UUID | None = None,
@@ -76,6 +89,8 @@ def rewrite_draft(  # noqa: PLR0913
         mode=norm_mode,
         primary_keyword=primary_keyword,
         locale=locale,
+        target_brand=target_brand,
+        target_industry=target_industry,
     )
     resolved_llm = llm_adapter or (FakeLLM() if conn is None else None)
     return llm.structured_call(

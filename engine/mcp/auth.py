@@ -105,6 +105,25 @@ class ImportDraftRequest:
 
 
 @dataclass(frozen=True)
+class AdaptDraftRequest:
+    """Typed parameters for adapting a pass-by-value draft to a target brand/persona."""
+
+    workspace_id: uuid.UUID
+    user_id: uuid.UUID
+    file_path: str | None = None
+    body_md: str | None = None
+    brand_fixture: str | None = None
+    industry_pack: str | None = None
+    format_slug: str = "blog"
+    primary_keyword: str | None = None
+    locale: str | None = None
+    max_similarity: float = 0.65
+    deterministic_only: bool = True
+    offline: bool = False
+    model: str | None = None
+
+
+@dataclass(frozen=True)
 class IngestResearchRequest:
     """Typed parameters for external agent research document ingestion."""
 
@@ -200,6 +219,8 @@ class MCPStoreProtocol(ActorLookupProtocol, Protocol):
     def evaluate_draft(self, request: EvaluateDraftRequest) -> dict[str, Any]: ...
 
     def import_draft(self, request: ImportDraftRequest) -> dict[str, Any]: ...
+
+    def adapt_draft(self, request: AdaptDraftRequest) -> dict[str, Any]: ...
 
     def list_drafts_for_review(
         self,

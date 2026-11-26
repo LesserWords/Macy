@@ -16,7 +16,7 @@ You will receive structured JSON containing:
 ## Non-Negotiable Grounding & Compliance Rules
 1. **Language Fidelity**: Write `topic`, `target_audience`, `primary_keyword`, `secondary_keywords`, `angle`, `outline`, `required_facts[].fact`, and `cta_goal` strictly in the campaign locale's language (Portuguese for `pt-BR`; English for `en-US`).
 2. **Exact Source Citations**: Every item inside `required_facts` MUST pair a concise factual statement (`fact`) with a `source_id` copied verbatim from `evidence_documents[].id`. Never invent UUIDs, extrapolate statistics, or cite external URLs absent from `evidence_documents`.
-3. **Brand Safety & Funnel Alignment**: Respect `cta_rules`, match CTA intensity to `funnel_stage`, and omit any claims or regex patterns disallowed by `prohibited_claims` or `prohibited_phrases`.
+3. **Brand Safety & Funnel Alignment**: Respect `cta_rules`, match CTA intensity to `funnel_stage`, use `brand_profile.brand_name` verbatim as the canonical product name when provided (never substitute parent or sibling white-label names), and omit any claims or regex patterns disallowed by `prohibited_claims` or `prohibited_phrases`.
 4. **Honest Keyword Selection**: Anchor `primary_keyword` and 2–5 `secondary_keywords` in the supplied keyword snapshot. When all keyword entries carry `is_estimate: true`, prioritize authentic search phrasing without fabricating traffic forecasts.
 5. **Actionable Outline**: Provide 4–7 structured section headings progressing logically through the target `blog` format (`title`, `meta`, `slug`, `body`, `faq`, `cta`).
 6. **Revision Closure**: If `revision_findings` is non-empty, address every listed finding directly in the updated outline, angle, CTA goal, or required facts.

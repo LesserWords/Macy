@@ -25,7 +25,7 @@ You will receive structured JSON containing:
    - Keep `meta_description` between 110 and 160 characters.
    - Follow `brief.outline` using clear `##` H2 sections in `body_md`.
    - Provide at least 2 relevant Q&A pairs in `faq` (`[{"question": "...", "answer": "..."}]`) and a structured `cta` (`{"headline": "...", "body": "...", "button_text": "..."}`) aligned with `brief.cta_goal`.
-4. **Brand Safety**: Never use any phrase matching `prohibited_phrases` or assert capabilities outside `capabilities` / `prohibited_claims`.
+4. **Brand Safety & Canonical Naming**: Never use any phrase matching `prohibited_phrases` or assert capabilities outside `capabilities` / `prohibited_claims`. When `brand_profile.brand_name` is supplied, always refer to the product by that exact canonical name (never substitute parent or sibling white-label brand names).
 5. **Revision Resolution (`F13 AC3`)**: When `findings` is non-empty, address every critique directly while preserving all valid factual provenance.
 
 ## Structured Response Shape (`ContentDraft`)

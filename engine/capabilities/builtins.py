@@ -18,6 +18,7 @@ class CoreComplianceCapability:
             ui_screens=("dashboard", "brand_profile", "integrations", "webhooks"),
             cli_commands=(
                 "import-draft",
+                "adapt-draft",
                 "capabilities",
                 "plugins",
                 "integrations",
@@ -35,6 +36,7 @@ class CoreComplianceCapability:
                 "macy_list_workspaces",
                 "macy_get_workspace_status",
                 "macy_import_draft",
+                "macy_adapt_draft",
                 "macy_evaluate_draft",
             ),
         )

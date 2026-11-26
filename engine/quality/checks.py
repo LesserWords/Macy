@@ -974,6 +974,59 @@ def _skipped_result(
     )
 
 
+def _word_shingles(text: str, width: int = 3) -> set[tuple[str, ...]]:
+    tokens = [t for t in normalize_keyword(text).split() if t]
+    if len(tokens) < width:
+        return {(tok,) for tok in tokens}
+    return {tuple(tokens[i : i + width]) for i in range(len(tokens) - width + 1)}
+
+
+def check_adaptation_uniqueness(
+    source_draft: ContentDraft,
+    adapted_draft: ContentDraft,
+    *,
+    max_similarity: float = 0.65,
+) -> DeterministicCheckResult:
+    """Verify adapted draft has distinct slug/title and low body shingle overlap."""
+    same_slug = source_draft.slug.strip().lower() == adapted_draft.slug.strip().lower()
+    same_title = normalize_keyword(source_draft.title) == normalize_keyword(adapted_draft.title)
+    src_shingles = _word_shingles(source_draft.body_md)
+    dst_shingles = _word_shingles(adapted_draft.body_md)
+    union_count = len(src_shingles | dst_shingles)
+    similarity = round(len(src_shingles & dst_shingles) / union_count, 4) if union_count else 1.0
+    passed = not same_slug and not same_title and similarity <= max_similarity
+    reasons = [
+        label
+        for flag, label in (
+            (same_slug, "identical slug"),
+            (same_title, "identical title"),
+            (
+                similarity > max_similarity,
+                f"body similarity {similarity:.2f} > {max_similarity:.2f}",
+            ),
+        )
+        if flag
+    ]
+    detail = (
+        f"Adapted draft is distinct (shingle similarity {similarity:.2f} <= {max_similarity:.2f})."
+        if passed
+        else f"Adapted draft failed anti-cannibalization gate: {', '.join(reasons)}."
+    )
+    return DeterministicCheckResult(
+        check="adaptation_uniqueness",
+        passed=passed,
+        severity="critical",
+        responsible_module="write",
+        detail=detail,
+        metadata={
+            "similarity": similarity,
+            "max_similarity": max_similarity,
+            "same_slug": same_slug,
+            "same_title": same_title,
+        },
+    )
+
+
 def _run_extended_seo_checks(
     draft_model: ContentDraft,
     resolved_kw: str | None,

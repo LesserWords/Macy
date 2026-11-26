@@ -9,7 +9,8 @@ As an owner, I get a blog draft in my campaign's language and brand voice, where
 - In:
   - `ContentDraft` contract (title, meta, slug, `body_md`, FAQ, CTA, `claims[]`);
   - `draft_claims` rows;
-  - revision drafts (0–2).
+  - revision drafts (0–2);
+  - modular draft rewriting (`improve`, `simplify`, `seo_optimize`) and pass-by-value cross-brand persona adaptation (`adapt_brand`, `ADR-034`, `M11-02`).
 - Out: images and ALT text (Phase 2), other formats (Phase 3).
 
 ## Acceptance criteria

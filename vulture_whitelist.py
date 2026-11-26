@@ -18,6 +18,7 @@ _.positioning = contracts.BrandProfile.positioning
 _.capabilities = contracts.BrandProfile.capabilities
 _.prohibited_claims = contracts.BrandProfile.prohibited_claims
 _.cta_rules = contracts.BrandProfile.cta_rules
+_.validate_optional_text = contracts.BrandProfile.validate_optional_text  # type: ignore[misc]
 _.validate_non_empty_text = contracts.BrandProfile.validate_non_empty_text  # type: ignore[misc]
 _.validate_list_entries = contracts.BrandProfile.validate_list_entries  # type: ignore[misc]
 

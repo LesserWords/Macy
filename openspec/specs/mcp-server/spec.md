@@ -190,5 +190,16 @@ The MCP server (`engine/mcp/`) SHALL filter advertised tools according to the wo
 - **THEN** the MCP server refuses execution with structured error `CAPABILITY_DISABLED`
 
 #### Scenario: Stateless stdio MCP runs audit and compliance tools with zero database
-- **WHEN** `macy mcp --stateless` handles `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, or `macy_import_draft`
+- **WHEN** `macy mcp --stateless` handles `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, `macy_import_draft`, or `macy_adapt_draft`
 - **THEN** each tool executes deterministically via in-memory contracts and returns structured JSON without opening a database connection
+
+### Requirement: Pass-by-value cross-workspace draft adaptation MCP tool
+The MCP server SHALL expose `macy_adapt_draft` delegating strictly through `engine.services` (`adapt_draft_for_workspace` in DB mode, `adapt_draft_stateless` in stateless mode, and `MockStore.adapt_draft` in non-production mock mode), enforcing workspace membership, rejecting `file_path` over `streamable-http`, re-binding `draft_claims` inside the target workspace, and running the `check_adaptation_uniqueness` anti-cannibalization gate (`ADR-034`).
+
+#### Scenario: Adapting an exported draft into a sibling workspace stages it at Gate 2
+- **WHEN** `macy_adapt_draft` is invoked with target `workspace_id`, `body_md` (with optional `source_urls`), and authorized actor credentials
+- **THEN** the server SHALL adapt copy to the target workspace brand/persona, re-ingest public `source_urls` as tenant-local documents, verify uniqueness (`similarity <= max_similarity`), and stage the adapted draft for Gate 2 approval without cross-workspace DB references
+
+#### Scenario: Stateless stdio MCP adapts a draft against an explicit fixture with zero database
+- **WHEN** `macy mcp --stateless` receives `macy_adapt_draft` with `body_md`, `brand_fixture`, and `industry_pack`
+- **THEN** it SHALL return `adapted_markdown`, `uniqueness`, and compliance evaluation JSON cleanly without touching PostgreSQL

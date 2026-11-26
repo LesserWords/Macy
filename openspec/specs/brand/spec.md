@@ -40,3 +40,14 @@ The system SHALL provide `autoseed_from_url` in `engine/onboarding.py` to fetch 
 #### Scenario: Auto-seeder populates brand profile v1 and content inventory from public URL
 - **WHEN** `autoseed_from_url` runs for a valid public website URL with an accessible sitemap
 - **THEN** `brand_profiles` (`version=1`, `is_current=true`) and `content_inventory` rows are created with zero LLM API spend, while private or loopback URLs are refused by `safe_http`
+
+### Requirement: Canonical brand identity fields and acyclic load-time YAML composition
+The system SHALL support optional canonical identity fields (`brand_name`, `target_persona`, `canonical_domain`) on `BrandProfile` and acyclic load-time YAML `extends` fixture inheritance (`capabilities_add`, `capabilities_remove`, `prohibited_phrases_add`, `prohibited_claims_add`) resolved across cascading fixture roots and materialized into the workspace's own `brand_profiles` row with zero runtime parent links (`ADR-034`, `M11-01`).
+
+#### Scenario: Child fixture composes core rules via extends and strips composition directives
+- **WHEN** `config.load_brand_fixture_dict` resolves a child fixture declaring `extends: _base_core.yaml` alongside `capabilities_add`, `capabilities_remove`, `prohibited_phrases_add`, and `prohibited_claims_add`
+- **THEN** shared parent fields are merged deterministically, removed items are excluded, composition directive keys are stripped before `BrandProfile.model_validate()`, and seeding persists a self-contained workspace snapshot
+
+#### Scenario: Circular or missing extends reference fails cleanly
+- **WHEN** a brand fixture declares a cyclic `extends` chain or names a non-existent parent file
+- **THEN** loading raises `ValueError` naming the cycle or missing parent path
