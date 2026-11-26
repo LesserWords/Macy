@@ -37,3 +37,4 @@ One file per decision. Template: [../templates/adr.md](../templates/adr.md). To 
 | [031](ADR-031-zero-key-adapters-and-guided-onboarding.md) | Zero-key default adapters (`ollama`, `gnews_rss`, `autocomplete`) & guided URL onboarding | Accepted | F01, F03–F05, F07, F11, F22 |
 | [032](ADR-032-oss-context-overlay-and-public-readiness.md) | OSS public-readiness, hybrid 3-layer context overlay + DB snapshot (`MACY_CONTEXT_DIR`), Apache-2.0 & clean `macy` release | Accepted | F01, F03, F04, F08, F09, F20–F23 |
 | [033](ADR-033-macy-package-cli-and-tooling-identity.md) | Clean-break unified `macy` Python package, CLI entrypoint, `macy.*` plugin groups & default image identity | Accepted | F01, F05, F18, F20–F23 |
+| [034](ADR-034-white-label-brand-composition-and-persona-adaptation.md) | White-label brand composition (YAML `extends`) & pass-by-value cross-workspace persona adaptation | Accepted | F01, F03, F12–F14, F21, F23 |
