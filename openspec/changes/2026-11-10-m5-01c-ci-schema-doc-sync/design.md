@@ -2,7 +2,7 @@
 
 ## Context & Principles
 
-This change closes verification, local-dev ergonomics, schema-snapshot, and documentation drift gaps identified after M5-01 (`3fe745f`) while honoring `docs/adr/README.md`: **historical ADRs keep their original decision rationale intact**—only stale action-item checkboxes, implementation notes (`PG 18 runtime / PG 19 GA target`, dropped `rsshub`, current CLI syntax `content-engine <cmd>`), and tooling notes are updated alongside active guides, `DATA-MODEL.md`, `db/schema.sql`, and `M5.md`.
+This change closes verification, local-dev ergonomics, schema-snapshot, and documentation drift gaps identified after M5-01 (`3fe745f`) while honoring `docs/adr/README.md`: **historical ADRs keep their original decision rationale intact**—only stale action-item checkboxes, implementation notes (`PG 18 runtime / PG 19 GA target`, dropped `rsshub`, current CLI syntax `macy <cmd>`), and tooling notes are updated alongside active guides, `DATA-MODEL.md`, `db/schema.sql`, and `M5.md`.
 
 ## Decisions
 
@@ -39,13 +39,13 @@ This change closes verification, local-dev ergonomics, schema-snapshot, and docu
   - Align `bigint` integer types (`version`, `schema_version`, `articles_per_week`, `tier`, `key_version`, `attempts`, `last_http_status`, `input_tokens`, `output_tokens`, `cached_tokens`, `latency_ms`, `http_status`, `rank`, `revision`, `idx`).
   - Align `webhook_subscriptions.url CHECK (url ~ '^https?://')` (noting HTTPS enforcement in `safe_http` / production).
   - Add missing columns/constraints/cascades/defaults: `opportunities.created_at`, `drafts.decision_note`, `draft_claims` (`CHECK (idx >= 0)`, `ON DELETE CASCADE`), `quality_reports` (`score`, defaults `'{}'`/`'[]'`, `ON DELETE CASCADE`), `publications` (nullable `draft_id` and `url`, `title`, `error`, `UNIQUE (workspace_id, url)`), `anonymise_user_events(uuid)`, and `retention` grants (`usage_ledger` `SELECT`, `documents` `SELECT, UPDATE`).
-  - Clarify PostgreSQL 18 current runtime (`PG 19` target post-GA `2026-11-19`) and `content-engine purge` CLI invocation (`§5`).
+  - Clarify PostgreSQL 18 current runtime (`PG 19` target post-GA `2026-11-19`) and `macy purge` CLI invocation (`§5`).
 
 ### Decision 5: Cross-Repo Documentation & Checklist Reconciliation
 - **Files:** `docs/adr/ADR-{006,008,011,012,013,017,024}*.md`, `docs/architecture/TECH-RADAR.md`, `docs/features/F{01,04,05,08,18,20}*.md`, `docs/prd/MVP-PRD.md`, `docs/guides/developer-guide.md`, `docs/runbook.md`, `docs/plans/M5.md`.
-- Update `docs/adr/ADR-006` (`vulture` `min_confidence = 60` matches `pyproject.toml`), `ADR-011` (`[x] M0-04`), `ADR-012` (note `rsshub` dropped in M1-11 alongside implementation), `ADR-013` (`[x] M1-01` + runtime creator-only invariant note), `ADR-017` (`[x] M2-04`), and note `content-engine <cmd>` as the CLI entrypoint where stale `cli.py <cmd>` commands remain in active docs/features.
+- Update `docs/adr/ADR-006` (`vulture` `min_confidence = 60` matches `pyproject.toml`), `ADR-011` (`[x] M0-04`), `ADR-012` (note `rsshub` dropped in M1-11 alongside implementation), `ADR-013` (`[x] M1-01` + runtime creator-only invariant note), `ADR-017` (`[x] M2-04`), and note `macy <cmd>` as the CLI entrypoint where stale `cli.py <cmd>` commands remain in active docs/features.
 - Sync `docs/architecture/TECH-RADAR.md` §3 (`RSSHub/GDELT` dropped note instead of implying live savings) and remove ambiguous `PG 19 GA` phrasing where PG 18 is active.
-- Reconcile `docs/prd/MVP-PRD.md` active references cleanly (`scripts/check.sh` vs removed `poe check`, `mypy --strict`, dropped `rsshub`, external cron/`content-engine crontab` vs bundled `supercronic`, and PG 18 until 19 GA). Note `pyproject.toml` `[tool.pyrefly]` cleanup or document whether `[tool.pyrefly]` is experimental vs active `mypy` gate (explicitly leave `[tool.pyrefly]` removal decision or clear note cleanly).
+- Reconcile `docs/prd/MVP-PRD.md` active references cleanly (`scripts/check.sh` vs removed `poe check`, `mypy --strict`, dropped `rsshub`, external cron/`macy crontab` vs bundled `supercronic`, and PG 18 until 19 GA). Note `pyproject.toml` `[tool.pyrefly]` cleanup or document whether `[tool.pyrefly]` is experimental vs active `mypy` gate (explicitly leave `[tool.pyrefly]` removal decision or clear note cleanly).
 - Update `docs/plans/M5.md` and `docs/runbook.md` so J0–J8 live E2E paths reference `tests/test_live_e2e.py` and M5-01 completion criteria align cleanly between local verified work and pending live VPS steps.
 
 ## Risks & Mitigations

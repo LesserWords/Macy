@@ -35,7 +35,7 @@ All tables (retention); database roles
 ## Interfaces
 - `compose.*.yaml`, `scripts/deploy.sh`, `scripts/backup.sh`, `scripts/post_deploy_smoke.py`
 - `.github/workflows/{ci,e2e-live,deploy}.yml`
-- `content-engine create-workspace`, `content-engine test-sentry`
+- `macy create-workspace`, `macy test-sentry`
 - `cli purge`
 - `cli anonymise-user`
 - `docs/runbook.md`

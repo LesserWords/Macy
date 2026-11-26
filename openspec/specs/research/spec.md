@@ -41,7 +41,7 @@ The system SHALL poll feeds and site searches within the run window, canonicaliz
 - **THEN** it maps supported locales (`pt-BR`, `en-US`) to Brave parameters (raising `UnsupportedLocale` for unmapped locales) and records its unit cost in `usage_ledger`
 
 ### Requirement: Zero-key Google News RSS search plugin
-The system SHALL provide a `gnews_rss` plugin implementing `NewsSearchPort` registered under `content_engine.news_search`, executing topic and `site:<domain>` queries via `safe_http` + `defusedxml` across `pt-BR`/`BR` and `en-US`/`US` with zero external API keys (`ADR-031`, `F22 AC7`).
+The system SHALL provide a `gnews_rss` plugin implementing `NewsSearchPort` registered under `macy.news_search`, executing topic and `site:<domain>` queries via `safe_http` + `defusedxml` across `pt-BR`/`BR` and `en-US`/`US` with zero external API keys (`ADR-031`, `F22 AC7`).
 
 #### Scenario: Google News RSS plugin performs domain-scoped search and rejects unsupported locales
 - **WHEN** `gnews_rss` searches for `site:example.com` with `locale="pt-BR"` and `market="BR"`

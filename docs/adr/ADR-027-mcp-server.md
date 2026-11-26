@@ -18,7 +18,7 @@ Exposing Macy as an MCP server without distorting its invariants imposes hard ar
 | Option | Complexity | Cost | Fit |
 |---|---|---|---|
 | **A. FastMCP (`mcp>=1.2.0`) over `engine.services`, dual transport (`stdio` local + `streamable-http` behind Caddy) with fail-closed Bearer auth** (chosen) | Medium | Low (reuses existing Docker runtime image, Postgres pool, and Caddy) | Serves local IDEs (`stdio`) and VPS/CI E2E (`streamable-http`) cleanly under existing quality & deploy gates |
-| B. Stdio-only CLI command (`content-engine mcp`) | Low | Very low | Cannot be deployed, healthchecked, or smoke-tested as a containerized service on staging/prod VPS |
+| B. Stdio-only CLI command (`macy mcp`) | Low | Very low | Cannot be deployed, healthchecked, or smoke-tested as a containerized service on staging/prod VPS |
 | C. Separate FastAPI microservice + custom JSON-RPC server | High | Medium | Duplicates auth/observability plumbing, adds deployment drift, and bypasses FastMCP SDK protocol guarantees |
 
 ## Decision
@@ -62,7 +62,7 @@ Adopt **Option A**:
 External self-serve tenants require distinct user logins over public internet to `/mcp` without per-user Bearer tokens; then upgrade `engine/mcp/auth.py` and Caddy to OAuth 2.1 Dynamic Client Registration + OIDC JWT verification against `users`.
 
 ## Action items
-- [ ] `M5-03` — `ADR-027`, `F21`, OpenSpec change `2026-11-11-m5-03-mcp-foundation-auth`, `mcp>=1.2.0` + `importlinter`, `engine/mcp/{auth,errors,mock_store,server}.py`, `observability.py` MCP tags, `content-engine mcp` CLI.
+- [ ] `M5-03` — `ADR-027`, `F21`, OpenSpec change `2026-11-11-m5-03-mcp-foundation-auth`, `mcp>=1.2.0` + `importlinter`, `engine/mcp/{auth,errors,mock_store,server}.py`, `observability.py` MCP tags, `macy mcp` CLI.
 - [ ] `M5-04` — OpenSpec change `2026-11-11-m5-04-mcp-discovery-gate1`, service helpers & `engine/mcp/tools_research.py` (`macy_list_workspaces`, `macy_get_workspace_status`, `macy_research_topic`, `macy_score_topics`, `macy_list_topics_awaiting_approval`, `macy_decide_topic`).
 - [ ] `M5-05` — OpenSpec change `2026-11-11-m5-05-mcp-drafting-gate2`, `engine/quality/claims.py` + `services.verify_claims`, `services.preflight_mcp_spend`, `engine/mcp/{tools_editorial,resources,prompts}.py`, Hypothesis property suite.
 - [ ] `M5-06` — OpenSpec change `2026-11-11-m5-06-mcp-deploy-smoke`, Compose/Caddy/`deploy.sh`/`post_deploy_smoke.py`/CI/live-E2E integration + `docs/MCP.md` + `docs/runbook.md` + `macy-prod` Compose rehearsal.

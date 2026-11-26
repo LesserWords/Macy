@@ -9,6 +9,7 @@ import sys
 import uuid
 from contextlib import nullcontext
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from engine import capabilities, config, observability, services
@@ -420,12 +421,200 @@ def _handle_import_draft(args: argparse.Namespace) -> int:
             topic=args.topic,
             primary_keyword=args.primary_keyword,
             deterministic_only=bool(args.deterministic_only),
+            offline=bool(getattr(args, "offline", False)),
         )
         print(
             json.dumps(res, indent=2, default=str)
             if getattr(args, "json", False)
             else f"Imported draft {res['draft_id']} (rev {res['revision']}, "
             f"verdict={res['verdict']}, findings={len(res['findings'])})"
+        )
+        return 0
+    except Exception as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 1
+
+
+def _handle_adapt_draft(args: argparse.Namespace) -> int:
+    try:
+        if args.file is None and args.markdown is None:
+            msg = "Either --file or --markdown is required."
+            raise ValueError(msg)
+        if _is_stateless_mode(args):
+            res = services.adapt_draft_stateless(
+                file_path=args.file,
+                markdown_text=args.markdown,
+                brand_fixture=args.brand_fixture,
+                industry_pack=args.industry_pack,
+                format_slug=str(args.format),
+                primary_keyword=args.primary_keyword,
+                locale=str(args.locale or "pt-BR"),
+                max_similarity=float(args.max_similarity),
+                deterministic_only=bool(args.deterministic_only),
+                offline=bool(getattr(args, "offline", False)),
+                model=args.model,
+            )
+            summary = f"Adapted draft '{res['title']}' (stateless, verdict={res['verdict']})"
+        else:
+            ws_id, owner_id = _resolve_workspace_and_owner(args.workspace)
+            res = services.adapt_draft_for_workspace(
+                workspace_id=ws_id,
+                user_id=owner_id,
+                file_path=args.file,
+                markdown_text=args.markdown,
+                format_slug=str(args.format),
+                primary_keyword=args.primary_keyword,
+                locale=args.locale,
+                max_similarity=float(args.max_similarity),
+                deterministic_only=bool(args.deterministic_only),
+                offline=bool(getattr(args, "offline", False)),
+            )
+            summary = f"Adapted draft {res['draft_id']} (verdict={res['verdict']})"
+        if getattr(args, "output", None):
+            out_path = Path(str(args.output))
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(str(res["adapted_markdown"]), encoding="utf-8")
+        _print_cli_result(res, as_json=bool(getattr(args, "json", False)), summary=summary)
+        return 0
+    except Exception as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 1
+
+
+def _print_cli_result(res: Any, *, as_json: bool, summary: str) -> None:
+    print(json.dumps(res, indent=2, default=str) if as_json else summary)
+
+
+def _handle_decide_topic(args: argparse.Namespace) -> int:
+    try:
+        ws_id, owner_id = _resolve_workspace_and_owner(args.workspace)
+        res = services.decide_topic(
+            workspace_id=ws_id,
+            opportunity_id=uuid.UUID(str(args.topic_id)),
+            decision=str(args.decision),
+            user_id=owner_id,
+            note=getattr(args, "note", None),
+        )
+        _print_cli_result(
+            res,
+            as_json=bool(getattr(args, "json", False)),
+            summary=(
+                f"Decided topic {res.get('id', args.topic_id)}: {res.get('status', args.decision)}"
+            ),
+        )
+        return 0
+    except Exception as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 1
+
+
+def _handle_brief(args: argparse.Namespace) -> int:
+    try:
+        ws_id, owner_id = _resolve_workspace_and_owner(args.workspace)
+        res = services.get_or_create_mcp_brief(
+            workspace_id=ws_id,
+            opportunity_id=uuid.UUID(str(args.topic_id)),
+            user_id=owner_id,
+            offline=bool(getattr(args, "offline", False)),
+            format_slug=str(getattr(args, "format_slug", "blog") or "blog"),
+            funnel_stage=getattr(args, "funnel_stage", None),
+        )
+        _print_cli_result(
+            res,
+            as_json=bool(getattr(args, "json", False)),
+            summary=(
+                f"Brief {res.get('id')} (v{res.get('version')}, "
+                f"keyword={res.get('primary_keyword')})"
+            ),
+        )
+        return 0
+    except Exception as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 1
+
+
+def _handle_write(args: argparse.Namespace) -> int:
+    try:
+        ws_id, owner_id = _resolve_workspace_and_owner(args.workspace)
+        res = services.produce_and_evaluate_draft(
+            workspace_id=ws_id,
+            brief_id=uuid.UUID(str(args.brief_id)),
+            user_id=owner_id,
+            offline=bool(getattr(args, "offline", False)),
+        )
+        draft_info = res.get("draft") or {}
+        _print_cli_result(
+            res,
+            as_json=bool(getattr(args, "json", False)),
+            summary=f"Draft {draft_info.get('id')} (verdict={res.get('verdict')})",
+        )
+        return 0
+    except Exception as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 1
+
+
+def _handle_evaluate(args: argparse.Namespace) -> int:
+    try:
+        ws_id, owner_id = _resolve_workspace_and_owner(args.workspace)
+        res = services.evaluate_draft(
+            workspace_id=ws_id,
+            draft_id=uuid.UUID(str(args.draft_id)),
+            user_id=owner_id,
+            offline=bool(getattr(args, "offline", False)),
+            deterministic_only=bool(getattr(args, "deterministic_only", False)),
+        )
+        report = res.get("report")
+        verdict = getattr(report, "verdict", None) or (
+            report.get("verdict") if isinstance(report, dict) else "UNKNOWN"
+        )
+        _print_cli_result(
+            res,
+            as_json=bool(getattr(args, "json", False)),
+            summary=f"Evaluated draft {args.draft_id}: verdict={verdict}",
+        )
+        return 0
+    except Exception as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 1
+
+
+def _handle_decide_draft(args: argparse.Namespace) -> int:
+    try:
+        ws_id, owner_id = _resolve_workspace_and_owner(args.workspace)
+        res = services.decide_draft(
+            workspace_id=ws_id,
+            draft_id=uuid.UUID(str(args.draft_id)),
+            decision=str(args.decision),
+            user_id=owner_id,
+            note=getattr(args, "note", None),
+        )
+        _print_cli_result(
+            res,
+            as_json=bool(getattr(args, "json", False)),
+            summary=(
+                f"Decided draft {res.get('id', args.draft_id)}: {res.get('status', args.decision)}"
+            ),
+        )
+        return 0
+    except Exception as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 1
+
+
+def _handle_publish(args: argparse.Namespace) -> int:
+    try:
+        ws_id, owner_id = _resolve_workspace_and_owner(args.workspace)
+        res = services.publish_draft(
+            workspace_id=ws_id,
+            draft_id=uuid.UUID(str(args.draft_id)),
+            user_id=owner_id,
+            destination=getattr(args, "channel", None),
+        )
+        _print_cli_result(
+            res,
+            as_json=bool(getattr(args, "json", False)),
+            summary=f"Published draft {args.draft_id}: {res.get('status')}",
         )
         return 0
     except Exception as err:
@@ -525,7 +714,7 @@ def _handle_mcp(args: argparse.Namespace) -> int:
 
 
 def _build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
-    parser = argparse.ArgumentParser(prog="content-engine")
+    parser = argparse.ArgumentParser(prog="macy")
     subparsers = parser.add_subparsers(dest="subcommand")
 
     # plugins list
@@ -779,6 +968,12 @@ def _build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="Run deterministic compliance checks only (skip LLM rubric)",
     )
     import_draft_parser.add_argument(
+        "--offline",
+        action="store_true",
+        default=False,
+        help="Use the deterministic fake LLM for the rubric instead of the workspace LLM",
+    )
+    import_draft_parser.add_argument(
         "--stateless",
         action="store_true",
         default=False,
@@ -791,6 +986,66 @@ def _build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="Emit full structured JSON output",
     )
     import_draft_parser.set_defaults(func=_handle_import_draft)
+
+    # adapt-draft
+    adapt_parser = subparsers.add_parser(
+        "adapt-draft",
+        help="Adapt a pass-by-value .md/.pdf draft to another brand/persona or workspace",
+    )
+    adapt_parser.add_argument("--file", default=None, help="Path to source .md or .pdf draft")
+    adapt_parser.add_argument("--markdown", default=None, help="Inline source Markdown text")
+    adapt_parser.add_argument(
+        "-w", "--workspace", default=None, help="Target workspace slug or UUID (DB mode)"
+    )
+    adapt_parser.add_argument(
+        "--brand-fixture", default=None, help="Target BrandProfile YAML path/name (--stateless)"
+    )
+    adapt_parser.add_argument(
+        "--industry-pack", default=None, help="Target industry pack slug (--stateless)"
+    )
+    adapt_parser.add_argument(
+        "--format",
+        choices=["blog-short", "blog", "blog-long"],
+        default="blog",
+        help="Target format pack slug (default: blog)",
+    )
+    adapt_parser.add_argument("--primary-keyword", default=None, help="Override primary keyword")
+    adapt_parser.add_argument("--locale", default=None, help="Target locale (e.g. pt-BR, en-US)")
+    adapt_parser.add_argument(
+        "--max-similarity",
+        type=float,
+        default=0.65,
+        help="Maximum body shingle similarity threshold (default: 0.65)",
+    )
+    adapt_parser.add_argument(
+        "--deterministic-only",
+        action="store_true",
+        default=False,
+        help="Evaluate deterministically without LLM rubric spend",
+    )
+    adapt_parser.add_argument(
+        "--offline",
+        action="store_true",
+        default=False,
+        help="Use deterministic FakeLLM adapter",
+    )
+    adapt_parser.add_argument(
+        "--stateless",
+        action="store_true",
+        default=False,
+        help="Adapt draft against fixtures/packs with zero database connection (Path B)",
+    )
+    adapt_parser.add_argument("--model", default=None, help="Optional LLM model override")
+    adapt_parser.add_argument(
+        "--output", default=None, help="Optional output file path for adapted Markdown"
+    )
+    adapt_parser.add_argument(
+        "--json",
+        action="store_true",
+        default=False,
+        help="Emit full structured JSON output",
+    )
+    adapt_parser.set_defaults(func=_handle_adapt_draft)
 
     # audit
     audit_parser = subparsers.add_parser("audit", help="Run SEO + GEO URL audit or site crawl")
@@ -892,14 +1147,75 @@ def _build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     )
     mcp_parser.set_defaults(func=_handle_mcp)
 
+    _register_editorial_stage_parsers(subparsers)
+
     return parser
+
+
+def _register_editorial_stage_parsers(subparsers: Any) -> None:
+    dt_p = subparsers.add_parser("decide-topic", help="Approve or reject a scored topic")
+    dt_p.add_argument("--workspace", required=True, help="Workspace slug or UUID")
+    dt_p.add_argument("--topic-id", required=True, help="Opportunity/topic UUID")
+    dt_p.add_argument(
+        "--decision", required=True, choices=["approve", "approved", "reject", "rejected"]
+    )
+    dt_p.add_argument("--note", default=None, help="Optional editorial decision note")
+    dt_p.add_argument("--json", action="store_true", default=False)
+    dt_p.set_defaults(func=_handle_decide_topic)
+
+    br_p = subparsers.add_parser("brief", help="Get or generate an editorial brief for a topic")
+    br_p.add_argument("--workspace", required=True, help="Workspace slug or UUID")
+    br_p.add_argument("--topic-id", required=True, help="Approved topic/opportunity UUID")
+    br_p.add_argument("--format-slug", default="blog", help="Format pack slug (default: blog)")
+    br_p.add_argument("--funnel-stage", default=None, help="Funnel stage override (tofu|mofu|bofu)")
+    br_p.add_argument("--offline", action="store_true", default=False)
+    br_p.add_argument("--json", action="store_true", default=False)
+    br_p.set_defaults(func=_handle_brief)
+
+    wr_p = subparsers.add_parser(
+        "write", help="Produce and evaluate a draft from an editorial brief"
+    )
+    wr_p.add_argument("--workspace", required=True, help="Workspace slug or UUID")
+    wr_p.add_argument("--brief-id", required=True, help="Editorial brief UUID")
+    wr_p.add_argument("--offline", action="store_true", default=False)
+    wr_p.add_argument("--json", action="store_true", default=False)
+    wr_p.set_defaults(func=_handle_write)
+
+    ev_p = subparsers.add_parser(
+        "evaluate", help="Run deterministic + rubric evaluation on a draft"
+    )
+    ev_p.add_argument("--workspace", required=True, help="Workspace slug or UUID")
+    ev_p.add_argument("--draft-id", required=True, help="Draft UUID")
+    ev_p.add_argument("--deterministic-only", action="store_true", default=False)
+    ev_p.add_argument("--offline", action="store_true", default=False)
+    ev_p.add_argument("--json", action="store_true", default=False)
+    ev_p.set_defaults(func=_handle_evaluate)
+
+    dd_p = subparsers.add_parser(
+        "decide-draft", help="Approve or decline an evaluated draft (Gate 2)"
+    )
+    dd_p.add_argument("--workspace", required=True, help="Workspace slug or UUID")
+    dd_p.add_argument("--draft-id", required=True, help="Draft UUID")
+    dd_p.add_argument(
+        "--decision", required=True, choices=["approve", "approved", "decline", "declined"]
+    )
+    dd_p.add_argument("--note", default=None, help="Optional Gate 2 review note")
+    dd_p.add_argument("--json", action="store_true", default=False)
+    dd_p.set_defaults(func=_handle_decide_draft)
+
+    pb_p = subparsers.add_parser("publish", help="Publish an approved draft via the Publisher port")
+    pb_p.add_argument("--workspace", required=True, help="Workspace slug or UUID")
+    pb_p.add_argument("--draft-id", required=True, help="Approved draft UUID")
+    pb_p.add_argument("--channel", default=None, help="Optional destination channel override")
+    pb_p.add_argument("--json", action="store_true", default=False)
+    pb_p.set_defaults(func=_handle_publish)
 
 
 def main(args: list[str] | None = None) -> int:
     """CLI main entry point."""
     parser = _build_parser()
 
-    if args is None and any("pytest" in arg for arg in sys.argv):
+    if args is None and Path(sys.argv[0]).stem.lower().startswith("pytest"):
         parser.print_help()
         return 0
 

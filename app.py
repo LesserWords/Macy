@@ -14,7 +14,7 @@ from pydantic import ValidationError
 
 from engine import auth, bootstrap, capabilities, i18n, migrations, observability, services
 from engine.__main__ import start_embedded_worker
-from engine.contracts import CampaignConfig, CrawlConfig, ScoringWeights
+from engine.contracts import CampaignConfig, ContentDraft, CrawlConfig, DraftClaim, ScoringWeights
 from engine.i18n import _
 
 
@@ -1837,6 +1837,87 @@ def _render_draft_review_card(
         bundle.get("cost_breakdown") or [],
         bundle.get("total_run_cost_usd"),
     )
+    _render_adapt_to_workspace_section(bundle, user, workspace)
+
+
+def _adapt_draft_to_workspace(  # noqa: PLR0913
+    bundle: dict[str, Any],
+    *,
+    target_workspace_id: uuid.UUID,
+    user_id: uuid.UUID,
+    format_slug: str = "blog",
+    deterministic_only: bool = True,
+    offline: bool = False,
+) -> dict[str, Any]:
+    """Export review bundle by value and adapt it into a sibling workspace (ADR-034)."""
+    draft_row = bundle["draft"]
+    payload = dict(draft_row.get("payload") or {})
+    bundle_claims = bundle.get("claims") or []
+    source_urls = {
+        str(c["document_id"]): str(c["document_url"]).strip()
+        for c in bundle_claims
+        if c.get("document_id") and c.get("document_url")
+    }
+    if not payload.get("claims") and bundle_claims:
+        payload["claims"] = [
+            DraftClaim(
+                text=str(c.get("text") or ""),
+                kind="analysis" if str(c.get("kind") or "fact").lower() == "analysis" else "fact",
+                source_id=str(c["document_id"]) if c.get("document_id") else None,
+            ).model_dump(mode="json")
+            for c in bundle_claims
+        ]
+    draft_model = ContentDraft.model_validate(payload)
+    src_md = services.render_draft_markdown(draft_model, source_url_by_doc_id=source_urls)
+    return services.adapt_draft_for_workspace(
+        workspace_id=target_workspace_id,
+        user_id=user_id,
+        markdown_text=src_md,
+        format_slug=format_slug,
+        deterministic_only=deterministic_only,
+        offline=offline,
+    )
+
+
+def _render_adapt_to_workspace_section(  # pragma: no cover
+    bundle: dict[str, Any],
+    user: dict[str, Any],
+    workspace: dict[str, Any],
+) -> None:
+    siblings = [
+        ws
+        for ws in services.list_accessible_workspaces(user_id=user["user_id"])
+        if str(ws.get("workspace_id")) != str(workspace["workspace_id"])
+    ]
+    with st.expander(_("Adapt for Another Workspace")):
+        if not siblings:
+            st.caption(_("No other workspaces available for adaptation."))
+            return
+        labels = {str(ws["workspace_id"]): f"{ws['name']} ({ws['slug']})" for ws in siblings}
+        target_id_str = st.selectbox(
+            _("Target Workspace"),
+            options=list(labels.keys()),
+            format_func=lambda wid: labels.get(wid, wid),
+            key=f"adapt_target_{bundle['draft'].get('id')}",
+        )
+        if st.button(
+            _("Adapt Draft to Selected Workspace"),
+            key=f"adapt_btn_{bundle['draft'].get('id')}",
+        ):
+            res = _adapt_draft_to_workspace(
+                bundle,
+                target_workspace_id=uuid.UUID(str(target_id_str)),
+                user_id=user["user_id"],
+                deterministic_only=False,
+            )
+            st.success(_("Draft adapted cleanly and staged at Gate 2 in the target workspace."))
+            st.json(
+                {
+                    "draft_id": str(res.get("draft_id")),
+                    "verdict": res.get("verdict"),
+                    "uniqueness": res.get("uniqueness"),
+                }
+            )
 
 
 def _render_draft_review(user: dict[str, Any], workspace: dict[str, Any]) -> None:

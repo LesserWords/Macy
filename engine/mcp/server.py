@@ -20,6 +20,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from engine import __version__, capabilities, services
 from engine.contracts import CrawlConfig
 from engine.mcp.auth import (
+    AdaptDraftRequest,
     BriefRequest,
     DraftDecisionRequest,
     EvaluateDraftRequest,
@@ -154,6 +155,8 @@ class ServiceStoreAdapter:
             user_id=request.user_id,
             force_regenerate=request.force_regenerate,
             offline=request.offline,
+            format_slug=request.format_slug,
+            funnel_stage=request.funnel_stage,
         )
 
     def generate_draft(self, request: GenerateDraftRequest) -> dict[str, Any]:
@@ -195,6 +198,21 @@ class ServiceStoreAdapter:
             topic=request.topic,
             primary_keyword=request.primary_keyword,
             deterministic_only=request.deterministic_only,
+            offline=request.offline,
+        )
+
+    def adapt_draft(self, request: AdaptDraftRequest) -> dict[str, Any]:
+        return services.adapt_draft_for_workspace(
+            workspace_id=request.workspace_id,
+            user_id=request.user_id,
+            file_path=request.file_path,
+            markdown_text=request.body_md,
+            format_slug=request.format_slug,
+            primary_keyword=request.primary_keyword,
+            locale=request.locale,
+            max_similarity=request.max_similarity,
+            deterministic_only=request.deterministic_only,
+            offline=request.offline,
         )
 
     def list_drafts_for_review(

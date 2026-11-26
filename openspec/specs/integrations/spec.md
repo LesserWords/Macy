@@ -84,7 +84,7 @@ The OpenRouter LLM plugin SHALL request structured output through JSON-schema `r
 - **THEN** a warning is logged, the fallback request includes the response JSON Schema, and a validated result is returned
 
 ### Requirement: Universal OpenAI-compatible and local Ollama LLM plugins
-The system SHALL provide `openai_compat` and `ollama` plugins implementing `LLMPort` registered under `content_engine.llm`, supporting structured `instructor` outputs, per-stage model selection, SSRF validation on custom base URLs, and `$0.000000` cost tracking for local Ollama runs (`ADR-031`, `F22 AC7`).
+The system SHALL provide `openai_compat` and `ollama` plugins implementing `LLMPort` registered under `macy.llm`, supporting structured `instructor` outputs, per-stage model selection, SSRF validation on custom base URLs, and `$0.000000` cost tracking for local Ollama runs (`ADR-031`, `F22 AC7`).
 
 #### Scenario: Local Ollama LLM completes structured prompt with zero USD spend
 - **WHEN** `ollama` executes `complete(prompt, schema=...)` against a configured local Ollama endpoint

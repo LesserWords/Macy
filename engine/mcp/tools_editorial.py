@@ -6,6 +6,7 @@ import uuid
 from typing import Any
 
 from engine.mcp.auth import (
+    AdaptDraftRequest,
     BriefRequest,
     DraftDecisionRequest,
     EvaluateDraftRequest,
@@ -129,6 +130,7 @@ def _register_import_draft_tool(bundle: MCPBundleProtocol) -> None:
         topic: str | None = None,
         primary_keyword: str | None = None,
         deterministic_only: bool = True,
+        offline: bool = False,
         actor_email: str | None = None,
         actor_user_id: str | None = None,
     ) -> dict[str, Any]:
@@ -157,6 +159,7 @@ def _register_import_draft_tool(bundle: MCPBundleProtocol) -> None:
                     topic=topic,
                     primary_keyword=primary_keyword,
                     deterministic_only=deterministic_only,
+                    offline=offline,
                 )
             )
 
@@ -357,9 +360,64 @@ def _register_audit_tools(bundle: MCPBundleProtocol) -> None:
         bundle.mcp.tool()(tool_fn)
 
 
+def _register_adapt_draft_tool(bundle: MCPBundleProtocol) -> None:
+    def macy_adapt_draft(  # noqa: PLR0913
+        workspace_id: str,
+        body_md: str | None = None,
+        file_path: str | None = None,
+        brand_fixture: str | None = None,
+        industry_pack: str | None = None,
+        format_slug: str = "blog",
+        primary_keyword: str | None = None,
+        locale: str | None = None,
+        max_similarity: float = 0.65,
+        deterministic_only: bool = True,
+        offline: bool = False,
+        model: str | None = None,
+        actor_email: str | None = None,
+        actor_user_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Adapt an exported Markdown draft into another brand/persona by value (ADR-034)."""
+
+        def _exec() -> dict[str, Any]:
+            if file_path is not None and bundle.transport == "streamable-http":
+                msg = (
+                    "file_path is not allowed over streamable-http transport; pass body_md instead."
+                )
+                raise ValueError(msg)
+            ws_uuid, actor = authorize_bundle_workspace(
+                bundle,
+                workspace_id=workspace_id,
+                actor_email=actor_email,
+                actor_user_id=actor_user_id,
+            )
+            return bundle.store.adapt_draft(
+                AdaptDraftRequest(
+                    workspace_id=ws_uuid,
+                    user_id=actor.user_id,
+                    file_path=file_path,
+                    body_md=body_md,
+                    brand_fixture=brand_fixture,
+                    industry_pack=industry_pack,
+                    format_slug=format_slug,
+                    primary_keyword=primary_keyword,
+                    locale=locale,
+                    max_similarity=max_similarity,
+                    deterministic_only=deterministic_only,
+                    offline=offline,
+                    model=model,
+                )
+            )
+
+        return run_mcp_tool("macy_adapt_draft", _exec, workspace_id=workspace_id)
+
+    bundle.mcp.tool()(macy_adapt_draft)
+
+
 def register_editorial_tools(bundle: MCPBundleProtocol) -> None:
     """Register M5-05 editorial, runtime claim check, Gate 2, and publish MCP tools."""
     _register_brief_and_draft_tools(bundle)
     _register_gate2_and_publish_tools(bundle)
     _register_import_draft_tool(bundle)
+    _register_adapt_draft_tool(bundle)
     _register_audit_tools(bundle)

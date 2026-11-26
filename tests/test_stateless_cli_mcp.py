@@ -29,7 +29,7 @@ def test_stateless_cli_audit_and_crawl_without_db(
     monkeypatch: pytest.MonkeyPatch,
     capsys: Any,
 ) -> None:
-    """D4 Path B: content-engine audit [--crawl] --stateless runs with zero DB calls."""
+    """D4 Path B: macy audit [--crawl] --stateless runs with zero DB calls."""
     _forbid_db(monkeypatch)
     monkeypatch.setattr("engine.safe_http.safe_request", _mock_site_fetcher())
 
@@ -63,7 +63,7 @@ def test_stateless_cli_import_draft_without_db(
     monkeypatch: pytest.MonkeyPatch,
     capsys: Any,
 ) -> None:
-    """D4 Path B: content-engine import-draft --stateless runs compliance + JSON-LD cleanly."""
+    """D4 Path B: macy import-draft --stateless runs compliance + JSON-LD cleanly."""
     _forbid_db(monkeypatch)
     md_file = tmp_path / "draft.md"
     body_words = " ".join(["lentes", "oticas", "gestao", "atendimento", "qualidade"] * 90)
@@ -113,7 +113,7 @@ def test_stateless_mcp_server_tools_without_db(
     monkeypatch: pytest.MonkeyPatch,
     capsys: Any,
 ) -> None:
-    """D4 Path B: content-engine mcp --stateless serves audit & compliance tools with 0 DB calls."""
+    """D4 Path B: macy mcp --stateless serves audit & compliance tools with 0 DB calls."""
     _forbid_db(monkeypatch)
     monkeypatch.setattr("engine.safe_http.safe_request", _mock_site_fetcher())
 
@@ -127,6 +127,7 @@ def test_stateless_mcp_server_tools_without_db(
         "macy_audit_url",
         "macy_crawl_site",
         "macy_import_draft",
+        "macy_adapt_draft",
         "macy_evaluate_draft",
     }
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 import pytest
@@ -203,7 +204,7 @@ def test_backup_script_once_and_retention_pruning(tmp_path: Path) -> None:
     for f in (old_local, old_offsite, recent_local, recent_offsite):
         f.write_text("dummy", encoding="utf-8")
 
-    now_ts = 1794200000  # arbitrary reference epoch
+    now_ts = int(time.time())
     twenty_days_ago = now_ts - (20 * 86400)
     two_days_ago = now_ts - (2 * 86400)
     os.utime(old_local, (twenty_days_ago, twenty_days_ago))

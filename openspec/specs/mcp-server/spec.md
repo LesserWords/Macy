@@ -20,7 +20,7 @@ The system SHALL expose an MCP server over local `stdio` and containerized `stre
 The system SHALL provide an explicit `--mock` (or `MACY_MCP_STANDALONE=1`) offline demo workspace (`acme-demo`) for local dev/test use ONLY, and MUST refuse `--mock` in staging/production or silently degrading on Postgres failure (`ADR-027`, `F01 AC6`).
 
 #### Scenario: Explicit mock mode boots demo general store in non-production
-- **WHEN** `content-engine mcp --mock` executes while `APP_ENV` is neither `staging`, `production`, nor `prod`
+- **WHEN** `macy mcp --mock` executes while `APP_ENV` is neither `staging`, `production`, nor `prod`
 - **THEN** the server SHALL initialize an in-memory general store (`acme-demo`, `owner@example.com`) backed by test doubles and log a diagnostic notice to `stderr`
 
 #### Scenario: Mock mode is refused in staging and production
@@ -51,7 +51,7 @@ The system SHALL enforce fail-closed Bearer token authentication on `streamable-
 - **THEN** identity resolves from `actor_email` -> `MACY_USER_EMAIL` -> `MACY_ACTOR_USER_ID` -> `MACY_TEST_USER_EMAIL` (rejected with `FakeIdentityForbiddenError` in `staging`/`production`/`prod`), falling back to the workspace owner ONLY when `--allow-owner-fallback` is explicitly set in non-production environments
 
 ### Requirement: Workspace member boundary, CLI entrypoint, and scrubbed telemetry
-Every workspace-scoped MCP operation SHALL enforce `require_member`, operate strictly through `engine.services` and `engine.contracts`, emit Sentry telemetry tagged with `mcp_tool` and scrubbed of secrets, and expose `content-engine mcp` in CLI (`ADR-014`, `ADR-023`, `ADR-027`).
+Every workspace-scoped MCP operation SHALL enforce `require_member`, operate strictly through `engine.services` and `engine.contracts`, emit Sentry telemetry tagged with `mcp_tool` and scrubbed of secrets, and expose `macy mcp` in CLI (`ADR-014`, `ADR-023`, `ADR-027`).
 
 #### Scenario: Non-member caller is refused with structured permission error
 - **WHEN** a resolved authenticated user invokes a workspace-scoped MCP handler for a workspace where they hold no membership
@@ -62,7 +62,7 @@ Every workspace-scoped MCP operation SHALL enforce `require_member`, operate str
 - **THEN** Sentry receives the exception tagged with `mcp_tool`, `workspace_id`, and optional `run_id` with `MCP_AUTH_TOKEN` and `Bearer` strings redacted
 
 #### Scenario: CLI check flag validates startup readiness without hanging
-- **WHEN** `content-engine mcp --check` executes (with `--mock` in dev, or live DB config)
+- **WHEN** `macy mcp --check` executes (with `--mock` in dev, or live DB config)
 - **THEN** it validates dependencies, configuration, and identity/DB connectivity and exits `0` cleanly
 
 ### Requirement: Workspace discovery and operational status MCP tools
@@ -179,7 +179,7 @@ The system SHALL expose `macy_ingest_research_documents` and `macy_import_draft`
 - **THEN** the server persists the draft as `revision + 1` (up to `revision = 2`) under `brief_id` and updates `draft_claims` atomically
 
 #### Scenario: Headless Strands Agents client executes Agent-Driven Mode compliance loop over MCP
-- **WHEN** `scripts/compliance_agent.py` connects to `content-engine mcp` via `strands.tools.mcp.MCPClient`
+- **WHEN** `scripts/compliance_agent.py` connects to `macy mcp` via `strands.tools.mcp.MCPClient`
 - **THEN** the agent discovers the `macy_*` toolset, ingests research sources, imports and iteratively refines the draft against `macy_evaluate_draft` findings (`revision 0..2`), and halts at Gate 2 (`status = 'pass'`) without importing any agent framework inside `engine/`
 
 ### Requirement: Capability-scoped MCP tool exposure and stateless mode
@@ -190,5 +190,16 @@ The MCP server (`engine/mcp/`) SHALL filter advertised tools according to the wo
 - **THEN** the MCP server refuses execution with structured error `CAPABILITY_DISABLED`
 
 #### Scenario: Stateless stdio MCP runs audit and compliance tools with zero database
-- **WHEN** `content-engine mcp --stateless` handles `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, or `macy_import_draft`
+- **WHEN** `macy mcp --stateless` handles `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, `macy_import_draft`, or `macy_adapt_draft`
 - **THEN** each tool executes deterministically via in-memory contracts and returns structured JSON without opening a database connection
+
+### Requirement: Pass-by-value cross-workspace draft adaptation MCP tool
+The MCP server SHALL expose `macy_adapt_draft` delegating strictly through `engine.services` (`adapt_draft_for_workspace` in DB mode, `adapt_draft_stateless` in stateless mode, and `MockStore.adapt_draft` in non-production mock mode), enforcing workspace membership, rejecting `file_path` over `streamable-http`, re-binding `draft_claims` inside the target workspace, and running the `check_adaptation_uniqueness` anti-cannibalization gate (`ADR-034`).
+
+#### Scenario: Adapting an exported draft into a sibling workspace stages it at Gate 2
+- **WHEN** `macy_adapt_draft` is invoked with target `workspace_id`, `body_md` (with optional `source_urls`), and authorized actor credentials
+- **THEN** the server SHALL adapt copy to the target workspace brand/persona, re-ingest public `source_urls` as tenant-local documents, verify uniqueness (`similarity <= max_similarity`), and stage the adapted draft for Gate 2 approval without cross-workspace DB references
+
+#### Scenario: Stateless stdio MCP adapts a draft against an explicit fixture with zero database
+- **WHEN** `macy mcp --stateless` receives `macy_adapt_draft` with `body_md`, `brand_fixture`, and `industry_pack`
+- **THEN** it SHALL return `adapted_markdown`, `uniqueness`, and compliance evaluation JSON cleanly without touching PostgreSQL

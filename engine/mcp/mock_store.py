@@ -13,6 +13,7 @@ from typing import Any, Literal
 from engine import budget, capabilities, safe_http
 from engine.audit import audit_url as _run_url_audit_core
 from engine.contracts import (
+    BrandProfile,
     ContentDraft,
     CrawlConfig,
     DraftClaim,
@@ -31,6 +32,7 @@ from engine.integrations.fakes import (
 )
 from engine.integrations.registry import IntegrationMissing
 from engine.mcp.auth import (
+    AdaptDraftRequest,
     BriefRequest,
     DraftDecisionRequest,
     EvaluateDraftRequest,
@@ -1035,7 +1037,7 @@ class MockStore:
             "quality_report": report,
         }
 
-    def _read_mock_import_markdown(self, request: ImportDraftRequest) -> str:
+    def _read_mock_import_markdown(self, request: ImportDraftRequest | AdaptDraftRequest) -> str:
         from engine.production import writer
 
         if request.file_path is not None:
@@ -1129,6 +1131,81 @@ class MockStore:
             "verdict": report_obj.verdict,
             "score": report_obj.score,
             "findings": findings,
+        }
+
+    def adapt_draft(self, request: AdaptDraftRequest) -> dict[str, Any]:
+        """Adapt an exported Markdown draft to the mock workspace brand/persona."""
+        from engine import quality, services
+        from engine.production import rewrite as rewrite_mod
+        from engine.production import writer
+        from engine.quality import checks as quality_checks
+
+        self.require_member(workspace_id=request.workspace_id, user_id=request.user_id)
+        ws = self._workspaces[request.workspace_id]
+        raw_md = self._read_mock_import_markdown(request)
+        source_draft = writer.parse_markdown_draft(raw_md)
+        brand_row = self.current_brand(workspace_id=request.workspace_id, user_id=request.user_id)
+        target_brand = (
+            BrandProfile.model_validate(brand_row["payload"])
+            if brand_row and brand_row.get("payload")
+            else None
+        )
+        adapted = rewrite_mod.rewrite_draft(
+            source_draft,
+            mode="adapt_brand",
+            primary_keyword=request.primary_keyword or source_draft.title,
+            locale=request.locale or ws["locale"],
+            target_brand=target_brand,
+            llm_adapter=FakeLLM(),
+        )
+        uniq = quality_checks.check_adaptation_uniqueness(
+            source_draft,
+            adapted,
+            max_similarity=request.max_similarity,
+        )
+        report_obj = quality.evaluate(
+            adapted,
+            brand_profile=target_brand,
+            format_slug=request.format_slug,
+            deterministic_only=request.deterministic_only,
+            primary_keyword=request.primary_keyword or adapted.title,
+            locale=request.locale or ws["locale"],
+            llm_adapter=FakeLLM(),
+        )
+        draft_id = uuid.uuid4()
+        new_status = "pass" if report_obj.verdict == "PASS" else "revision"
+        findings = [f.model_dump(mode="json") for f in report_obj.findings]
+        self._drafts[draft_id] = {
+            "id": draft_id,
+            "workspace_id": request.workspace_id,
+            "brief_id": uuid.uuid4(),
+            "run_id": uuid.uuid4(),
+            "revision": 0,
+            "status": new_status,
+            "payload": adapted.model_dump(mode="json"),
+            "claims": [c.model_dump(mode="json") for c in adapted.claims],
+            "quality_report": {
+                "verdict": report_obj.verdict,
+                "score": report_obj.score,
+                "findings": findings,
+            },
+            "created_at": datetime.now(UTC),
+        }
+        return {
+            "draft_id": draft_id,
+            "status": new_status,
+            "title": adapted.title,
+            "slug": adapted.slug,
+            "verdict": report_obj.verdict,
+            "score": report_obj.score,
+            "findings": findings,
+            "uniqueness": {
+                "check": uniq.check,
+                "passed": uniq.passed,
+                "detail": uniq.detail,
+                **uniq.metadata,
+            },
+            "adapted_markdown": services.render_draft_markdown(adapted),
         }
 
     def list_drafts_for_review(

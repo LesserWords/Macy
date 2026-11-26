@@ -1,6 +1,6 @@
 # Developer & CLI Guide
 
-This guide covers local development, the `content-engine` CLI reference, quality gates, testing suites, and extending Macy (plugins, packs, prompts, translations, and migrations).
+This guide covers local development, the `macy` CLI reference, quality gates, testing suites, and extending Macy (plugins, packs, prompts, translations, and migrations).
 
 > **Related docs:**
 > - Product & workflow overview → [README.md](../../README.md) · [User & Editorial Guide](user-guide.md)
@@ -53,13 +53,13 @@ Key architectural rules:
 ### Running & Testing Live Locally
 - **Rebuild after image changes:** After `Dockerfile`, `pyproject.toml`, or `fixtures/` changes, run `docker compose up -d --build` so running `app` and `worker` containers pick up the updated image.
 - **Dev vs Prod adapter parity:** In `compose.override.yaml` (`APP_ENV=development`), configuring plugins in **Integrations** (OpenRouter, Brave, DataForSEO, Publisher) executes real vendor API calls, while unconfigured ports still fall back to `Fake*` adapters. To enforce `staging`/`production` parity (`RSSFeedSource`/`TrafilaturaExtractor` defaults + `blocked(integration_missing)` if `llm`/`news_search` is absent + Caddy TLS/Google OIDC), run the `compose.prod.yaml` overlay locally (`SKIP_PULL=1 SMOKE_INSECURE=1 sh scripts/deploy.sh`, see [Operations Runbook](../runbook.md#two-projects-on-one-host)).
-- **Worker vs Scheduled Cron:** `worker` (`python -m engine`) polls queued UI `Run now` jobs and outbound webhooks every `WORKER_POLL_INTERVAL_SECONDS` (default `15 s`), whereas automatic `schedule_cron` execution and nightly `02:00 UTC` `purge` require wiring external/host cron or Supercronic from `content-engine crontab`.
+- **Worker vs Scheduled Cron:** `worker` (`python -m engine`) polls queued UI `Run now` jobs and outbound webhooks every `WORKER_POLL_INTERVAL_SECONDS` (default `15 s`), whereas automatic `schedule_cron` execution and nightly `02:00 UTC` `purge` require wiring external/host cron or Supercronic from `macy crontab`.
 
 ---
 
-## 3. Complete CLI Reference (`content-engine`)
+## 3. Complete CLI Reference (`macy`)
 
-Invoke via `docker compose exec app content-engine <command>` or locally via `uv run content-engine <command>` (equivalent to `python -m engine.cli`).
+Invoke via `docker compose exec app macy <command>` or locally via `uv run macy <command>` (equivalent to `python -m engine.cli`).
 
 ### Workspace, Brand & Source Bootstrap
 
@@ -73,6 +73,7 @@ Invoke via `docker compose exec app content-engine <command>` or locally via `uv
 | `verify-sources` | `[--pack <slug>] [--days 30] [--offline]` | Probes all pack sources over the lookback window and prints `records_found`, `dated_pct`, and status (`ok` / `disabled` / `no_records` / `error`). |
 | `import-sitemap` | `<url> [--workspace <slug-or-id>] [--fetch-titles]` | Idempotently imports existing blog URLs from a sitemap XML/index (or local file) into `publications` (`mode='live'`) so reports flag already-covered topics. |
 | `import-draft` | `--file <path.md\|.pdf> [--workspace <slug-or-id>] [--format blog\|blog-short\|blog-long] [--brief-id <uuid>] [--topic <str>] [--primary-keyword <str>] [--deterministic-only] [--stateless] [--json]` | Parses Markdown/frontmatter or PDF into a `ContentDraft` and runs compliance evaluation (`--stateless` runs zero-DB Path B check + JSON-LD generation). |
+| `adapt-draft` | `--file <path.md\|.pdf> [--markdown <text>] [--workspace <slug-or-id>] [--brand-fixture <path>] [--industry-pack <slug>] [--format blog\|blog-short\|blog-long] [--max-similarity 0.65] [--deterministic-only] [--offline] [--stateless] [--output <out.md>] [--json]` | Adapts a draft by value to a target brand/persona with `check_adaptation_uniqueness` (`max_similarity <= 0.65`), staging at Gate 2 in DB mode or running zero-DB in `--stateless` mode (`ADR-034`). |
 | `audit` | `<url> [--crawl] [--max-pages <n>] [--plan free\|paid] [--stateless] [--json]` | Runs a 7-category single-URL SEO+GEO audit or a bounded BFS site crawl (`free` `20`, `paid` `50`, hard cap `200`; `--stateless` runs with zero DB). |
 
 ### Pipeline Runs, Scheduling & Webhooks
@@ -82,7 +83,7 @@ Invoke via `docker compose exec app content-engine <command>` or locally via `uv
 | `run-week` | `[<workspace> \| --workspace <slug-or-id>] [--campaign <name-or-id>] [--user-id <uuid>] [--offline] [--window-days 7]` | Triggers a run, executes research + scoring synchronously, and compiles the weekly report on completion. In live/production mode (`offline=False` or `APP_ENV=staging\|production`), missing `llm`/`news_search` integrations block cleanly (`blocked_reason='integration_missing'`). |
 | `run-now` | `<workspace> [--campaign <name-or-id>] [--user-id <uuid>] [--offline]` | Queues a manual run (`run_now`) for the background worker loop (`python -m engine --worker` / `KEEP_ALIVE=true`). Passing `--offline` executes the queued run immediately with fake adapters. |
 | `run-stage` | `<run-or-record-uuid> [--stage <stage>] [--offline]` | Re-runs failed items for a `research_record` UUID or resumes/re-runs a `blocked`/`failed` run stage (`research`, `score`) cleanly with configured live adapters (pass `--offline` to force fakes). |
-| `crontab` | `[--workspace <slug-or-id>]` | Generates a Supercronic crontab emitting `CRON_TZ=<workspace-tz> <schedule_cron> content-engine run-week --workspace ...` plus daily `02:00 UTC` `content-engine purge`. |
+| `crontab` | `[--workspace <slug-or-id>]` | Generates a Supercronic crontab emitting `CRON_TZ=<workspace-tz> <schedule_cron> macy run-week --workspace ...` plus daily `02:00 UTC` `macy purge`. |
 | `webhooks-deliver` | `[--batch-size 10]` | Dispatches due `pending` / retrying `webhook_deliveries` rows using Standard Webhooks HMAC-SHA256 signing and `safe_http`. |
 
 ### Integrations, Encryption & Observability
@@ -162,7 +163,7 @@ sh scripts/check.sh
 1. Implement the matching `Protocol` in [engine/integrations/ports.py](../../engine/integrations/ports.py) (`LLMPort`, `FeedSourcePort`, `NewsSearchPort`, `ExtractorPort`, `KeywordProviderPort`, `PublisherPort`, `AnalyticsSourcePort`, `BrowserAuditPort`, `PageSpeedPort`, or `RankTrackerPort`).
 2. Define a nested `class Settings(BaseModel)` with `model_config = ConfigDict(extra="forbid")`. Mark sensitive credentials as `SecretStr` so the Admin UI renders password inputs and encrypts them automatically.
 3. Implement `healthcheck(self) -> None` (called by **Test Connection** in the UI) and declare `SUPPORTED_LOCALES: tuple[str, ...]` (raising `UnsupportedLocale` if a requested locale cannot be served).
-4. Register entry-point plugins under their `[project.entry-points."content_engine.<port>"]` group in [pyproject.toml](../../pyproject.toml) (e.g., `gsc = "engine.integrations.gsc:GSCAnalyticsSource"` under `content_engine.analytics_source`).
+4. Register entry-point plugins under their `[project.entry-points."macy.<port>"]` group in [pyproject.toml](../../pyproject.toml) (e.g., `gsc = "engine.integrations.gsc:GSCAnalyticsSource"` under `macy.analytics_source`). *(Breaking change in `M9` / [ADR-033](../adr/ADR-033-macy-package-cli-and-tooling-identity.md): legacy pre-M9 plugin group names are no longer loaded.)*
 5. Optional heavy extras in [pyproject.toml](../../pyproject.toml) (`uv sync --extra agent` for `scripts/compliance_agent.py`, `uv sync --extra audit-browser` for Playwright + `axe-core`) keep the default 4 GB VPS runtime lean.
 6. Parametrize and pass the shared contract suite in [tests/test_contract_suites.py](../../tests/test_contract_suites.py). Zero edits to core pipeline modules are needed.
 

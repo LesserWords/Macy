@@ -47,4 +47,4 @@ The repository SHALL keep active tooling commands, runtime dependency notes, com
 
 #### Scenario: Documentation references match implemented CLI, quality gates, and trial outcomes
 - **WHEN** active documentation is inspected after sync
-- **THEN** CLI examples use `content-engine <cmd>`, quality-gate docs reference `scripts/check.sh` and active tools cleanly, completed M0–M4 ADR action checkboxes reflect delivered work without altering original decision sections, and `M5.md` / `runbook.md` distinguish delivered local verification from pending live VPS rollout
+- **THEN** CLI examples use `macy <cmd>`, quality-gate docs reference `scripts/check.sh` and active tools cleanly, completed M0–M4 ADR action checkboxes reflect delivered work without altering original decision sections, and `M5.md` / `runbook.md` distinguish delivered local verification from pending live VPS rollout

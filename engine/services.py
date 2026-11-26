@@ -12,7 +12,7 @@ import re
 import secrets
 import uuid
 import xml.etree.ElementTree as ET
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -1054,7 +1054,7 @@ def _execute_seed_brand(
         msg = f"Fixture file not found: {resolved_path}"
         raise ValueError(msg)
 
-    profile = _parse_brand_fixture_yaml(resolved_path.read_text(encoding="utf-8"))
+    profile = BrandProfile.model_validate(config.load_brand_fixture_dict(resolved_path))
     return _execute_save_brand(
         conn,
         workspace_id=ws_id,
@@ -2934,6 +2934,8 @@ def _execute_generate_brief(
         keyword_provider=params.get("keyword_provider"),
         news_search_adapter=params.get("news_search_adapter"),
         extractor_adapter=params.get("extractor_adapter"),
+        format_slug=str(params.get("format_slug") or "blog"),
+        funnel_stage=params.get("funnel_stage"),
     )
 
 
@@ -2948,6 +2950,8 @@ def generate_brief(  # noqa: PLR0913
     keyword_provider: KeywordProviderPort | None = None,
     news_search_adapter: NewsSearchPort | None = None,
     extractor_adapter: ExtractorPort | None = None,
+    format_slug: str = "blog",
+    funnel_stage: str | None = None,
 ) -> dict[str, Any]:
     """Generate a grounded, brand-pinned editorial brief for an approved topic (F12 AC1-AC3)."""
     params = {
@@ -2959,6 +2963,8 @@ def generate_brief(  # noqa: PLR0913
         "keyword_provider": keyword_provider,
         "news_search_adapter": news_search_adapter,
         "extractor_adapter": extractor_adapter,
+        "format_slug": format_slug,
+        "funnel_stage": funnel_stage,
     }
     if conn is not None:
         return _execute_generate_brief(conn, params)
@@ -5313,6 +5319,35 @@ def _resolve_brief_cited_documents(
     return cited
 
 
+def _brief_needs_regeneration(
+    existing: dict[str, Any] | None,
+    opp_ctx: dict[str, Any],
+    params: dict[str, Any],
+) -> bool:
+    if existing is None or params.get("force_regenerate"):
+        return True
+    req_format = str(params.get("format_slug") or "blog").strip().lower()
+    existing_payload = existing.get("payload") or {}
+    existing_format = str(existing_payload.get("format") or "blog").strip().lower()
+    if existing_format != req_format:
+        return True
+    req_funnel = params.get("funnel_stage")
+    if req_funnel:
+        cur_funnel = (
+            str(
+                existing_payload.get("funnel_stage")
+                or existing.get("funnel_stage")
+                or opp_ctx.get("funnel_stage")
+                or "mofu"
+            )
+            .strip()
+            .lower()
+        )
+        if cur_funnel != str(req_funnel).strip().lower():
+            return True
+    return False
+
+
 def _execute_get_or_create_mcp_brief(
     conn: psycopg.Connection[Any],
     params: dict[str, Any],
@@ -5336,7 +5371,7 @@ def _execute_get_or_create_mcp_brief(
         conn, workspace_id=workspace_id, opportunity_id=opportunity_id
     )
     created = False
-    if existing is None or params.get("force_regenerate"):
+    if existing is None or _brief_needs_regeneration(existing, opp_ctx, params):
         _execute_preflight_mcp_spend(
             conn, workspace_id=workspace_id, run_id=run_id, estimated_cost=Decimal("0.000000")
         )
@@ -5358,6 +5393,8 @@ def _execute_get_or_create_mcp_brief(
                 "keyword_provider": params.get("keyword_provider"),
                 "news_search_adapter": params.get("news_search_adapter"),
                 "extractor_adapter": params.get("extractor_adapter"),
+                "format_slug": str(params.get("format_slug") or "blog"),
+                "funnel_stage": params.get("funnel_stage"),
             },
         )
         created = True
@@ -5365,10 +5402,18 @@ def _execute_get_or_create_mcp_brief(
         brief_row = existing
 
     payload = brief_row.get("payload") or {}
+    eff_funnel = str(
+        params.get("funnel_stage")
+        or payload.get("funnel_stage")
+        or brief_row.get("funnel_stage")
+        or opp_ctx.get("funnel_stage")
+        or "mofu"
+    )
     return {
         **brief_row,
         "run_id": run_id,
         "created": created,
+        "funnel_stage": eff_funnel,
         "primary_keyword": payload.get("primary_keyword"),
         "outline": payload.get("outline"),
         "cited_documents": _resolve_brief_cited_documents(
@@ -5386,6 +5431,8 @@ def get_or_create_mcp_brief(  # noqa: PLR0913
     force_regenerate: bool = False,
     offline: bool | None = None,
     llm_adapter: LLMPort | None = None,
+    format_slug: str = "blog",
+    funnel_stage: str | None = None,
 ) -> dict[str, Any]:
     """Return latest brief or generate a budget-preflighted editorial brief via MCP (M5-05)."""
     params: dict[str, Any] = {
@@ -5395,6 +5442,8 @@ def get_or_create_mcp_brief(  # noqa: PLR0913
         "force_regenerate": force_regenerate,
         "offline": offline,
         "llm_adapter": llm_adapter,
+        "format_slug": format_slug,
+        "funnel_stage": funnel_stage,
     }
     if conn is not None:
         return _execute_get_or_create_mcp_brief(conn, params)
@@ -5769,6 +5818,7 @@ def _ensure_external_brief(  # noqa: PLR0913
         target_audience="General",
         primary_keyword=resolved_kw,
         format=format_slug,
+        funnel_stage="mofu",
         angle=resolved_topic,
         outline=["Introduction"],
         cta_goal=str(draft_model.cta.get("headline") or "Saiba mais"),
@@ -5845,7 +5895,7 @@ def _execute_import_external_draft(
             "workspace_id": workspace_id,
             "draft_id": draft_id,
             "user_id": user_id,
-            "offline": True,
+            "offline": bool(params.get("offline", False)),
             "deterministic_only": bool(params.get("deterministic_only", True)),
         },
     )
@@ -5935,6 +5985,7 @@ def import_external_draft(  # noqa: PLR0913
     primary_keyword: str | None = None,
     sources: Sequence[dict[str, Any]] | None = None,
     deterministic_only: bool = True,
+    offline: bool = False,
 ) -> dict[str, Any]:
     """Import an external .md/.pdf or Markdown draft and evaluate compliance (M5-07)."""
     draft_model = _load_draft_model(
@@ -5952,6 +6003,7 @@ def import_external_draft(  # noqa: PLR0913
         "primary_keyword": primary_keyword,
         "sources": sources,
         "deterministic_only": deterministic_only,
+        "offline": offline,
     }
     if conn is not None:
         return _execute_import_external_draft(conn, params)
@@ -6375,3 +6427,335 @@ def autoseed_from_url(
             site_url=site_url,
             timeout=timeout,
         )
+
+
+def render_draft_markdown(
+    draft: ContentDraft | Mapping[str, Any],
+    *,
+    source_url_by_doc_id: Mapping[str, str] | None = None,
+) -> str:
+    """Serialize a ContentDraft with YAML frontmatter for portable pass-by-value handoff."""
+    draft_model = draft if isinstance(draft, ContentDraft) else ContentDraft.model_validate(draft)
+    dumped = draft_model.model_dump(mode="json")
+    frontmatter_data: dict[str, Any] = {
+        "title": dumped["title"],
+        "slug": dumped["slug"],
+        "meta_description": dumped["meta_description"],
+        "faq": dumped["faq"],
+        "cta": dumped["cta"],
+        "claims": dumped["claims"],
+    }
+    if source_url_by_doc_id:
+        frontmatter_data["source_urls"] = {
+            str(doc_id): str(url) for doc_id, url in source_url_by_doc_id.items() if url
+        }
+    yaml_header = yaml.safe_dump(frontmatter_data, allow_unicode=True, sort_keys=False).strip()
+    return f"---\n{yaml_header}\n---\n\n{draft_model.body_md.strip()}\n"
+
+
+def _extract_source_url_map(
+    *,
+    file_path: Path | str | None,
+    markdown_text: str | None,
+) -> dict[str, str]:
+    import frontmatter
+
+    from engine.production import writer
+
+    raw_md = writer.extract_file_to_markdown(file_path) if file_path is not None else markdown_text
+    if not raw_md:
+        return {}
+    meta = dict(frontmatter.loads(raw_md).metadata or {})
+    raw_map = meta.get("source_urls")
+    if not isinstance(raw_map, Mapping):
+        return {}
+    return {str(k): str(v).strip() for k, v in raw_map.items() if str(v).strip()}
+
+
+def _resolve_stateless_llm_adapter(
+    *,
+    offline: bool,
+    model: str | None = None,
+) -> tuple[Any, str | None]:
+    if offline:
+        from engine.integrations.fakes import FakeLLM
+
+        return FakeLLM(), model
+    api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
+    if not api_key:
+        msg = "OPENROUTER_API_KEY is required when offline=False in stateless adaptation mode."
+        raise ValueError(msg)
+    from engine.integrations.openrouter import OpenRouterLLM
+
+    adapter = OpenRouterLLM(OpenRouterLLM.Settings(api_key=SecretStr(api_key), data_policy="allow"))
+    return adapter, model or "anthropic/claude-sonnet-5.5"
+
+
+def _rebind_claims_for_target(
+    claims: Sequence[DraftClaim],
+    rebind_map: Mapping[str, str],
+) -> list[DraftClaim]:
+    rebound: list[DraftClaim] = []
+    for claim in claims:
+        if claim.kind == "fact":
+            mapped_id = rebind_map.get(str(claim.source_id)) if claim.source_id else None
+            if mapped_id:
+                rebound.append(DraftClaim(text=claim.text, kind="fact", source_id=mapped_id))
+            else:
+                rebound.append(DraftClaim(text=claim.text, kind="analysis", source_id=None))
+        else:
+            rebound.append(claim)
+    return rebound
+
+
+def _build_adaptation_summary(
+    source_draft: ContentDraft,
+    adapted_draft: ContentDraft,
+    *,
+    max_similarity: float,
+    adapted_md: str,
+) -> tuple[dict[str, Any], str]:
+    from engine.quality import checks as quality_checks
+
+    uniqueness = quality_checks.check_adaptation_uniqueness(
+        source_draft,
+        adapted_draft,
+        max_similarity=max_similarity,
+    )
+    return {
+        "check": uniqueness.check,
+        "passed": uniqueness.passed,
+        "detail": uniqueness.detail,
+        **uniqueness.metadata,
+        "source_slug": source_draft.slug,
+        "adapted_slug": adapted_draft.slug,
+    }, adapted_md
+
+
+def adapt_draft_stateless(  # noqa: PLR0913
+    *,
+    file_path: Path | str | None = None,
+    markdown_text: str | None = None,
+    brand_fixture: Path | str | None = None,
+    industry_pack: str | None = None,
+    format_slug: str = "blog",
+    primary_keyword: str | None = None,
+    locale: str = "pt-BR",
+    max_similarity: float = 0.65,
+    deterministic_only: bool = True,
+    offline: bool = True,
+    model: str | None = None,
+) -> dict[str, Any]:
+    """Adapt an article draft to another BrandProfile/IndustryPack without PostgreSQL (ADR-034)."""
+    from engine.production import rewrite as rewrite_mod
+    from engine.quality import evaluate as evaluate_fn
+
+    source_draft = _load_draft_model(file_path=file_path, markdown_text=markdown_text)
+    source_urls = _extract_source_url_map(file_path=file_path, markdown_text=markdown_text)
+    fixture_path = (
+        config.resolve_brand_fixture_path(brand_fixture)
+        if brand_fixture is not None
+        else config.get_default_brand_fixture()
+    )
+    target_brand = BrandProfile.model_validate(config.load_brand_fixture_dict(fixture_path))
+    target_industry = config.resolve_industry_pack_dict(
+        industry_pack or config.get_default_industry_pack()
+    )
+    adapter, resolved_model = _resolve_stateless_llm_adapter(offline=offline, model=model)
+    adapted_draft = rewrite_mod.rewrite_draft(
+        source_draft,
+        mode="adapt_brand",
+        primary_keyword=primary_keyword or source_draft.title,
+        locale=locale,
+        target_brand=target_brand,
+        target_industry=target_industry,
+        llm_adapter=adapter,
+        model=resolved_model,
+    )
+    adapted_md = render_draft_markdown(adapted_draft, source_url_by_doc_id=source_urls)
+    uniqueness_meta, rendered_md = _build_adaptation_summary(
+        source_draft,
+        adapted_draft,
+        max_similarity=max_similarity,
+        adapted_md=adapted_md,
+    )
+    report_obj = evaluate_fn(
+        adapted_draft,
+        brand_profile=target_brand,
+        format_slug=format_slug,
+        deterministic_only=deterministic_only,
+        primary_keyword=primary_keyword or adapted_draft.title,
+        locale=locale,
+        llm_adapter=adapter,
+        model=resolved_model,
+    )
+    return {
+        "stateless": True,
+        "title": adapted_draft.title,
+        "slug": adapted_draft.slug,
+        "format_slug": format_slug,
+        "verdict": report_obj.verdict,
+        "score": report_obj.score,
+        "findings": [f.model_dump(mode="json") for f in report_obj.findings],
+        "uniqueness": uniqueness_meta,
+        "adapted_markdown": rendered_md,
+    }
+
+
+def _reingest_adaptation_sources(
+    conn: psycopg.Connection[Any],
+    *,
+    workspace_id: uuid.UUID,
+    user_id: uuid.UUID,
+    source_urls: Mapping[str, str],
+    sources: Sequence[dict[str, Any]] | None,
+) -> tuple[uuid.UUID, list[dict[str, Any]], dict[str, str]]:
+    run_id = _create_completed_adhoc_run(conn, workspace_id=workspace_id, user_id=user_id)
+    doc_specs = list(sources or [])
+    for idx, (_doc_id, url) in enumerate(source_urls.items(), start=1):
+        if not any(str(d.get("url") or "").rstrip("/") == url.rstrip("/") for d in doc_specs):
+            doc_specs.append({"title": f"Adapted Source {idx}", "url": url, "summary": url})
+    url_to_target_id: dict[str, str] = {}
+    for spec in doc_specs:
+        new_doc_id, _rec_id = _persist_external_doc_and_record(
+            conn, workspace_id=workspace_id, run_id=run_id, doc_spec=spec
+        )
+        spec_url = str(spec.get("url") or "").rstrip("/")
+        if spec_url:
+            url_to_target_id[spec_url] = str(new_doc_id)
+
+    rebind_map: dict[str, str] = {}
+    for old_id, raw_url in source_urls.items():
+        mapped = url_to_target_id.get(raw_url.rstrip("/"))
+        if mapped:
+            rebind_map[old_id] = mapped
+    return run_id, doc_specs, rebind_map
+
+
+def _execute_adapt_draft_for_workspace(
+    conn: psycopg.Connection[Any],
+    params: dict[str, Any],
+) -> dict[str, Any]:
+    from engine.production import rewrite as rewrite_mod
+
+    workspace_id: uuid.UUID = params["workspace_id"]
+    user_id: uuid.UUID = params["user_id"]
+    require_member(conn, workspace_id=workspace_id, user_id=user_id)
+
+    ws_row = db.get_workspace(conn, workspace_id=workspace_id) or {}
+    ws_cfg = ws_row.get("config") or {}
+    brand_row = db.get_current_brand_profile(conn, workspace_id=workspace_id)
+    if brand_row is None:
+        msg = f"Workspace {workspace_id} has no active brand profile."
+        raise ValueError(msg)
+    target_brand = BrandProfile.model_validate(brand_row["payload"])
+    campaign_row = (
+        _select_primary_campaign(db.list_campaigns(conn, workspace_id=workspace_id)) or {}
+    )
+    resolved_locale = str(params.get("locale") or campaign_row.get("locale") or "pt-BR")
+    target_industry = config.resolve_industry_pack_dict(
+        ws_cfg.get("industry_pack"),
+        workspace_config=ws_cfg,
+    )
+
+    source_draft = _load_draft_model(
+        file_path=params.get("file_path"),
+        markdown_text=params.get("markdown_text"),
+    )
+    source_urls = _extract_source_url_map(
+        file_path=params.get("file_path"),
+        markdown_text=params.get("markdown_text"),
+    )
+    run_id, doc_specs, rebind_map = _reingest_adaptation_sources(
+        conn,
+        workspace_id=workspace_id,
+        user_id=user_id,
+        source_urls=source_urls,
+        sources=params.get("sources"),
+    )
+    offline = bool(params.get("offline", False))
+    llm_adapter: Any = None
+    if offline:
+        from engine.integrations.fakes import FakeLLM
+
+        llm_adapter = FakeLLM()
+    adapted_raw = rewrite_mod.rewrite_draft(
+        source_draft,
+        mode="adapt_brand",
+        primary_keyword=params.get("primary_keyword") or source_draft.title,
+        locale=resolved_locale,
+        target_brand=target_brand,
+        target_industry=target_industry,
+        llm_adapter=llm_adapter,
+        workspace_id=workspace_id,
+        run_id=run_id,
+        conn=conn,
+    )
+    rebound_claims = _rebind_claims_for_target(adapted_raw.claims, rebind_map)
+    rebound_draft = adapted_raw.model_copy(update={"claims": rebound_claims})
+    import_res = _execute_import_external_draft(
+        conn,
+        {
+            "workspace_id": workspace_id,
+            "user_id": user_id,
+            "draft_model": rebound_draft,
+            "format_slug": str(params.get("format_slug") or "blog"),
+            "primary_keyword": params.get("primary_keyword") or rebound_draft.title,
+            "sources": doc_specs,
+            "deterministic_only": bool(params.get("deterministic_only", True)),
+            "offline": offline,
+        },
+    )
+    target_url_map = {
+        new_id: source_urls[old_id]
+        for old_id, new_id in rebind_map.items()
+        if old_id in source_urls
+    }
+    uniqueness_meta, rendered_md = _build_adaptation_summary(
+        source_draft,
+        rebound_draft,
+        max_similarity=float(params.get("max_similarity", 0.65)),
+        adapted_md=render_draft_markdown(rebound_draft, source_url_by_doc_id=target_url_map),
+    )
+    return {
+        **import_res,
+        "title": rebound_draft.title,
+        "slug": rebound_draft.slug,
+        "uniqueness": uniqueness_meta,
+        "adapted_markdown": rendered_md,
+    }
+
+
+def adapt_draft_for_workspace(  # noqa: PLR0913
+    conn: psycopg.Connection[Any] | None = None,
+    *,
+    workspace_id: uuid.UUID,
+    user_id: uuid.UUID,
+    file_path: Path | str | None = None,
+    markdown_text: str | None = None,
+    format_slug: str = "blog",
+    primary_keyword: str | None = None,
+    locale: str | None = None,
+    sources: Sequence[dict[str, Any]] | None = None,
+    max_similarity: float = 0.65,
+    deterministic_only: bool = True,
+    offline: bool = False,
+) -> dict[str, Any]:
+    """Adapt a pass-by-value draft to a target workspace and stage it at Gate 2 (ADR-034)."""
+    params: dict[str, Any] = {
+        "workspace_id": workspace_id,
+        "user_id": user_id,
+        "file_path": file_path,
+        "markdown_text": markdown_text,
+        "format_slug": format_slug,
+        "primary_keyword": primary_keyword,
+        "locale": locale,
+        "sources": sources,
+        "max_similarity": max_similarity,
+        "deterministic_only": deterministic_only,
+        "offline": offline,
+    }
+    if conn is not None:
+        return _execute_adapt_draft_for_workspace(conn, params)
+    with db.get_connection() as managed_conn:
+        return _execute_adapt_draft_for_workspace(managed_conn, params)

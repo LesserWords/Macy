@@ -5,7 +5,7 @@
 <h1 align="center">Macy — Content Intelligence &amp; SEO/GEO Audit Engine</h1>
 
 <p align="center">
-  <a href="https://github.com/LesserWords/open-macy/actions/workflows/ci.yml"><img src="https://github.com/LesserWords/open-macy/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/LesserWords/Macy/actions/workflows/ci.yml"><img src="https://github.com/LesserWords/Macy/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-blue.svg" alt="License: Apache-2.0" /></a>
   <img src="https://img.shields.io/badge/Python-3.12%2B-3776AB.svg" alt="Python 3.12+" />
   <img src="https://img.shields.io/badge/PostgreSQL-18-336791.svg" alt="PostgreSQL 18" />
@@ -31,7 +31,7 @@ Unlike single-prompt AI writers that fabricate statistics or lock you into a sin
 
 ## Core Workflows
 
-Macy runs cleanly across three complementary modes:
+Macy runs cleanly across three complementary workflow models — see the full **[6-Mode Comparison Matrix & Expected Cost per Post](docs/PRODUCT-OVERVIEW.md#operating-modes--expected-cost-per-post)** (`~$0.18–$0.35/post` balanced cloud, `~$0.04–$0.10/post` agent-driven MCP, `$0.00/post` stateless/local Ollama):
 
 ### 1. Sourced Editorial Pipeline (Human-Gated)
 
@@ -61,7 +61,7 @@ Git Packs (industry, format, prompts) + Postgres Workspace Config (brand, campai
 ```
 
 ### 2. Agent-Driven Mode — External `.md`/PDF Compliance & MCP Agent Loop
-- Bring externally researched or drafted `.md` (with YAML frontmatter) and `.pdf` files via CLI (`content-engine import-draft`), MCP (`macy_ingest_research_documents` + `macy_import_draft`), or the headless Strands Agents runner (`scripts/compliance_agent.py`).
+- Bring externally researched or drafted `.md` (with YAML frontmatter) and `.pdf` files via CLI (`macy import-draft`), MCP (`macy_ingest_research_documents` + `macy_import_draft`), or the headless Strands Agents runner (`scripts/compliance_agent.py`).
 - Enforce zero-LLM-cost deterministic compliance (`deterministic_only=True`) across format word counts (`blog-short`, `blog`, `blog-long`), brand phrase prohibitions, keyword density/placement, subheading density, and tiered bilingual Flesch readability (`en-US` and Martins et al. `pt-BR`).
 - Generate deterministic JSON-LD structured data (`Article`, `FAQPage`, `Product`, `LocalBusiness`, `HowTo`) independently from optional LLM rewrite modes (`improve`, `simplify`, `seo_optimize`).
 
@@ -99,7 +99,7 @@ Open [http://localhost:8501](http://localhost:8501) to walk through the 3-step S
 
 ```sh
 docker compose -f infra/compose.pocket.yaml exec app \
-  content-engine init --email admin@example.com --password '<secret>' \
+  macy init --email admin@example.com --password '<secret>' \
   --slug my-ws --name "My Workspace" --preset pocket_free --non-interactive
 ```
 
@@ -108,9 +108,10 @@ docker compose -f infra/compose.pocket.yaml exec app \
 Install the slim core extra (`[core]`) and run single-URL SEO/GEO audits, bounded crawls, draft compliance checks, or a `stdio` MCP server with zero Docker and zero PostgreSQL (`--stateless` / `MACY_STATELESS=true`):
 
 ```sh
-content-engine audit https://example.com --stateless --json
-content-engine import-draft --file ./draft.md --format blog-short --stateless --json
-content-engine mcp --transport stdio --stateless --check
+macy audit https://example.com --stateless --json
+macy import-draft --file ./draft.md --format blog-short --stateless --json
+macy adapt-draft --file ./draft.md --stateless --brand-fixture seed_vertical.yaml --industry-pack b2b-saas --json
+macy mcp --transport stdio --stateless --check
 ```
 
 ### Option C — Full Multi-Container Local Development
@@ -134,10 +135,10 @@ Database migrations create the schema and roles without seeding tenant rows. To 
 1. **Create a workspace, add an owner, and seed brand + sources:**
 
    ```sh
-   docker compose exec app content-engine create-workspace acme-demo --name "Acme Demo" --pack general --timezone America/Sao_Paulo
-   docker compose exec app content-engine add-owner acme-demo editor@example.com
-   docker compose exec app content-engine seed-brand acme-demo
-   docker compose exec app content-engine seed-sources --pack general
+   docker compose exec app macy create-workspace acme-demo --name "Acme Demo" --pack general --timezone America/Sao_Paulo
+   docker compose exec app macy add-owner acme-demo editor@example.com
+   docker compose exec app macy seed-brand acme-demo
+   docker compose exec app macy seed-sources --pack general
    ```
 
 2. **Sign in to the Admin UI:**
@@ -149,10 +150,10 @@ Database migrations create the schema and roles without seeding tenant rows. To 
    - Run research & scoring:
 
      ```sh
-     docker compose exec app content-engine run-week acme-demo --offline --window-days 7
+     docker compose exec app macy run-week acme-demo --offline --window-days 7
      ```
 
-   - Review **Weekly Report** (Gate 1 approve), generate the brief + draft, inspect **Draft Review** (Gate 2 approve + publish), or test single-URL audits under **SEO & GEO Audit** (`content-engine audit https://example.com`).
+   - Review **Weekly Report** (Gate 1 approve), generate the brief + draft, inspect **Draft Review** (Gate 2 approve + publish), or test single-URL audits under **SEO & GEO Audit** (`macy audit https://example.com`).
 
 > See the **[User & Editorial Guide](docs/guides/user-guide.md)** for all 10 Admin UI screens and **[Developer & CLI Guide](docs/guides/developer-guide.md)** for all 20 CLI commands, tests, and plugin authoring.
 
@@ -175,19 +176,19 @@ Database migrations create the schema and roles without seeding tenant rows. To 
 | **Runs** | View run history, queue manual runs (`Run now`), jump to Weekly Report, and inspect **Cost & Spend Overview** |
 | **SEO & GEO Audit** | Run 7-category single-URL SEO+GEO audits and bounded site crawls (`free`/`paid` tiers, `max_pages` up to `200`) |
 
-### CLI (`content-engine`)
+### CLI (`macy`)
 
-Run via `docker compose exec app content-engine <command>` or `uv run content-engine <command>`:
+Run via `docker compose exec app macy <command>` or `uv run macy <command>`:
 
 - **Bootstrap & Sources:** `init`, `create-workspace`, `add-owner`, `seed-brand`, `seed-sources`, `verify-sources`, `import-sitemap`
-- **Capabilities & Compliance / SEO Audits:** `capabilities {list,enable,disable}`, `import-draft [--stateless]`, `audit [--stateless]`
+- **Capabilities & Compliance / SEO Audits:** `capabilities {list,enable,disable}`, `import-draft [--stateless]`, `adapt-draft [--stateless]`, `audit [--stateless]`
 - **Runs & Delivery:** `run-week`, `run-now`, `run-stage`, `crontab`, `webhooks-deliver`
 - **Integrations, MCP & Ops:** `plugins list`, `integrations set`, `integrations preset {list,apply}`, `rotate-key`, `test-sentry`, `mcp [--stateless]`
 - **Retention & LGPD:** `purge`, `anonymise-user`
 
-### Model Context Protocol (`content-engine mcp`)
+### Model Context Protocol (`macy mcp`)
 
-Macy exposes **17 MCP tools**, **3 JSON resources**, and **1 review prompt** over `stdio` (Antigravity, Claude Desktop, Claude Code, Cursor) and fail-closed Bearer HTTPS `streamable-http` (`/mcp` behind Caddy) — see **[MCP Server Guide](docs/MCP.md)**.
+Macy exposes **18 MCP tools**, **3 JSON resources**, and **1 review prompt** over `stdio` (Antigravity, Claude Desktop, Claude Code, Cursor) and fail-closed Bearer HTTPS `streamable-http` (`/mcp` behind Caddy) — see **[MCP Server Guide](docs/MCP.md)**.
 
 ---
 
@@ -206,7 +207,7 @@ Macy exposes **17 MCP tools**, **3 JSON resources**, and **1 review prompt** ove
 | `analytics_source` (`AnalyticsSourcePort`) | `gsc`, `fake` | Google Search Console (`service_account` / `oauth2`) analytics + 12h-cached URL inspection |
 
 Modular capability and optional audit/rank-tracking layers:
-- **`CapabilityPlugin`** (`content_engine.capabilities`): `core-compliance`, `seo-audit`, `editorial-pipeline`, and `route-monitors` dynamically filter Admin UI sidebar, CLI, and MCP tools per workspace (`workspaces.config.enabled_capabilities`).
+- **`CapabilityPlugin`** (`macy.capabilities`): `core-compliance`, `seo-audit`, `editorial-pipeline`, and `route-monitors` dynamically filter Admin UI sidebar, CLI, and MCP tools per workspace (`workspaces.config.enabled_capabilities`).
 - **Package Extras (`pyproject.toml`):** `[core]`, `[editorial]`, `[ui]`, `[audit-browser]` (Playwright + `axe-core`), and `[full]`.
 - **`BrowserAuditPort` / `PageSpeedPort` / `RankTrackerPort`:** optional accessibility/rendering, Google PSI, and paid-plan SERP tracking.
 

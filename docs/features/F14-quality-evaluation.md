@@ -15,7 +15,8 @@ As an owner, every draft is checked by code and by an independent evaluator befo
     - meta length and slug format are valid;
     - no prohibited brand phrases;
     - CTA intensity is within the campaign limit;
-    - the language matches the campaign (lingua-py).
+    - the language matches the campaign (lingua-py);
+    - cross-domain adaptation uniqueness (`check_adaptation_uniqueness`, `ADR-034`, `M11-02`).
   - LLM evaluator with the format rubric.
   - Verdicts PASS / REVISION / REJECT.
   - Routing to brief, write or research.

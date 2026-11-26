@@ -14,7 +14,7 @@ This guide explains how workspace owners and editors configure **Macy** and run 
 ## 1. Signing In & UI Language
 
 ### Authentication
-- **Staging & Production (`APP_ENV=staging` or `production`):** Click **Sign in with Google** (`st.login("google")`). Your Google account email must already hold an `owner` membership in a workspace (seeded by an operator with `content-engine add-owner <workspace-slug> <email>`). Accounts without membership see an access-denied message and zero workspace data.
+- **Staging & Production (`APP_ENV=staging` or `production`):** Click **Sign in with Google** (`st.login("google")`). Your Google account email must already hold an `owner` membership in a workspace (seeded by an operator with `macy add-owner <workspace-slug> <email>`). Accounts without membership see an access-denied message and zero workspace data.
 - **Local Development / Testing (`APP_ENV=development` or `test`):** Set `MACY_TEST_USER_EMAIL=<email>` in your environment before launching the UI to bypass OIDC locally. This test identity is strictly refused when `APP_ENV` / `ENV` is `production` or `prod`.
 
 ### Bilingual Interface (`pt-BR` / `en-US`)
@@ -46,7 +46,7 @@ Macy connects to external services through swappable **ports**. Secrets are Fern
 > **Optional Audit & Rank-Tracking Toggles (`ADR-028`):** Browser accessibility (`BrowserAuditPort` / `axe-core` via `--extra audit-browser`), Google PageSpeed Insights (`PageSpeedPort`), and paid SERP rank tracking (`RankTrackerPort` gated by workspace `rank_tracking_enabled` and `usage_ledger` spend caps) toggle cleanly per workspace without changing the core pipeline.
 
 2. Click **Save Integration**, then click **Test Connection** to verify credentials (`healthcheck()`).
-   - **Tip:** For cost control, use a fast, low-cost model (such as `anthropic/claude-haiku-5.5`) for bulk `research` and `score` stages, and a stronger reasoning/writing model (`anthropic/claude-opus-5.5`) for `brief`, `write`, and `evaluate`.
+   - **Tip:** For the best cost-to-quality balance, use a fast, low-cost model (`anthropic/claude-haiku-5.5`) for bulk `research` and `score` stages, and `anthropic/claude-sonnet-5.5` (`~$0.18–$0.35/post`) or `anthropic/claude-opus-5.5` (`~$0.60–$1.50/post`) for `brief`, `write`, and `evaluate`.
    - **SSRF protection:** Any private, loopback (`127.0.0.1`, `::1`), or cloud-metadata (`169.254.169.254`) URL is refused. Production URLs must use HTTPS.
 
 ### Step 2: Campaigns (`Campaigns`)
@@ -72,7 +72,7 @@ Your Brand Profile steers editorial briefs, article tone, and deterministic proh
    - **CTA Rules** (one per line — e.g. TOFU vs MOFU vs BOFU call-to-action rules)
 2. Click **Save Brand Profile**.
    - Every save creates an immutable new version (`v1`, `v2`, …). Generated briefs record exact `brand_version` provenance.
-   - Operators can also seed the initial Acme Demo profile with `content-engine seed-brand <workspace-slug>`.
+   - Operators can also seed the initial Acme Demo profile with `macy seed-brand <workspace-slug>`.
 
 ### Step 4: Trusted Sources (`Sources`)
 Sources drive what Macy reads during research and brief evidence gathering.
@@ -85,7 +85,7 @@ Sources drive what Macy reads during research and brief evidence gathering.
   - `feed`: Polls an RSS/Atom **Feed URL** directly (validated on save via `safe_http`).
   - `site_search`: Queries your configured `news_search` plugin scoped to the source **Domain**.
 - Use the **Select Source to Edit** dropdown (`Add New Source` or pick an existing source) to add/edit entries, or click **Enable / Disable** in the source list below.
-- **Tip (Prevent Duplicate Topic Proposals):** Have an operator run `content-engine import-sitemap <blog-sitemap-url> --workspace <slug>` so previously published blog posts are flagged as **already covered** in future reports.
+- **Tip (Prevent Duplicate Topic Proposals):** Have an operator run `macy import-sitemap <blog-sitemap-url> --workspace <slug>` so previously published blog posts are flagged as **already covered** in future reports.
 
 ### Step 5: Outbound Webhooks (`Webhooks`) — Optional
 Subscribe external automation tools (such as n8n or Slack) to engine lifecycle events:
@@ -102,9 +102,9 @@ Subscribe external automation tools (such as n8n or Slack) to engine lifecycle e
 Open **Runs** to inspect the active campaign's schedule, spend caps, run history, and **Cost & Spend Overview**.
 - **In the UI:** Clicking **Run now** creates a `queued` run row (refused if a run is already queued/running, or if monthly spend has reached `monthly_cap_usd`).
 - **Execution & Adapter Resolution:**
-  - The `worker` container (`python -m engine`) polls queued runs every `15 s` (`run_worker_tick()`), compiles weekly reports on completion, and delivers pending webhooks continuously. Operators can also trigger runs synchronously via CLI (`content-engine run-week <workspace> [--offline]` or `content-engine run-now <workspace> [--offline]`).
+  - The `worker` container (`python -m engine`) polls queued runs every `15 s` (`run_worker_tick()`), compiles weekly reports on completion, and delivers pending webhooks continuously. Operators can also trigger runs synchronously via CLI (`macy run-week <workspace> [--offline]` or `macy run-now <workspace> [--offline]`).
   - **Live vs Fake Plugins:** Any port configured under **Integrations** (`openrouter`, `brave`, `dataforseo`, `rss`, `trafilatura`, `markdown_export`, `http_webhook`) runs live even in `APP_ENV=development`. In `development`, unconfigured ports fall back to `Fake*` adapters; in `staging`/`production` (or `--offline=false`), `feed_source`/`extractor` default to `rss`/`trafilatura` and missing `llm` or `news_search` transitions the run cleanly to `blocked` (`integration_missing`).
-  - **Scheduled Weekly Cron:** `schedule_cron` is exported by `content-engine crontab` for host cron / Supercronic; clicking **Run now** uses the background `worker` immediately without external cron setup.
+  - **Scheduled Weekly Cron:** `schedule_cron` is exported by `macy crontab` for host cron / Supercronic; clicking **Run now** uses the background `worker` immediately without external cron setup.
 - **Cost & Spend Overview** (also shown on **Dashboard**) displays:
   - Current month spend vs monthly cap and remaining budget
   - Average cost per run and average cost per published article
@@ -125,7 +125,7 @@ Once a run completes research and scoring, click **View Weekly Report** (or sele
    - The brief panel shows `Brand Version`, `Format`, `Topic`, `Target Audience`, `Angle`, **Target Keywords** (with search volume or `(Estimated)` label), numbered **Outline**, **CTA Goal**, and **Verified Facts** linked to evidence document IDs.
 4. **Write & Evaluate the Draft:**
    - Click **Write & Evaluate Draft** below the brief. Macy drafts the article, runs all free deterministic checks (source provenance, freshness, URL status, primary keyword placement, meta/slug format, prohibited brand phrases, CTA intensity, language match via `lingua-py`, FormatPack `word_count` bounds across `blog-short`/`blog`/`blog-long`, plus optional extended SEO checks: keyword/subheading density and tiered bilingual Flesch readability using `en-US` and Martins et al. `pt-BR`), and invokes the isolated LLM evaluator (routing up to 2 automatic revisions to `brief` or `write` if needed).
-   - Ready-made `.md` or `.pdf` drafts can also be imported for audit via CLI `content-engine import-draft` or MCP `macy_import_draft` (`deterministic_only=True` or full rubric), while structured JSON-LD (`Article`, `FAQPage`, `Product`, `LocalBusiness`, `HowTo`) and modular LLM rewrite modes (`improve`, `simplify`, `seo_optimize`) operate independently.
+   - Ready-made `.md` or `.pdf` drafts can also be imported for audit via CLI `macy import-draft` or MCP `macy_import_draft` (`deterministic_only=True` or full rubric), while structured JSON-LD (`Article`, `FAQPage`, `Product`, `LocalBusiness`, `HowTo`) and modular LLM rewrite modes (`improve`, `simplify`, `seo_optimize`) operate independently.
    - When finished, click **Open Draft Review** (or open **Draft Review** in the sidebar). If the evaluator returns `reject` (`research`), the topic is returned to the pool.
 
 ### C. Reviewing Drafts & Publishing (`Draft Review` — Gate 2)
@@ -140,6 +140,7 @@ The **Draft Review** screen shows status counters (`Awaiting Approval`, `Approve
 3. **Claims & Sources Table:** Every claim (`Fact` or `Analysis`) mapped to its source document title, clickable URL, publication date, and `Verified` / `Unverified` date status.
 4. **Quality Evaluation:** Evaluator verdict (`PASS` / `REVISION` / `REJECT`), overall score (`/100`), evaluator model, each **Deterministic Check** (`PASS`/`FAIL`, severity, detail), and **Evaluator Findings** (`severity`, `criterion`, `responsible_module`).
 5. **Revision History & Run Cost Breakdown:** Every draft revision (`r0`, `r1`, `r2`), linked brief version, verdict/score, and stage-by-stage token + USD cost breakdown.
+6. **Adapt for Another Workspace (`ADR-034`):** Export the draft by value (Markdown + source URL provenance) and stage a persona-adapted version (`macy adapt-draft` CLI or `macy_adapt_draft` MCP) into any sibling workspace with anti-cannibalization uniqueness checking (`max_similarity <= 0.65`) and zero cross-workspace DB coupling (`~$0.13/post` in Balanced Cloud).
 
 ### D. Running Single-URL & Site SEO/GEO Audits (`SEO & GEO Audit`)
 Open **SEO & GEO Audit** in the sidebar to audit any public blog post, landing page, or website across WordPress, Webflow, headless CMSs, or custom stacks:
@@ -152,8 +153,8 @@ Open **SEO & GEO Audit** in the sidebar to audit any public blog post, landing p
 
 | Message / Symptom | Cause | Resolution |
 |---|---|---|
-| `Access denied: '<email>' is not a member of any workspace` | Signed-in Google email is not registered as an owner in any workspace | Ask an operator to run `content-engine add-owner <workspace-slug> <email>` |
-| Run status becomes `blocked` (`integration_missing`) | Live/production run lacked configured `llm` (`openrouter`) or `news_search` (`brave`) plugin | Configure the missing port in **Integrations** (verify **Test Connection**), then resume via `content-engine run-stage <run-id>` |
+| `Access denied: '<email>' is not a member of any workspace` | Signed-in Google email is not registered as an owner in any workspace | Ask an operator to run `macy add-owner <workspace-slug> <email>` |
+| Run status becomes `blocked` (`integration_missing`) | Live/production run lacked configured `llm` (`openrouter`) or `news_search` (`brave`) plugin | Configure the missing port in **Integrations** (verify **Test Connection**), then resume via `macy run-stage <run-id>` |
 | `Integration missing for port '<port>'` | A stage requires a port (`llm`, `news_search`, `keyword_provider`, `publisher`, etc.) that has no saved row | Open **Integrations**, configure the named port, save, and click **Test Connection** |
 | `Plugin '<plugin>' does not support locale '<locale>'` | Selected plugin cannot serve the campaign's `Content Locale` / `Target Market` | Switch the campaign locale/market (e.g. `pt-BR`/`BR` or `en-US`/`US`) or choose a compatible plugin |
 | `Monthly budget cap reached. New runs are refused.` | Cumulative monthly spend in `usage_ledger` reached `monthly_cap_usd` | Raise `Monthly Spend Cap (USD)` in **Campaigns** or wait for the next month |
@@ -168,4 +169,24 @@ Open **SEO & GEO Audit** in the sidebar to audit any public blog post, landing p
 
 - **First-Boot Setup Wizard:** Starting Macy against a fresh database opens a 3-step bilingual wizard (`pt-BR` / `en-US`) to create your local admin login, toggle active capabilities (`core-compliance`, `seo-audit`, `editorial-pipeline`, `route-monitors`), pick a stack preset, and auto-seed your brand profile and sitemap from an existing website URL.
 - **Stack Presets (`Integrations -> Stack Presets`):** Switch between `pocket_free` (zero API keys: `gnews_rss`, `autocomplete`, `rss`, `trafilatura`, `markdown_export`), `local_ollama` (`ollama` + free search/keywords), or `pro_cloud` (`openrouter`, `brave`, `dataforseo`, `http_webhook`) in one click.
-- **Capability Switchboard (`content-engine capabilities`):** Hide unused sidebar pages and MCP tools (`editorial-pipeline`, `route-monitors`) when you only want Compliance Auditing and Brand Checking.
+- **Capability Switchboard (`macy capabilities`):** Hide unused sidebar pages and MCP tools (`editorial-pipeline`, `route-monitors`) when you only want Compliance Auditing and Brand Checking.
+
+---
+
+## 6. Expected Cost per Post & Budget Cap Planning
+
+Real OpenRouter runs with the balanced stack (`anthropic/claude-haiku-5.5` for `research`/`score`, `anthropic/claude-sonnet-5.5` for `brief`/`write`/`evaluate`, zero-key RSS + `trafilatura` discovery) average **`~$0.18–$0.21` per post** cleanly passing on revision 0, and **`~$0.35` per post** with 10 scored candidates plus one automatic revision round. For the full **6-mode and stack comparison matrix**, see [Operating Modes & Expected Cost per Post](../PRODUCT-OVERVIEW.md#operating-modes--expected-cost-per-post).
+
+### Recommended Budget Caps by Weekly Volume
+
+| Weekly Cadence | Balanced Stack (`Haiku 5.5` + `Sonnet 5.5`) | Pro Stack (`Opus 5.5` + Brave/DataForSEO) | Suggested `Per-Run Cap` | Suggested `Monthly Cap` |
+|---|---|---|---|---|
+| **1 article / week** (~4/mo) | `~$0.80–$1.40 / month` | `~$2.40–$6.00 / month` (+ paid search/keywords) | `$3.00–$5.00` | `$15.00–$25.00` |
+| **2–3 articles / week** (~8–12/mo) | `~$1.60–$4.20 / month` | `~$4.80–$18.00 / month` (+ paid search/keywords) | `$5.00–$10.00` | `$25.00–$40.00` |
+| **5 articles / week** (~20/mo) | `~$4.00–$7.00 / month` | `~$12.00–$30.00 / month` (+ paid search/keywords) | `$10.00–$15.00` | `$50.00–$75.00` |
+
+### Main Cost Levers
+- **Stage model split:** Keep `anthropic/claude-haiku-5.5` on high-volume `research` and `score`, reserving `anthropic/claude-sonnet-5.5` (or `opus-5.5`) for `brief`, `write`, and `evaluate`.
+- **Agent-Driven drafting (Mode 2B / `macy import-draft`):** When an IDE coding agent writes the article externally, Macy API cost drops to **`~$0.04–$0.10` per post** (scoring/briefing/evaluation only), or **`$0.00`** with `deterministic_only=True` / `--stateless`.
+- **Pre-LLM deterministic gates & keyword caching:** All structural/SEO/brand checks run for `$0.00` before `evaluate`, DataForSEO lookups cache for 30 days, and imported blog sitemaps skip duplicate topics automatically.
+- **Conservative UI estimator:** The **Campaigns** screen estimates `articles_per_week * $6.00 + $10.00` monthly headroom so hard caps still comfortably absorb 2-revision cycles and multi-source research spikes.

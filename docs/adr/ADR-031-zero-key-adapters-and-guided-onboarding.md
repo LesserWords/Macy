@@ -18,18 +18,18 @@ Users who want to run local models (`Ollama`), use a single direct LLM key (`Ope
 
 ## Decision
 1. **Universal OpenAI-Compatible & Local Ollama LLM Adapter (`engine/integrations/openai_compat.py`):**
-   - Register `openai_compat` and `ollama` under `content_engine.llm`.
+   - Register `openai_compat` and `ollama` under `macy.llm`.
    - Support custom `base_url` (defaulting to `http://host.docker.internal:11434/v1` for `ollama` with `$0.000000` ledger cost, or provider endpoints for direct OpenAI/Gemini/Anthropic keys) using `instructor` structured outputs.
 2. **Zero-Key News Search Adapter (`engine/integrations/gnews_rss.py`):**
-   - Register `gnews_rss` under `content_engine.news_search`.
+   - Register `gnews_rss` under `macy.news_search`.
    - Query Google News RSS (`https://news.google.com/rss/search?q=...&hl=<locale>&gl=<market>`) including domain-scoped `site:<domain>` queries via `safe_http` + `defusedxml`/`feedparser` with zero API keys required.
 3. **Zero-Key Autocomplete Keyword Provider (`engine/integrations/autocomplete_keywords.py`):**
-   - Register `autocomplete` under `content_engine.keyword_provider`.
+   - Register `autocomplete` under `macy.keyword_provider`.
    - Fetch public search autocomplete expansions via `safe_http`, combine with any cached GSC query metrics when available, and return `KeywordData` explicitly marked as `is_estimate=True` (honoring `F11` / `ADR-004` estimate labeling and the 30-day `keyword_cache`).
 4. **Integration Stack Presets (`services.apply_integration_preset`):**
    - Provide one-click presets: `pocket_free` (`gnews_rss` + `autocomplete` + `rss` + `trafilatura` + `markdown_export`), `local_ollama` (`pocket_free` + `ollama`), and `pro_cloud` (`openrouter` + `brave` + `dataforseo` + `http_webhook`).
 5. **First-Boot Setup Wizard & URL Auto-Seeder (`engine/onboarding.py` & `app.py`):**
-   - When `list_workspaces()` is empty, `app.py` renders a bilingual (`pt-BR`/`en-US`) 3-step Setup Wizard (also exposed via `content-engine init`):
+   - When `list_workspaces()` is empty, `app.py` renders a bilingual (`pt-BR`/`en-US`) 3-step Setup Wizard (also exposed via `macy init`):
      - **Step 1:** Create owner account + choose active Capability Plugins (`ADR-029`).
      - **Step 2:** Select Integration Stack Preset and enter optional LLM key/URL.
      - **Step 3:** Enter target website URL (or choose an industry pack). `autoseed_from_url()` fetches the homepage and sitemap via `safe_http` + `trafilatura` to seed `brand_profiles` (`v1`) and `content_inventory` automatically.
@@ -43,4 +43,4 @@ Google News RSS or Autocomplete endpoints change response formats (covered by co
 
 ## Action items
 - [ ] `M7-03` — Implement `openai_compat`/`ollama`, `gnews_rss`, `autocomplete` keyword provider, and `services.apply_integration_preset`.
-- [ ] `M7-04` — Implement `engine/onboarding.py` (`bootstrap_onboarding`, `autoseed_from_url`), `content-engine init`, the 3-step Streamlit Setup Wizard, and offline E2E journey `J-POCKET`.
+- [ ] `M7-04` — Implement `engine/onboarding.py` (`bootstrap_onboarding`, `autoseed_from_url`), `macy init`, the 3-step Streamlit Setup Wizard, and offline E2E journey `J-POCKET`.

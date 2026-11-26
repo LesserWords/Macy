@@ -146,6 +146,105 @@ def get_default_brand_fixture() -> Path:
     return resolve_brand_fixture_path(None)
 
 
+_BRAND_LIST_FIELDS: tuple[str, ...] = (
+    "capabilities",
+    "prohibited_claims",
+    "prohibited_phrases",
+    "cta_rules",
+)
+_BRAND_DIRECTIVE_KEYS: frozenset[str] = frozenset(
+    {
+        "extends",
+        "capabilities_add",
+        "capabilities_remove",
+        "prohibited_phrases_add",
+        "prohibited_claims_add",
+    }
+)
+
+
+def _dedupe_str_entries(items: list[Any]) -> list[str]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for raw in items:
+        text = str(raw).strip()
+        if text and text not in seen:
+            seen.add(text)
+            ordered.append(text)
+    return ordered
+
+
+def _resolve_parent_fixture(parent_ref: str, current_file: Path) -> Path:
+    ref_path = Path(parent_ref)
+    if ref_path.is_file():
+        return ref_path.resolve()
+    relative = current_file.parent / ref_path
+    if relative.is_file():
+        return relative.resolve()
+    for root in get_fixtures_roots():
+        layered = root / ref_path.name
+        if layered.is_file():
+            return layered.resolve()
+    msg = f"Parent brand fixture not found: '{parent_ref}'"
+    raise ValueError(msg)
+
+
+def _merge_brand_list_field(
+    parent_vals: list[Any],
+    child: dict[str, Any],
+    *,
+    field: str,
+) -> list[str]:
+    base_list = list(child[field]) if field in child else list(parent_vals)
+    remove_key = f"{field}_remove"
+    add_key = f"{field}_add"
+    if remove_key in child:
+        to_remove = {str(x).strip() for x in (child.get(remove_key) or [])}
+        base_list = [x for x in base_list if str(x).strip() not in to_remove]
+    if add_key in child:
+        base_list.extend(child.get(add_key) or [])
+    return _dedupe_str_entries(base_list)
+
+
+def load_brand_fixture_dict(
+    fixture_path: str | Path,
+    *,
+    _visited: tuple[Path, ...] = (),
+) -> dict[str, Any]:
+    """Load a brand fixture YAML mapping, resolving acyclic `extends` directives at load time."""
+    resolved = resolve_brand_fixture_path(fixture_path).resolve()
+    if resolved in _visited:
+        chain = " -> ".join(p.name for p in (*_visited, resolved))
+        msg = f"Circular brand fixture extends detected: {chain}"
+        raise ValueError(msg)
+    if not resolved.is_file():
+        msg = f"Fixture file not found: {resolved}"
+        raise ValueError(msg)
+
+    raw = yaml.safe_load(resolved.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        msg = f"Brand fixture '{resolved}' must be a YAML mapping"
+        raise ValueError(msg)
+
+    parent_ref = str(raw.get("extends") or "").strip()
+    merged: dict[str, Any] = {}
+    if parent_ref:
+        parent_path = _resolve_parent_fixture(parent_ref, resolved)
+        merged = load_brand_fixture_dict(parent_path, _visited=(*_visited, resolved))
+
+    for key, val in raw.items():
+        if key not in _BRAND_DIRECTIVE_KEYS and key not in _BRAND_LIST_FIELDS:
+            merged[key] = val
+
+    for field in _BRAND_LIST_FIELDS:
+        merged[field] = _merge_brand_list_field(
+            list(merged.get(field) or []),
+            raw,
+            field=field,
+        )
+    return merged
+
+
 def _industry_search_dirs(base_dir: Path | str | None) -> list[Path]:
     if base_dir is not None:
         return [Path(base_dir)]

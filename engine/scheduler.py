@@ -82,11 +82,11 @@ def generate_crontab(
         for camp in db.list_campaigns(conn, workspace_id=ws_id):
             cron_expr = str(camp.get("schedule_cron", "0 9 * * 1")).strip()
             lines.append(
-                f"CRON_TZ={tz_name} {cron_expr} content-engine run-week --workspace {ws_id} "
+                f"CRON_TZ={tz_name} {cron_expr} macy run-week --workspace {ws_id} "
                 f"--campaign {camp['id']}"
             )
 
-    lines.append("CRON_TZ=UTC 0 2 * * * content-engine purge")
+    lines.append("CRON_TZ=UTC 0 2 * * * macy purge")
     return "\n".join(lines) + "\n"
 
 

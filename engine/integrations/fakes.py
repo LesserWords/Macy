@@ -143,6 +143,7 @@ def _build_fake_editorial_brief(prompt: str) -> dict[str, Any]:
         "primary_keyword": primary_kw,
         "secondary_keywords": kw_names[1:5],
         "format": str(payload.get("format") or "blog"),
+        "funnel_stage": funnel,
         "angle": full_angle,
         "outline": outline,
         "required_facts": _build_fake_required_facts(
@@ -353,8 +354,125 @@ def _pad_fake_paragraphs(
         filler_idx += 1
 
 
+def _build_fake_adapted_copy(
+    *,
+    is_pt: bool,
+    brand_name: str,
+    persona: str,
+    primary_kw: str,
+) -> dict[str, Any]:
+    if is_pt:
+        return {
+            "title": f"{primary_kw} com foco em {persona}: playbook {brand_name}",
+            "meta": (
+                f"{primary_kw}: guia adaptado para {persona} operar fluxos integrados "
+                f"e conformidade prática no {brand_name}."
+            )[:158],
+            "intro": (
+                f"Adaptado para {persona}, este guia mostra como estruturar {primary_kw} "
+                f"utilizando os fluxos dedicados do {brand_name} com previsibilidade e controle."
+            ),
+            "pad_unit": (
+                f"Na operação diária de {persona}, o {brand_name} organiza prioridades técnicas, "
+                "indicadores setoriais, conferência e governança documental sem retrabalho."
+            ),
+            "heading": f"## Aplicação prática no {brand_name}",
+            "faq": [
+                {
+                    "question": f"Como {brand_name} atende {persona} em {primary_kw}?",
+                    "answer": (
+                        f"O {brand_name} adapta etapas de conferência e indicadores específicos."
+                    ),
+                },
+                {
+                    "question": "Qual o primeiro passo para revisar o fluxo na equipe?",
+                    "answer": (
+                        "Mapear gargalos operacionais e validar cadastros críticos antes do pico."
+                    ),
+                },
+            ],
+            "cta": {
+                "headline": f"Conheça o checklist do {brand_name}",
+                "body": f"Avalie na prática como o {brand_name} apoia {persona}.",
+                "button_text": f"Ver guia {brand_name}",
+                "intensity": "medium",
+            },
+        }
+    return {
+        "title": f"{primary_kw} for {persona}: {brand_name} workflow guide",
+        "meta": (
+            f"{primary_kw}: adapted workflow guide for {persona} executing "
+            f"compliant operations in {brand_name}."
+        )[:158],
+        "intro": (
+            f"Tailored for {persona}, this guide explains how to apply {primary_kw} "
+            f"using dedicated {brand_name} workflows with operational clarity."
+        ),
+        "pad_unit": (
+            f"Within daily workflows for {persona}, {brand_name} aligns compliance controls, "
+            "operational checkpoints, and reporting accuracy across every order cycle."
+        ),
+        "heading": f"## Practical workflows in {brand_name}",
+        "faq": [
+            {
+                "question": f"How does {brand_name} support {persona} for {primary_kw}?",
+                "answer": f"{brand_name} structures dedicated checklists and tracking metrics.",
+            },
+            {
+                "question": "What is the first operational review step?",
+                "answer": "Audit critical master data and workflow bottlenecks before peak demand.",
+            },
+        ],
+        "cta": {
+            "headline": f"Explore the {brand_name} checklist",
+            "body": f"Review how {brand_name} supports {persona} in daily execution.",
+            "button_text": f"View {brand_name} guide",
+            "intensity": "medium",
+        },
+    }
+
+
+def _build_fake_adapted_draft(payload: dict[str, Any]) -> dict[str, Any]:
+    is_pt = str(payload.get("locale") or "pt-BR").lower().startswith("pt")
+    target_brand = payload.get("target_brand") or {}
+    target_industry = payload.get("target_industry") or {}
+    src_draft = payload.get("draft") or {}
+    brief_dict = payload.get("brief") or {}
+
+    brand_name = str(
+        target_brand.get("brand_name") or ("Vertical Brand" if is_pt else "Target Brand")
+    ).strip()
+    persona = str(
+        target_brand.get("target_persona")
+        or target_industry.get("name")
+        or ("gestores especializados" if is_pt else "specialty operators")
+    ).strip()
+    primary_kw = str(brief_dict.get("primary_keyword") or src_draft.get("title") or "").strip()
+    copy = _build_fake_adapted_copy(
+        is_pt=is_pt,
+        brand_name=brand_name,
+        persona=persona,
+        primary_kw=primary_kw,
+    )
+    slug = _slugify_kebab(f"{brand_name}-{src_draft.get('slug') or copy['title']}")
+    sections = [f"# {copy['title']}", copy["intro"], copy["heading"], copy["pad_unit"]]
+    while len("\n\n".join(sections).split()) < 860:
+        sections.append(f"{copy['pad_unit']} #{len(sections)} ({persona}).")
+    return {
+        "title": copy["title"],
+        "meta_description": copy["meta"],
+        "slug": slug,
+        "body_md": "\n\n".join(sections),
+        "faq": copy["faq"],
+        "cta": copy["cta"],
+        "claims": list(src_draft.get("claims") or []),
+    }
+
+
 def _build_fake_content_draft(prompt: str) -> dict[str, Any]:
     payload = _extract_json_input(prompt)
+    if payload.get("rewrite_mode") == "adapt_brand":
+        return _build_fake_adapted_draft(payload)
     is_pt = str(payload.get("locale") or "pt-BR").lower().startswith("pt")
     brief_dict = payload.get("brief") or {}
     evidence_docs = payload.get("evidence_documents") or []

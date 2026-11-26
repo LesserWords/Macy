@@ -1,6 +1,6 @@
 # Macy Model Context Protocol (MCP) Guide
 
-This guide covers configuring, authenticating, and operating the Macy **MCP server** (`content-engine mcp`) across local `stdio` AI clients (**Antigravity**, **Claude Desktop**, **Claude Code**, **Cursor**) and containerized HTTPS `streamable-http` deployments behind Caddy (`ADR-027`, `F21`).
+This guide covers configuring, authenticating, and operating the Macy **MCP server** (`macy mcp`) across local `stdio` AI clients (**Antigravity**, **Claude Desktop**, **Claude Code**, **Cursor**) and containerized HTTPS `streamable-http` deployments behind Caddy (`ADR-027`, `F21`).
 
 > **Related docs:**
 > - VPS deployment, secrets & rotation → [Operations Runbook](runbook.md)
@@ -32,7 +32,7 @@ Macy enforces identical domain, tenancy, spend, and approval invariants across S
 |---|---|---|
 | Discovery Tools | `macy_list_workspaces`, `macy_get_workspace_status` | List accessible workspaces; inspect budget caps, sources, integrations, and Gate 1/2 queues |
 | Research & Gate 1 Tools | `macy_ingest_research_documents`, `macy_research_topic`, `macy_score_topics`, `macy_list_topics_awaiting_approval`, `macy_decide_topic` | Ingest SSRF-validated external docs (Agent-Driven Mode), gather source-backed research, score `'scored'` candidates, and approve/reject Gate 1 topics |
-| Drafting, Import & Quality Tools | `macy_get_editorial_brief`, `macy_generate_draft`, `macy_import_draft`, `macy_verify_claims`, `macy_evaluate_draft` | Retrieve/create SEO briefs, draft articles with FK-linked `draft_claims`, import external `.md` drafts (Agent-Driven Mode), verify claims, evaluate deterministic checks + rubric |
+| Drafting, Import & Quality Tools | `macy_get_editorial_brief`, `macy_generate_draft`, `macy_import_draft`, `macy_adapt_draft`, `macy_verify_claims`, `macy_evaluate_draft` | Retrieve/create SEO briefs, draft articles with FK-linked `draft_claims`, import external `.md` drafts (Agent-Driven Mode), adapt drafts across personas by value (`adapt_brand`), verify claims, evaluate deterministic checks + rubric |
 | Gate 2 & Publish Tools | `macy_list_drafts_awaiting_approval`, `macy_decide_draft`, `macy_publish_draft` | Review evaluated drafts, record creator decision (`approved`/`declined`), and publish via `PublisherPort` |
 | SEO & GEO Audit Tools | `macy_audit_url`, `macy_crawl_site` | Audit a single public URL across 7 weighted SEO/GEO categories (`A+..F`) or run a bounded BFS site crawl (`free` `20`, `paid` `50`, hard cap `200`) |
 | Resources (`application/json`) | `macy://workspaces/{workspace_id}/brand`, `macy://workspaces/{workspace_id}/weekly-report`, `macy://drafts/{draft_id}/claims` | Tenant-scoped brand rules, latest weekly report, and full draft + claims + quality bundle |
@@ -46,14 +46,14 @@ Before connecting a client locally:
 
 ```sh
 # 1. Non-production offline mock sanity check (no database needed)
-APP_ENV=development uv run content-engine mcp --mock --check
+APP_ENV=development uv run macy mcp --mock --check
 
 # 2. Local PostgreSQL sanity check (requires db + migrate running)
 DATABASE_URL=postgres://app:app_secret@localhost:5432/macy?sslmode=disable \
-  uv run content-engine mcp --check
+  uv run macy mcp --check
 ```
 
-Note on local `stdio` output hygiene: `content-engine mcp` automatically redirects Python `sys.stdout` prints and root logging handlers to `sys.stderr`, reserving the true `stdout` stream strictly for JSON-RPC frames.
+Note on local `stdio` output hygiene: `macy mcp` automatically redirects Python `sys.stdout` prints and root logging handlers to `sys.stderr`, reserving the true `stdout` stream strictly for JSON-RPC frames.
 
 ### Environment Variable Reference
 
@@ -84,7 +84,7 @@ Use `--mock` (`acme-demo` seeded dataset) to test tool calls and workflows witho
   "mcpServers": {
     "macy-mock": {
       "command": "uv",
-      "args": ["--directory", "/path/to/macy", "run", "content-engine", "mcp", "--mock"],
+      "args": ["--directory", "/path/to/macy", "run", "macy", "mcp", "--mock"],
       "env": {
         "APP_ENV": "development",
         "MACY_USER_EMAIL": "owner@example.com"
@@ -100,7 +100,7 @@ Use `--mock` (`acme-demo` seeded dataset) to test tool calls and workflows witho
 claude mcp add macy-mock \
   -e APP_ENV=development \
   -e MACY_USER_EMAIL=owner@example.com \
-  -- uv --directory /path/to/macy run content-engine mcp --mock
+  -- uv --directory /path/to/macy run macy mcp --mock
 ```
 
 ### Client Setup B — Local `stdio` (PostgreSQL-backed)
@@ -112,7 +112,7 @@ Connects directly to your local Compose Postgres instance (`infra/compose.yaml` 
   "mcpServers": {
     "macy-local": {
       "command": "uv",
-      "args": ["--directory", "/path/to/macy", "run", "content-engine", "mcp"],
+      "args": ["--directory", "/path/to/macy", "run", "macy", "mcp"],
       "env": {
         "APP_ENV": "development",
         "DATABASE_URL": "postgres://app:app_secret@localhost:5432/macy?sslmode=disable",
@@ -131,7 +131,7 @@ claude mcp add macy-local \
   -e APP_ENV=development \
   -e DATABASE_URL=postgres://app:app_secret@localhost:5432/macy?sslmode=disable \
   -e MACY_USER_EMAIL=owner@example.com \
-  -- uv --directory /path/to/macy run content-engine mcp
+  -- uv --directory /path/to/macy run macy mcp
 ```
 
 ### Client Setup C — Remote HTTPS (`streamable-http` behind Caddy)
@@ -232,7 +232,7 @@ MCP_AUTH_TOKEN="<token>" uv run python scripts/post_deploy_smoke.py --url "https
 | Symptom / Error Code | Cause | Resolution |
 |---|---|---|
 | HTTP `401 unauthorized` on `/mcp` | Missing/mismatched `Authorization: Bearer` header or placeholder `CHANGE_ME` token | Verify client sends exact `Bearer <MCP_AUTH_TOKEN>` configured in host `.env` and restart `mcp` after token rotation |
-| `AUTH_REQUIRED` in HTTP/stdio calls | `MCP_ACTOR_EMAIL` / `MACY_USER_EMAIL` not found in Postgres `users` table (or unset) | Provision user + membership via `content-engine add-owner <workspace-slug> <email>` |
+| `AUTH_REQUIRED` in HTTP/stdio calls | `MCP_ACTOR_EMAIL` / `MACY_USER_EMAIL` not found in Postgres `users` table (or unset) | Provision user + membership via `macy add-owner <workspace-slug> <email>` |
 | `MOCK_FORBIDDEN` at startup | `--mock` or `MACY_MCP_STANDALONE=1` used with `APP_ENV=staging\|production\|prod` | Remove `--mock` and configure PostgreSQL (`DATABASE_URL`) |
 | `PERMISSION_DENIED` on Gate 1/2 or publish | Caller overrides `MCP_ACTOR_EMAIL`, lacks workspace membership, or is not campaign-creator `owner` | Use the creator's `MCP_ACTOR_EMAIL` / `MACY_USER_EMAIL` and verify `memberships` role is `owner` |
 | `INVALID_STATE` on `macy_decide_topic` or `macy_decide_draft` | Item is not in `'scored'` (Gate 1) or draft does not belong to target workspace / expected state | Run `macy_score_topics` before Gate 1, and inspect draft state via `macy_list_drafts_awaiting_approval` |
@@ -276,8 +276,8 @@ AI clients can trigger CMS-agnostic technical SEO + GEO audits across WordPress,
 Run Macy as a pure local compliance and SEO audit MCP server without PostgreSQL or Docker:
 
 ```sh
-content-engine mcp --transport stdio --stateless --check
-content-engine mcp --transport stdio --stateless
+macy mcp --transport stdio --stateless --check
+macy mcp --transport stdio --stateless
 ```
 
-Stateless mode exposes `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, and `macy_import_draft` backed by `StatelessStoreAdapter`. Capability-disabled workspace tools automatically return `-32004 CAPABILITY_DISABLED`.
+Stateless mode exposes `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, `macy_import_draft`, and `macy_adapt_draft` backed by `StatelessStoreAdapter`. Capability-disabled workspace tools automatically return `-32004 CAPABILITY_DISABLED`.

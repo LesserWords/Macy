@@ -272,8 +272,8 @@ def test_cli_run_week_accepts_workspace_flag_from_crontab(
         name="Weekly Flag Campaign",
     )
     crontab_txt = services.generate_crontab(db_conn, workspace_id=ws_id)
-    run_line = next(line for line in crontab_txt.splitlines() if "content-engine run-week" in line)
-    tokens = shlex.split(run_line.split("content-engine ", 1)[1])
+    run_line = next(line for line in crontab_txt.splitlines() if "macy run-week" in line)
+    tokens = shlex.split(run_line.split("macy ", 1)[1])
 
     assert cli.main([*tokens, "--offline"]) == 0
     assert str(camp["id"]) in run_line
@@ -433,7 +433,7 @@ def test_cli_import_draft_subcommand(
 def test_cli_audit_single_url_and_crawl(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """Verify M6-02 D4: `content-engine audit` supports single-URL and bounded crawl modes."""
+    """Verify M6-02 D4: `macy audit` supports single-URL and bounded crawl modes."""
     from engine.contracts import CrawlConfig, PageAuditReport, SiteAuditReport
 
     page = PageAuditReport(
@@ -481,3 +481,8 @@ def test_cli_audit_single_url_and_crawl(
     out = capsys.readouterr().out
     assert "B+" in out
     assert "2 pages" in out
+
+
+def test_cli_parser_uses_macy_prog() -> None:
+    """Verify M9-01 D1: CLI ArgumentParser reports prog='macy'."""
+    assert cli._build_parser().prog == "macy"

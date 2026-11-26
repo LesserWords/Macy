@@ -1,3 +1,4 @@
+import configparser
 import contextlib
 import shutil
 import subprocess
@@ -170,7 +171,7 @@ def _assert_archive_clean(members: list[str], kind: str) -> None:
 
 
 def test_wheel_and_sdist_exclude_private_context(tmp_path: Path) -> None:
-    """M8-04 D2: Built wheel and sdist preserve content-engine package and exclude private files."""
+    """M8-04 & M9-01: Built wheel/sdist use macy package identity and exclude private files."""
     repo_root = Path(__file__).resolve().parent.parent
     out_dir = tmp_path / "dist"
     uv_exe = shutil.which("uv") or "uv"
@@ -187,13 +188,80 @@ def test_wheel_and_sdist_exclude_private_context(tmp_path: Path) -> None:
     sdists = list(out_dir.glob("*.tar.gz"))
     assert len(wheels) == 1
     assert len(sdists) == 1
-    assert wheels[0].name.startswith("content_engine-")
+    assert wheels[0].name.startswith("macy-")
+    assert sdists[0].name.startswith("macy-")
 
     with zipfile.ZipFile(wheels[0]) as zf:
         wheel_members = zf.namelist()
+        ep_files = [m for m in wheel_members if m.endswith(".dist-info/entry_points.txt")]
+        assert len(ep_files) == 1
+        ep_text = zf.read(ep_files[0]).decode("utf-8")
     assert any(m.startswith("engine/") for m in wheel_members)
     _assert_archive_clean(wheel_members, "wheel")
+
+    ep_parser = configparser.ConfigParser()
+    ep_parser.read_string(ep_text)
+    assert ep_parser["console_scripts"]["macy"] == "engine.cli:main"
+    assert ("content" + "-engine") not in ep_parser["console_scripts"]
+    assert "macy.capabilities" in ep_parser
+    assert "macy.llm" in ep_parser
+    legacy_ep_prefix = "content" + "_engine."
+    assert not any(sec.startswith(legacy_ep_prefix) for sec in ep_parser.sections())
 
     with tarfile.open(sdists[0], "r:gz") as tf:
         sdist_members = tf.getnames()
     _assert_archive_clean(sdist_members, "sdist")
+
+
+def _iter_macy_tracked_paths(repo_root: Path) -> list[Path]:
+    git_exe = shutil.which("git") or "git"
+    proc = subprocess.run(  # noqa: S603
+        [git_exe, "-c", "core.quotePath=false", "ls-files"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=True,
+    )
+    excluded_exact = {
+        "docs/adr/ADR-033-macy-package-cli-and-tooling-identity.md",
+        "docs/plans/M9.md",
+        "uv.lock",
+    }
+    scopes = (
+        "pyproject.toml",
+        "README.md",
+        "CONTRIBUTING.md",
+        "engine/",
+        "scripts/",
+        "infra/",
+        "docs/",
+    )
+    openspec_prefix = "openspec/"
+    archive_prefix = "openspec/changes/archive/"
+    selected: list[Path] = []
+    for rel in proc.stdout.splitlines():
+        norm = rel.strip().replace("\\", "/")
+        if not norm or norm in excluded_exact:
+            continue
+        in_scope = (
+            norm in scopes
+            or norm.startswith(scopes)
+            or (norm.startswith(openspec_prefix) and not norm.startswith(archive_prefix))
+        )
+        if in_scope and (repo_root / norm).is_file():
+            selected.append(repo_root / norm)
+    return selected
+
+
+def test_repo_uses_macy_instead_of_legacy_cli_name() -> None:
+    """M9-03 D2: Zero legacy CLI or entry-point group names remain outside M9/archive docs."""
+    repo_root = Path(__file__).resolve().parent.parent
+    legacy_cli = "content" + "-engine"
+    legacy_mod = "content" + "_engine"
+    hits: list[str] = []
+    for path in _iter_macy_tracked_paths(repo_root):
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        if legacy_cli in text or legacy_mod in text:
+            hits.append(str(path.relative_to(repo_root)))
+    assert hits == [], f"Legacy naming references remain: {hits}"
