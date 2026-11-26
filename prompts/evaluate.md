@@ -29,7 +29,7 @@ Evaluate every applicable criterion and compute `score` (`0.0` to `100.0`) using
 3. **`search_optimization` (weight `20`, `critical: false`)**:
    - Confirm `primary_keyword` and `secondary_keywords` fit naturally across headings, body prose, FAQ questions, and metadata without keyword stuffing.
 4. **`brand_voice_alignment` (weight `15`, `critical: false`)**:
-   - Ensure tone reflects `brand_profile.voice` and `positioning`, asserts no capabilities outside `capabilities`, obeys `prohibited_claims`, and matches funnel-appropriate `cta_rules`.
+   - Ensure tone reflects `brand_profile.voice` and `positioning`, asserts no capabilities outside `capabilities`, obeys `prohibited_claims`, uses `brand_profile.brand_name` faithfully when supplied (flagging parent or sibling product name substitution as a defect), and matches funnel-appropriate `cta_rules`.
    - Any prohibited medical/financial guarantee or unverified capability MUST emit a finding on `brand_voice_alignment` (`"critical"` severity when violating explicit `prohibited_claims`).
 5. **`clarity_and_structure` (weight `10`, `critical: false`)**:
    - Assess heading hierarchy (`# H1`, `## H2` outline coverage), scannability, non-empty helpful `faq`, coherent `cta`, and publication polish. Extremely thin drafts (`< 100` words) or empty FAQ/CTA fail clarity critically or majorly.

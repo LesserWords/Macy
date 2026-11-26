@@ -1054,7 +1054,7 @@ def _execute_seed_brand(
         msg = f"Fixture file not found: {resolved_path}"
         raise ValueError(msg)
 
-    profile = _parse_brand_fixture_yaml(resolved_path.read_text(encoding="utf-8"))
+    profile = BrandProfile.model_validate(config.load_brand_fixture_dict(resolved_path))
     return _execute_save_brand(
         conn,
         workspace_id=ws_id,

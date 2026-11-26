@@ -53,12 +53,26 @@ class BrandProfile(BaseModel):
     """Brand voice, positioning and rules contract."""
 
     schema_version: int = 1
+    brand_name: str | None = None
+    target_persona: str | None = None
+    canonical_domain: str | None = None
     voice: str
     positioning: str
     capabilities: list[str] = Field(default_factory=list)
     prohibited_claims: list[str] = Field(default_factory=list)
     prohibited_phrases: list[str] = Field(default_factory=list)
     cta_rules: list[str] = Field(default_factory=list)
+
+    @field_validator("brand_name", "target_persona", "canonical_domain")
+    @staticmethod
+    def validate_optional_text(value: str | None, info: ValidationInfo) -> str | None:
+        if value is None:
+            return None
+        cleaned = value.strip()
+        if not cleaned:
+            msg = f"Field '{info.field_name}' must not be blank when provided"
+            raise ValueError(msg)
+        return cleaned
 
     @field_validator("voice", "positioning")
     @staticmethod

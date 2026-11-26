@@ -42,17 +42,39 @@ All brand fixture files loaded via `seed-brand`, the Setup Wizard, or the Admin 
 
 | Field | Required | Description |
 | :--- | :---: | :--- |
-| `brand_name` | Yes | Public display name for the workspace brand |
-| `tagline` | No | Concise brand positioning tagline |
-| `industry` | Yes | Industry pack slug matching `packs/industries/<slug>/` |
-| `language` | Yes | Primary workspace locale (`pt-BR` or `en-US`) |
-| `voice` / `tone_rules` | Yes | Voice traits, allowed claims, and forbidden wording |
-| `icp` | Yes | Ideal Customer Profile (segments, pain points, buying triggers) |
-| `pillars` | Yes | Content pillars with target ratios totaling `1.0` |
-| `products` / `catalog` | No | Optional product or solution catalog used in editorial briefs |
-| `competitors` | No | Optional competitor list to track or differentiate against |
+| `schema_version` | Yes | Schema version (`1`) |
+| `brand_name` | No | Exact canonical product/brand name expected across briefs, drafts, CTAs, and evaluations (`ADR-034`) |
+| `target_persona` | No | Target buyer persona summary for editorial framing and adaptation |
+| `canonical_domain` | No | Canonical product/blog hostname (e.g., `vertical.example.com`) |
+| `voice` | Yes | Narrative voice, tone, and stylistic guidance |
+| `positioning` | Yes | Core value proposition and market differentiation |
+| `capabilities` | Yes | Verified product capabilities (the only features drafts may claim) |
+| `prohibited_claims` | Yes | Forbidden promises or unsupported guarantees |
+| `prohibited_phrases` | Yes | Valid Python regex patterns enforced as `critical` deterministic gates |
+| `cta_rules` | Yes | Funnel-stage CTA guidance (`TOFU:`, `MOFU:`, `BOFU:`) |
 
 Refer to [`fixtures/seed_example.yaml`](../../fixtures/seed_example.yaml) as a starting template.
+
+### White-Label Composition (`extends`) & Symmetric Brand Walls (`ADR-034`)
+
+When managing a core horizontal product alongside vertical white-label forks that share core capabilities, extract shared rules into a base fixture (e.g., `_base_core_erp.yaml`) and compose child fixtures via load-time `extends`:
+
+```yaml
+extends: _base_core_erp.yaml
+brand_name: "Vertical Specialty ERP"
+target_persona: "Specialty clinic & lab managers"
+canonical_domain: "vertical.example.com"
+positioning: "Vertical Specialty ERP built for specialty clinics."
+capabilities_remove:
+  - "Generic wholesale invoicing"
+capabilities_add:
+  - "Specialty lab work-order tracking"
+prohibited_phrases_add:
+  - "\\bCore ERP\\b"
+```
+
+- `extends` is resolved **only at load/seed time** (`engine/config.py:load_brand_fixture_dict`) across the 3-layer fixture roots and materialized into each workspace's independent `brand_profiles` snapshot (`ADR-009` zero cross-tenant coupling).
+- Word-boundary regexes like `\bCore ERP\b` block bare parent mentions while cleanly allowing longer vertical names such as `Vertical Specialty ERP` or `Core Specialty ERP`.
 
 ## Loading & Exporting Fixtures
 
