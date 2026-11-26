@@ -435,6 +435,52 @@ def _handle_import_draft(args: argparse.Namespace) -> int:
         return 1
 
 
+def _handle_adapt_draft(args: argparse.Namespace) -> int:
+    try:
+        if args.file is None and args.markdown is None:
+            msg = "Either --file or --markdown is required."
+            raise ValueError(msg)
+        if _is_stateless_mode(args):
+            res = services.adapt_draft_stateless(
+                file_path=args.file,
+                markdown_text=args.markdown,
+                brand_fixture=args.brand_fixture,
+                industry_pack=args.industry_pack,
+                format_slug=str(args.format),
+                primary_keyword=args.primary_keyword,
+                locale=str(args.locale or "pt-BR"),
+                max_similarity=float(args.max_similarity),
+                deterministic_only=bool(args.deterministic_only),
+                offline=bool(getattr(args, "offline", False)),
+                model=args.model,
+            )
+            summary = f"Adapted draft '{res['title']}' (stateless, verdict={res['verdict']})"
+        else:
+            ws_id, owner_id = _resolve_workspace_and_owner(args.workspace)
+            res = services.adapt_draft_for_workspace(
+                workspace_id=ws_id,
+                user_id=owner_id,
+                file_path=args.file,
+                markdown_text=args.markdown,
+                format_slug=str(args.format),
+                primary_keyword=args.primary_keyword,
+                locale=args.locale,
+                max_similarity=float(args.max_similarity),
+                deterministic_only=bool(args.deterministic_only),
+                offline=bool(getattr(args, "offline", False)),
+            )
+            summary = f"Adapted draft {res['draft_id']} (verdict={res['verdict']})"
+        if getattr(args, "output", None):
+            out_path = Path(str(args.output))
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(str(res["adapted_markdown"]), encoding="utf-8")
+        _print_cli_result(res, as_json=bool(getattr(args, "json", False)), summary=summary)
+        return 0
+    except Exception as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 1
+
+
 def _print_cli_result(res: Any, *, as_json: bool, summary: str) -> None:
     print(json.dumps(res, indent=2, default=str) if as_json else summary)
 
@@ -940,6 +986,66 @@ def _build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="Emit full structured JSON output",
     )
     import_draft_parser.set_defaults(func=_handle_import_draft)
+
+    # adapt-draft
+    adapt_parser = subparsers.add_parser(
+        "adapt-draft",
+        help="Adapt a pass-by-value .md/.pdf draft to another brand/persona or workspace",
+    )
+    adapt_parser.add_argument("--file", default=None, help="Path to source .md or .pdf draft")
+    adapt_parser.add_argument("--markdown", default=None, help="Inline source Markdown text")
+    adapt_parser.add_argument(
+        "-w", "--workspace", default=None, help="Target workspace slug or UUID (DB mode)"
+    )
+    adapt_parser.add_argument(
+        "--brand-fixture", default=None, help="Target BrandProfile YAML path/name (--stateless)"
+    )
+    adapt_parser.add_argument(
+        "--industry-pack", default=None, help="Target industry pack slug (--stateless)"
+    )
+    adapt_parser.add_argument(
+        "--format",
+        choices=["blog-short", "blog", "blog-long"],
+        default="blog",
+        help="Target format pack slug (default: blog)",
+    )
+    adapt_parser.add_argument("--primary-keyword", default=None, help="Override primary keyword")
+    adapt_parser.add_argument("--locale", default=None, help="Target locale (e.g. pt-BR, en-US)")
+    adapt_parser.add_argument(
+        "--max-similarity",
+        type=float,
+        default=0.65,
+        help="Maximum body shingle similarity threshold (default: 0.65)",
+    )
+    adapt_parser.add_argument(
+        "--deterministic-only",
+        action="store_true",
+        default=False,
+        help="Evaluate deterministically without LLM rubric spend",
+    )
+    adapt_parser.add_argument(
+        "--offline",
+        action="store_true",
+        default=False,
+        help="Use deterministic FakeLLM adapter",
+    )
+    adapt_parser.add_argument(
+        "--stateless",
+        action="store_true",
+        default=False,
+        help="Adapt draft against fixtures/packs with zero database connection (Path B)",
+    )
+    adapt_parser.add_argument("--model", default=None, help="Optional LLM model override")
+    adapt_parser.add_argument(
+        "--output", default=None, help="Optional output file path for adapted Markdown"
+    )
+    adapt_parser.add_argument(
+        "--json",
+        action="store_true",
+        default=False,
+        help="Emit full structured JSON output",
+    )
+    adapt_parser.set_defaults(func=_handle_adapt_draft)
 
     # audit
     audit_parser = subparsers.add_parser("audit", help="Run SEO + GEO URL audit or site crawl")

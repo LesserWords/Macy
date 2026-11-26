@@ -127,6 +127,7 @@ def test_stateless_mcp_server_tools_without_db(
         "macy_audit_url",
         "macy_crawl_site",
         "macy_import_draft",
+        "macy_adapt_draft",
         "macy_evaluate_draft",
     }
 

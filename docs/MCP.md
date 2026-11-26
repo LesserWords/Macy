@@ -32,7 +32,7 @@ Macy enforces identical domain, tenancy, spend, and approval invariants across S
 |---|---|---|
 | Discovery Tools | `macy_list_workspaces`, `macy_get_workspace_status` | List accessible workspaces; inspect budget caps, sources, integrations, and Gate 1/2 queues |
 | Research & Gate 1 Tools | `macy_ingest_research_documents`, `macy_research_topic`, `macy_score_topics`, `macy_list_topics_awaiting_approval`, `macy_decide_topic` | Ingest SSRF-validated external docs (Agent-Driven Mode), gather source-backed research, score `'scored'` candidates, and approve/reject Gate 1 topics |
-| Drafting, Import & Quality Tools | `macy_get_editorial_brief`, `macy_generate_draft`, `macy_import_draft`, `macy_verify_claims`, `macy_evaluate_draft` | Retrieve/create SEO briefs, draft articles with FK-linked `draft_claims`, import external `.md` drafts (Agent-Driven Mode), verify claims, evaluate deterministic checks + rubric |
+| Drafting, Import & Quality Tools | `macy_get_editorial_brief`, `macy_generate_draft`, `macy_import_draft`, `macy_adapt_draft`, `macy_verify_claims`, `macy_evaluate_draft` | Retrieve/create SEO briefs, draft articles with FK-linked `draft_claims`, import external `.md` drafts (Agent-Driven Mode), adapt drafts across personas by value (`adapt_brand`), verify claims, evaluate deterministic checks + rubric |
 | Gate 2 & Publish Tools | `macy_list_drafts_awaiting_approval`, `macy_decide_draft`, `macy_publish_draft` | Review evaluated drafts, record creator decision (`approved`/`declined`), and publish via `PublisherPort` |
 | SEO & GEO Audit Tools | `macy_audit_url`, `macy_crawl_site` | Audit a single public URL across 7 weighted SEO/GEO categories (`A+..F`) or run a bounded BFS site crawl (`free` `20`, `paid` `50`, hard cap `200`) |
 | Resources (`application/json`) | `macy://workspaces/{workspace_id}/brand`, `macy://workspaces/{workspace_id}/weekly-report`, `macy://drafts/{draft_id}/claims` | Tenant-scoped brand rules, latest weekly report, and full draft + claims + quality bundle |
@@ -280,4 +280,4 @@ macy mcp --transport stdio --stateless --check
 macy mcp --transport stdio --stateless
 ```
 
-Stateless mode exposes `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, and `macy_import_draft` backed by `StatelessStoreAdapter`. Capability-disabled workspace tools automatically return `-32004 CAPABILITY_DISABLED`.
+Stateless mode exposes `macy_audit_url`, `macy_crawl_site`, `macy_evaluate_draft`, `macy_import_draft`, and `macy_adapt_draft` backed by `StatelessStoreAdapter`. Capability-disabled workspace tools automatically return `-32004 CAPABILITY_DISABLED`.

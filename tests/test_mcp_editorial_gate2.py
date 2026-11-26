@@ -974,6 +974,7 @@ def test_decide_draft_gate2_normalized_values_and_creator_check(
             "macy_get_editorial_brief",
             "macy_generate_draft",
             "macy_import_draft",
+            "macy_adapt_draft",
             "macy_verify_claims",
             "macy_evaluate_draft",
             "macy_list_drafts_awaiting_approval",
@@ -982,7 +983,7 @@ def test_decide_draft_gate2_normalized_values_and_creator_check(
             "macy_audit_url",
             "macy_crawl_site",
         }.issubset(names)
-        assert len(names) == 17
+        assert len(names) == 18
 
 
 def test_publish_draft_creator_gate_and_staging_draft_mode(

@@ -372,14 +372,12 @@ def test_adapt_draft_for_workspace_real_db_tenant_isolation(
     db_conn: psycopg.Connection[Any],
 ) -> None:
     """Real DB integration: adaptation writes strictly into target workspace with zero FK leaks."""
-    ws_src = db.create_workspace(
-        db_conn, slug=f"src-{uuid.uuid4().hex[:6]}", name="Src Brand", industry_pack="general"
-    )
-    ws_dst = db.create_workspace(
-        db_conn, slug=f"dst-{uuid.uuid4().hex[:6]}", name="Dst Brand", industry_pack="general"
-    )
+    src_slug = f"src-{uuid.uuid4().hex[:6]}"
+    dst_slug = f"dst-{uuid.uuid4().hex[:6]}"
+    ws_src = db.create_workspace(db_conn, slug=src_slug, name="Src Brand", industry_pack="general")
+    ws_dst = db.create_workspace(db_conn, slug=dst_slug, name="Dst Brand", industry_pack="general")
     owner = services.add_workspace_owner(
-        db_conn, workspace_slug=str(ws_dst), email=f"adapt-{uuid.uuid4().hex[:6]}@example.com"
+        db_conn, workspace_slug=dst_slug, email=f"adapt-{uuid.uuid4().hex[:6]}@example.com"
     )
     owner_id = uuid.UUID(str(owner["user"]["user_id"]))
     # Save distinct vertical brand on ws_dst only
@@ -388,6 +386,18 @@ def test_adapt_draft_for_workspace_real_db_tenant_isolation(
         workspace_id=ws_dst,
         user_id=owner_id,
         profile=_target_vertical_brand(),
+    )
+    services.save_campaign(
+        db_conn,
+        workspace_id=ws_dst,
+        user_id=owner_id,
+        name="Dst Campaign",
+        locale="pt-BR",
+        market="BR",
+        articles_per_week=2,
+        schedule_cron="0 8 * * 1",
+        monthly_cap_usd="50.00",
+        run_cap_usd="10.00",
     )
 
     src_draft = _sample_source_draft()

@@ -1072,5 +1072,20 @@ msgstr "Exportar YAML da Marca"
 msgid "Industry Pack"
 msgstr "Pacote de Indústria"
 
+msgid "Adapt for Another Workspace"
+msgstr "Adaptar para Outro Workspace"
+
+msgid "No other workspaces available for adaptation."
+msgstr "Nenhum outro workspace disponível para adaptação."
+
+msgid "Target Workspace"
+msgstr "Workspace de Destino"
+
+msgid "Adapt Draft to Selected Workspace"
+msgstr "Adaptar Rascunho para o Workspace Selecionado"
+
+msgid "Draft adapted cleanly and staged at Gate 2 in the target workspace."
+msgstr "Rascunho adaptado com sucesso e enviado ao Gate 2 no workspace de destino."
+
 #~ msgid "Add New Source"
 #~ msgstr "Adicionar Nova Fonte"

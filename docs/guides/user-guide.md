@@ -140,6 +140,7 @@ The **Draft Review** screen shows status counters (`Awaiting Approval`, `Approve
 3. **Claims & Sources Table:** Every claim (`Fact` or `Analysis`) mapped to its source document title, clickable URL, publication date, and `Verified` / `Unverified` date status.
 4. **Quality Evaluation:** Evaluator verdict (`PASS` / `REVISION` / `REJECT`), overall score (`/100`), evaluator model, each **Deterministic Check** (`PASS`/`FAIL`, severity, detail), and **Evaluator Findings** (`severity`, `criterion`, `responsible_module`).
 5. **Revision History & Run Cost Breakdown:** Every draft revision (`r0`, `r1`, `r2`), linked brief version, verdict/score, and stage-by-stage token + USD cost breakdown.
+6. **Adapt for Another Workspace (`ADR-034`):** Export the draft by value (Markdown + source URL provenance) and stage a persona-adapted version (`macy adapt-draft` CLI or `macy_adapt_draft` MCP) into any sibling workspace with anti-cannibalization uniqueness checking (`max_similarity <= 0.65`) and zero cross-workspace DB coupling (`~$0.13/post` in Balanced Cloud).
 
 ### D. Running Single-URL & Site SEO/GEO Audits (`SEO & GEO Audit`)
 Open **SEO & GEO Audit** in the sidebar to audit any public blog post, landing page, or website across WordPress, Webflow, headless CMSs, or custom stacks:
